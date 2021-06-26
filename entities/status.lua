@@ -18,7 +18,7 @@ local status = {
     problems = 0,
     probablyUses = 0,
     efficiencyPercentage = 0,
-    state = states.OFF,
+    state = states.MISSING,
     states = states
 }
 
