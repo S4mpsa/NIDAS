@@ -1,6 +1,6 @@
 -- Import section
 
-local status = require("entities.status")
+local status = require("server.entities.status")
 
 local getMachine = require("get-machine")
 local getNumberOfProblems = require("get-number-of-problems")
