@@ -18,7 +18,8 @@ local machine = {
     workMaxProgress = 0,
     isBroken = false,
     address = "",
-    status = status
+    status = status,
+    coordinates = {}
 }
 
 machine.status.states = nil

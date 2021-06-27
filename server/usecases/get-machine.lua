@@ -4,28 +4,29 @@ Component = require("component")
 Filesystem = require("filesystem")
 
 local mock = require("server.entities.mocks.mock-machine")
-local machine = require("server.entities.machine")
+local machineEntity = require("server.entities.machine")
 
 --
 
 local function exec(partialAdress, name)
-    local mach = nil
+    local machine = nil
 
     local successfull =
         pcall(
         function()
-            mach = New(machine, Component.proxy(Component.get(partialAdress)))
+            machine = New(machineEntity, Component.proxy(Component.get(partialAdress)))
+            machine.name = name
         end
     )
     if not successfull then
         if Filesystem.exists("/home/NIDAS/.gitignore") then -- Is in a development environment
-            mach = New(machine, mock:new(partialAdress, name))
+            machine = New(machineEntity, mock:new(partialAdress, name))
         else
-            mach = machine
+            machine = New(machineEntity)
         end
     end
 
-    return mach
+    return machine
 end
 
 return exec

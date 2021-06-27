@@ -1,7 +1,11 @@
 local function new(class, props)
-  local newObject = props or {}
+  local newObject = {}
 
   for key, value in pairs(class) do
+    newObject[key] = value
+  end
+
+  for key, value in pairs(props) do
     newObject[key] = value
   end
 
