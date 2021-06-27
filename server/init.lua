@@ -2,7 +2,7 @@
 
 Event = require("event")
 
-local addressesConfigFile = "server.configuration.addresses"
+local addressesConfigFile = "configuration.addresses"
 local addresses = require(addressesConfigFile)
 local addMachine = require("server.usecases.add-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")

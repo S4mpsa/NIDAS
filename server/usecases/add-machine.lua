@@ -2,6 +2,8 @@
 
 Component = require("component")
 Event = require("event")
+Modem = Component.modem
+Constants = require("configuration.constants")
 
 --
 
@@ -10,15 +12,14 @@ local componentAddresses = {}
 local addressesConfigFile = ""
 local knownMachines = {}
 
-local inputTimeout = 20
-local noInputTimeout = 2
+local inputTimeout = Constants.inputTimeout
+local noInputTimeout = Constants.noInputTimeout
 
 local relativeCoordinates = {}
 local tabletAddress = ""
 
-local portNumber = 0xADD
-local modem = Component.modem
-modem.open(portNumber)
+local portNumber = Constants.machineAddPort
+Modem.open(portNumber)
 
 local function reloadAddressesConfigFile()
     -- Unloads the config file from memory
@@ -136,9 +137,9 @@ local function pingTablets(waypointAddress, machineAddress)
     registerTabletCoordinatesListener(machineAddress)
     registerMachineNameListener()
 
-    modem.broadcast(portNumber, "what_are_the_waypoint_relative_coordinates", waypointAddress)
-    modem.send(tabletAddress, portNumber, "what_are_your_coordinates")
-    modem.send(tabletAddress, portNumber, "what_is_the_machine_name")
+    Modem.broadcast(portNumber, "what_are_the_waypoint_relative_coordinates", waypointAddress)
+    Modem.send(tabletAddress, portNumber, "what_are_your_coordinates")
+    Modem.send(tabletAddress, portNumber, "what_is_the_machine_name")
 
     return {name = nil, coordinates = {}}
 end
