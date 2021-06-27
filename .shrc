@@ -1,5 +1,6 @@
 # TODO: Configure first time setup
-cd /home/NIDAS
+ln /home/NIDAS/configuration /home/NIDAS/server/configuration
+cd /home/NIDAS/server
 clear
 init
 cd

@@ -4,8 +4,8 @@ Event = require("event")
 
 local addressesConfigFile = "configuration.addresses"
 local addresses = require(addressesConfigFile)
-local addMachine = require("server.usecases.add-machine")
-local getMultiblockStatus = require("server.usecases.get-multiblock-status")
+local addMachine = require("usecases.add-machine")
+local getMultiblockStatus = require("usecases.get-multiblock-status")
 
 --
 

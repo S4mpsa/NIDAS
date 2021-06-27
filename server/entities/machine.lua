@@ -1,6 +1,6 @@
 -- Import section
 
-local status = require("status")
+local status = require("entities.status")
 
 --
 
@@ -21,8 +21,6 @@ local machine = {
     status = status,
     coordinates = {}
 }
-
-machine.status.states = nil
 
 function machine:setWorkAllowed(allow)
 end
