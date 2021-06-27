@@ -1,6 +1,6 @@
 -- Import section
 
-local status = require("status")
+local status = require("entities.status")
 
 --
 
@@ -22,7 +22,11 @@ local machine = {
     coordinates = {}
 }
 
+<<<<<<< HEAD
 function machine.setWorkAllowed(allow, machine)
+=======
+function machine:setWorkAllowed(allow)
+>>>>>>> f55e930 (Changing critical stuff such as imports and symlinks and calling inexistent methods)
 end
 
 function machine:isWorkAllowed()

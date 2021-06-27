@@ -3,8 +3,8 @@
 Component = require("component")
 Filesystem = require("filesystem")
 
-local mock = require("server.entities.mocks.mock-machine")
-local machineEntity = require("server.entities.machine")
+local mock = require("entities.mocks.mock-machine")
+local machineEntity = require("entities.machine")
 
 --
 

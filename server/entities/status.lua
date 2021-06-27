@@ -1,4 +1,4 @@
--- Iport section
+-- Import section
 
 Colors = require("graphics.colors")
 
