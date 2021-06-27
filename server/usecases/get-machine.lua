@@ -14,8 +14,7 @@ local function exec(partialAdress, name)
     local successfull =
         pcall(
         function()
-            machine = New(machineEntity, Component.proxy(Component.get(partialAdress)))
-            machine.name = name
+            machine = New(machineEntity, Component.proxy(Component.get(partialAdress)), {name = name})
         end
     )
     if not successfull then
