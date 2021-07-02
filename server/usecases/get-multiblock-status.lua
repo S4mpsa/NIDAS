@@ -28,7 +28,7 @@ local function exec(address, name)
         state = States.OFF
     end
 
-    if problems > 0 then
+    if (problems or 0) > 0 then
         state = States.BROKEN
     end
 
