@@ -1,4 +1,6 @@
--- wget https://raw.githubusercontent.com/S4ampsa/NIDAS/master/setup.lua -f
+-- Paste this into OpenComputer terminal to download and set up NIDAS
+-- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/setup.lua -f
+
 local shell = require("shell")
 
 local tarMan = "https://raw.githubusercontent.com/mpmxyz/ocprograms/master/usr/man/tar.man"
