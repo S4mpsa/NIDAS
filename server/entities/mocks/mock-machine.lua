@@ -1,6 +1,6 @@
 -- Import section
 
-Machine = require("server.entities.machine")
+Machine = require("entities.machine")
 Inherits = require("utils.inherits")
 New = require("utils.new")
 
