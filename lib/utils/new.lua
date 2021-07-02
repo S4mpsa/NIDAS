@@ -5,14 +5,16 @@ local function new(class, props, ...)
     newObject[key] = value
   end
 
-  for key, value in pairs(props) do
-    newObject[key] = value
-  end
-
-  local parents = {...}
-  for i = 1, #parents do
-    for key, value in pairs(parents[i]) do
+  if props then
+    for key, value in pairs(props) do
       newObject[key] = value
+    end
+
+    local parents = {...}
+    for i = 1, #parents do
+      for key, value in pairs(parents[i]) do
+        newObject[key] = value
+      end
     end
   end
 
