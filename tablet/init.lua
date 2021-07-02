@@ -5,7 +5,7 @@ Modem = Component.modem
 Navigation = Component.navigation
 Term = require("term")
 Event = require("event")
-Constants = {machineAddPort = 0xADD, inputTimeout = 10} -- require("configuration.constants")
+Constants = require("configuration.constants")
 
 --
 
@@ -36,7 +36,8 @@ local function getWaypointRelativeCoordinates(server, waypointAddress)
 end
 
 local function getMyCoordinates(server)
-    Modem.send(server, portNumber, "my_coordinates", Navigation.getPosition())
+    local myCoordinates = {Navigation.getPosition()}
+    Modem.send(server, portNumber, "my_coordinates", myCoordinates[1], myCoordinates[2], myCoordinates[3])
 end
 
 local function getMachineName(server)
@@ -57,6 +58,7 @@ local function getMachineName(server)
     if name then
         Event.cancel(timeout)
         Modem.send(server, portNumber, "machine_name", name)
+        Term.clear()
     end
 end
 
@@ -65,7 +67,6 @@ Event.listen(
     function(_evName, _tabletAddress, sender, port, _distance, ...)
         local args = {...}
         if port == portNumber and args[1] == "what_are_the_waypoint_relative_coordinates" then
-            print(args[1])
             getWaypointRelativeCoordinates(sender, args[2])
         end
     end
@@ -76,7 +77,6 @@ Event.listen(
     function(_evName, _tabletAddress, sender, port, _distance, ...)
         local args = {...}
         if port == portNumber and args[1] == "what_are_your_coordinates" then
-            print(args[1])
             getMyCoordinates(sender)
         end
     end
@@ -87,7 +87,6 @@ Event.listen(
     function(_evName, _tabletAddress, sender, port, _distance, ...)
         local args = {...}
         if port == portNumber and args[1] == "what_is_the_machine_name" then
-            print(args[1])
             getMachineName(sender)
         end
     end
