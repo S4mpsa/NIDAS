@@ -1,5 +1,6 @@
 # TODO: Configure first time setup
 ln /home/NIDAS/configuration /home/NIDAS/server/configuration
+ln /home/NIDAS/configuration /home/NIDAS/tablet/configuration
 cd /home/NIDAS/server
 clear
 init
