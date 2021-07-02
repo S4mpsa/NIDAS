@@ -1,3 +1,9 @@
+-- Import section
+
+local status = require("status")
+
+--
+
 local machine = {
     name = "",
     workAllowed = false,
@@ -11,7 +17,8 @@ local machine = {
     workProgress = 0,
     workMaxProgress = 0,
     isBroken = false,
-    address = ""
+    address = "",
+    status = status
 }
 
 function machine.setWorkAllowed(allow, machine)
