@@ -1,6 +1,6 @@
 -- Import section
 
-States = require("entities.states")
+local states = require("entities.states")
 
 local getMachine = require("usecases.get-machine")
 local getNumberOfProblems = require("usecases.get-number-of-problems")
@@ -20,16 +20,16 @@ local function exec(address, name)
     local state = {}
     if multiblock:isWorkAllowed() then
         if multiblock:hasWork() then
-            state = States.ON
+            state = states.ON
         else
-            state = States.IDLE
+            state = states.IDLE
         end
     else
-        state = States.OFF
+        state = states.OFF
     end
 
     if (problems or 0) > 0 then
-        state = States.BROKEN
+        state = states.BROKEN
     end
 
     local status = {
