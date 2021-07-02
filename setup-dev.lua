@@ -1,5 +1,5 @@
 -- Paste this into OpenComputer terminal to download and set up NIDAS
--- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/setup.lua -f
+-- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/setup-dev.lua -f
 
 local shell = require("shell")
 
@@ -28,7 +28,7 @@ local successfull =
         shell.execute("rm -rf /home/lib")
         shell.execute("cp -r lib /home/lib")
         shell.execute("cp -f .shrc /home/.shrc")
-        shell.execute("cp -f setup.lua /home/setup.lua")
+        shell.execute("cp -f setup-dev.lua /home/setup-dev.lua")
 
         print("Success!\n")
     end
