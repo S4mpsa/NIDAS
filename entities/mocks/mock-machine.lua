@@ -38,7 +38,7 @@ function mockMachine:getMock(address, name)
     return self.mocks[address]
 end
 
-function mockMachine:setWorkAllowed(allow)
+function mockMachine.setWorkAllowed(allow, self)
     local mock = self:getMock(self.address, self.name)
     if mock.isBroken then
         mock.isBroken = false

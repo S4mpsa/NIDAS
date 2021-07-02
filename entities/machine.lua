@@ -14,7 +14,7 @@ local machine = {
     address = ""
 }
 
-function machine:setWorkAllowed(allow)
+function machine.setWorkAllowed(allow, machine)
 end
 
 function machine:isWorkAllowed()
