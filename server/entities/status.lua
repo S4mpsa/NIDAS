@@ -1,16 +1,8 @@
 -- Iport section
 
-Colors = require("graphics.colors")
+local states = require("entities.states")
 
 --
-
-local states = {
-    ON = {name = "ON"},
-    IDLE = {name = "IDLE"},
-    OFF = {name = "OFF"},
-    BROKEN = {name = "BROKEN"},
-    MISSING = {name = "NOT FOUND"}
-}
 
 local status = {
     progress = 0,
@@ -19,7 +11,6 @@ local status = {
     probablyUses = 0,
     efficiencyPercentage = 0,
     state = states.MISSING,
-    states = states
 }
 
 return status
