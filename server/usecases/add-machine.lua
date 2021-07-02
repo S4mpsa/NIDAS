@@ -1,9 +1,15 @@
 -- Import section
 
-Component = require("component")
+Filesystem = require("filesystem")
 Event = require("event")
+Component = require("component")
 Modem = Component.modem
-Constants = require("configuration.constants")
+Constants = {
+    inputTimeout = 10,
+    tabletBootUpTime = 3,
+    machineAddPort = 0xADD,
+    tabletResponseTime = 3
+} --require("configuration.constants")
 
 --
 
@@ -13,7 +19,7 @@ local addressesConfigFile = ""
 local knownMachines = {}
 
 local inputTimeout = Constants.inputTimeout
-local noInputTimeout = Constants.noInputTimeout
+local tabletResponseTime = Constants.tabletResponseTime
 
 local relativeCoordinates = {}
 local tabletAddress = ""
@@ -34,17 +40,20 @@ end
 
 -- Rewrites the address configuration file, based on the knownMachines
 local function rewriteAddressFile()
-    local configFile = io.open(addressesConfigFile, "w")
-    configFile:write("local addresses = {")
+    local filePath = package.searchpath(addressesConfigFile, package.path)
+    print("rewriting " .. filePath .. "...")
+    Filesystem.remove(filePath)
+    local configFile = io.open(filePath, "w")
+    configFile:write("local addresses = {\n")
     for address, properties in knownMachines do
-        configFile:write('    ["' .. address .. '"] = {')
-        configFile:write("        name = " .. properties.name .. ",")
-        configFile:write("        coordinates = {")
-        configFile:write("            x = " .. properties.coordinates.x .. ",")
-        configFile:write("            y = " .. properties.coordinates.y .. ",")
-        configFile:write("            z = " .. properties.coordinates.z)
-        configFile:write("        }")
-        configFile:write("    },")
+        configFile:write('    ["' .. address .. '"] = {\n')
+        configFile:write("        name = " .. properties.name .. ",\n")
+        configFile:write("        coordinates = {\n")
+        configFile:write("            " .. properties.coordinates[1] .. ",\n")
+        configFile:write("            " .. properties.coordinates[2] .. ",\n")
+        configFile:write("            " .. properties.coordinates[3] .. "\n")
+        configFile:write("        }\n")
+        configFile:write("    },\n")
     end
     configFile:write("}\n")
     configFile:write("return addresses\n")
@@ -55,21 +64,21 @@ end
 
 local function registerMachineNameListener(machineAddress)
     knownMachines[machineAddress].name = "Unknown"
-    local eventId =
-        Event.listen(
-        "modem_message",
-        function(_, sender, port, _, ...)
-            if sender == tabletAddress and port == portNumber and arg[1] == "machine_name" then
-                local name = arg[2]
-                knownMachines[machineAddress].name = name
-            end
+    local function machineNameListener(_evName, _serverAddress, sender, port, _distance, ...)
+        local args = {...}
+        if sender == tabletAddress and port == portNumber and args[1] == "machine_name" then
+            local name = args[2]
+            knownMachines[machineAddress].name = name
         end
-    )
+    end
+
+    Event.listen("modem_message", machineNameListener)
 
     Event.timer(
         inputTimeout,
         function()
-            Event.ignore("modem_message", eventId)
+            Event.ignore("modem_message", machineNameListener)
+            print('Machine name: "' .. knownMachines[machineAddress].name .. '"')
             rewriteAddressFile()
             tabletAddress = ""
         end
@@ -78,25 +87,25 @@ end
 
 local function registerTabletCoordinatesListener(machineAddress)
     knownMachines[machineAddress].coordinates = {}
-    local eventId =
-        Event.listen(
-        "modem_message",
-        function(_, sender, port, _, ...)
-            if sender == tabletAddress and port == portNumber and arg[1] == "my_coordinates" then
-                local tabletCoordinates = arg[2]
-                knownMachines[machineAddress].coordinates = {
-                    x = math.floor(tabletCoordinates.x + relativeCoordinates.x),
-                    y = math.floor(tabletCoordinates.y + relativeCoordinates.y),
-                    z = math.floor(tabletCoordinates.z + relativeCoordinates.z)
-                }
-            end
+    local function tabletCoordinatesListener(_evName, _serverAddress, sender, port, _distance, ...)
+        local args = {...}
+        if sender == tabletAddress and port == portNumber and args[1] == "my_coordinates" then
+            print("got tablet coordinates")
+            local tabletCoordinates = args[2]
+            knownMachines[machineAddress].coordinates = {
+                x = math.floor(tabletCoordinates[1] + relativeCoordinates[1]),
+                y = math.floor(tabletCoordinates[2] + relativeCoordinates[2]),
+                z = math.floor(tabletCoordinates[3] + relativeCoordinates[3])
+            }
         end
-    )
+    end
+
+    Event.listen("modem_message", tabletCoordinatesListener)
 
     Event.timer(
-        noInputTimeout,
+        tabletResponseTime,
         function()
-            Event.ignore("modem_message", eventId)
+            Event.ignore("modem_message", tabletCoordinatesListener)
             rewriteAddressFile()
             relativeCoordinates = {}
         end
@@ -105,27 +114,27 @@ end
 
 local function registerWaypointRelativeCoordinatesListener()
     local minDistance = math.huge
-    local eventId =
-        Event.listen(
-        "modem_message",
-        function(_, sender, port, _, ...)
-            if port == portNumber and arg[1] == "waypoint_relative_coordinates" then
-                local senderRelativeCoordinates = arg[2]
-                local senderDistance =
-                    senderRelativeCoordinates.x ^ 2 + senderRelativeCoordinates.y ^ 2 + senderRelativeCoordinates.z ^ 2
-                if minDistance > senderDistance then
-                    tabletAddress = sender
-                    minDistance = senderDistance
-                    relativeCoordinates = senderRelativeCoordinates
-                end
+    local function relativeCoordinatesListener(_evName, _serverAddress, sender, port, _distance, ...)
+        local args = {...}
+        if port == portNumber and args[1] == "waypoint_relative_coordinates" then
+            print("got relative coordinates")
+            local senderRelativeCoordinates = {args[2], args[3], args[4]}
+            local senderDistance =
+                senderRelativeCoordinates[1] ^ 2 + senderRelativeCoordinates[2] ^ 2 + senderRelativeCoordinates[3] ^ 2
+            if minDistance > senderDistance then
+                tabletAddress = sender
+                minDistance = senderDistance
+                relativeCoordinates = senderRelativeCoordinates
             end
         end
-    )
+    end
+
+    Event.listen("modem_message", relativeCoordinatesListener)
 
     Event.timer(
-        noInputTimeout,
+        tabletResponseTime,
         function()
-            Event.ignore("modem_message", eventId)
+            Event.ignore("modem_message", relativeCoordinatesListener)
         end
     )
 end
@@ -133,28 +142,33 @@ end
 -- Pings tablets for information about the newly placed machine and waypoint
 -- and registers listeners for machine setup
 local function pingTablets(waypointAddress, machineAddress)
-    registerWaypointRelativeCoordinatesListener()
-    registerTabletCoordinatesListener(machineAddress)
-    registerMachineNameListener()
-
-    Modem.broadcast(portNumber, "what_are_the_waypoint_relative_coordinates", waypointAddress)
-    Modem.send(tabletAddress, portNumber, "what_are_your_coordinates")
-    Modem.send(tabletAddress, portNumber, "what_is_the_machine_name")
-
-    return {name = nil, coordinates = {}}
-end
-
-local function exec(address, file)
-    addressesConfigFile = file
-
-    -- Unloads the config file from memory
-    pcall(
+    Modem.broadcast(portNumber, "wakeup_tablet")
+    Event.timer(
+        Constants.tabletBootUpTime,
         function()
-            package.loaded[addressesConfigFile] = nil
+            registerWaypointRelativeCoordinatesListener()
+            Modem.broadcast(portNumber, "what_are_the_waypoint_relative_coordinates", waypointAddress)
+            Event.timer(
+                tabletResponseTime,
+                function()
+                    registerTabletCoordinatesListener(machineAddress)
+                    Modem.broadcast(portNumber, "what_are_your_coordinates")
+                    Event.timer(
+                        tabletResponseTime,
+                        function()
+                            registerMachineNameListener(machineAddress)
+                            Modem.broadcast(portNumber, "what_is_the_machine_name")
+                        end
+                    )
+                end
+            )
         end
     )
-    -- Reloads the config file
-    knownMachines = require(addressesConfigFile)
+end
+
+local function exec(address, packageName)
+    addressesConfigFile = packageName
+    reloadAddressesConfigFile()
     -- Skips machine setup if it's already in the configuration file
     if knownMachines[address] then
         return
@@ -172,8 +186,6 @@ local function exec(address, file)
         componentAddresses["gt_machine"] = nil
         componentAddresses["gt_batterybuffer"] = nil
     end
-
-    return knownMachines
 end
 
 return exec
