@@ -1,0 +1,5 @@
+# TODO: Configure first time setup
+cd /home/NIDAS
+clear
+init
+cd
