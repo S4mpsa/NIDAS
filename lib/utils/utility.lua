@@ -1,5 +1,5 @@
 local component = require("component")
-
+local internet = require("internet")
 local utility = {}
 
 function utility.machine(address)
@@ -54,6 +54,28 @@ function utility.time(number)
             return (hours.."h "..minutes.."m "..seconds.."s")
         end
     end
+end
+
+function utility.split (string, separator)
+    separator = separator or "%s"
+    local t={}
+    for str in string.gmatch(string, "([^"..separator.."]+)") do table.insert(t, str) end
+    return t
+end
+function utility.offsetTime(offset, timeJSON)
+    offset = offset or 0
+    local data = timeJSON
+    if #data < 3 then return nil end
+    data = utility.split(data, ",")[2]
+    data = utility.split(data, "-")[3]
+    data = data:sub(data:find("T")+1, data:find("Z")-1)
+    local hours = data:sub(1, 2)
+    local minutes = data:sub(4, 5)
+    if math.floor(minutes) <= 9 then minutes = "0"..math.floor(minutes) else minutes = math.floor(minutes) end
+    if offset ~= 0 then
+        hours = (hours + offset) % 24
+    end
+    return math.floor(hours)..":"..minutes
 end
 
 function utility.getInteger(string)
