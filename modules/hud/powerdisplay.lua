@@ -1,151 +1,155 @@
 package.path = package.path..";/NIDAS/lib/graphics/?.lua"..";/NIDAS/lib/utils/?.lua"
-local component = require("component")
 local computer = require("computer")
-local event = require("event")
-package.loaded.colors = nil
 local colors = require("colors")
-package.loaded.ar = nil
 local ar = require("ar")
-package.loaded.util = nil
 local util = require("utility")
---Test Values
-local glasses = component.glasses
-local data = util.machine("53268277")
-ar.clear(glasses)
 
 local powerDisplay = {}
 
-local displayInitialized = false
-local hudObjects = {
-    static = {},
-    dynamic = {}
-}
+local hudObjects = {}
 local energyData = {
-    counter = 1,
+    intervalCounter = 1,
     readings = {},
-    first = 0,
-    last = 0,
+    startTime = 0,
+    endTime = 0,
     updateInterval = 100,
-    currentRate = 0
+    energyPerTick = 0
 }
-local sizes = {
-    x = 0,
-    y = 0,
-    energyBarLength = 0,
-    bar = 0,
-    div = 3,
-}
-local borderColor = colors.darkGray
-local primaryColor = colors.electricBlue
-local accentColor = colors.magenta
 
 --Change these two functions if you want to adapt for other power sources.
 local function getCurrentEnergy(data)
-    return math.floor(string.gsub(data.getSensorInformation()[2], "([^0-9]+)", "") + 0)
+    return util.getInteger(data.getSensorInformation()[2])
 end
 local function getMaxEnergy(data)
-    return math.floor(string.gsub(data.getSensorInformation()[3], "([^0-9]+)", "") + 0)
+    return util.getInteger(data.getSensorInformation()[3])
 end
-local energyUnit = "RF"
+local energyUnit = "EU"
 
---Small = 1, Normal = 2, Large = div, Auto = 4x to 10x (Even)
-function powerDisplay.widget(glasses, data, w, h, resolution, scale)
+--Scales: Small = 1, Normal = 2, Large = hDivisor, Auto = 4x to 10x (Even)
+--Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
+--Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [width], [heigth], [borderColor], [primaryColor], [accentColor]}
+--Only the glass proxy is required, rest have default values.
+function powerDisplay.widget(glasses, data)
     local currentEU = getCurrentEnergy(data)
     local maxEU = getMaxEnergy(data)
     if maxEU < 0 then
-        maxEU = -maxEU
+        maxEU = math.abs(maxEU)
     end
     local percentage = math.min(currentEU/maxEU, 1.0)
     --Update I/O
-    if energyData.counter == 1 then
-        energyData.first = computer.uptime()
+    if energyData.intervalCounter == 1 then
+        energyData.startTime = computer.uptime()
         energyData.readings[1] = currentEU
     end
-    if energyData.counter < energyData.updateInterval then
-        energyData.counter = energyData.counter + 1
+    if energyData.intervalCounter < energyData.updateInterval then
+        energyData.intervalCounter = energyData.intervalCounter + 1
     end
-    if energyData.counter == energyData.updateInterval then
-        energyData.last = computer.uptime()
+    if energyData.intervalCounter == energyData.updateInterval then
+        energyData.endTime = computer.uptime()
         energyData.readings[2] = currentEU
 
-        local ticks = math.ceil((energyData.last - energyData.first) * 20)
-        energyData.currentRate = math.floor((energyData.readings[2] - energyData.readings[1])/ticks)
-        energyData.counter = 1
+        local ticks = math.ceil((energyData.endTime - energyData.startTime) * 20)
+        energyData.energyPerTick = math.floor((energyData.readings[2] - energyData.readings[1])/ticks)
+        energyData.intervalCounter = 1
     end
-
-    if #hudObjects.static == 0 then
+    if #hudObjects < #glasses then
+        for i = 1, #glasses do
+            if glasses[i][1] == nil then
+                error("Must provide glass proxy for energy display.")
+            end
+            table.insert(hudObjects,  {
+                static          = {},
+                dynamic         = {},
+                glasses         = glasses[i][1],
+                resolution      = glasses[i][2] or {2560, 1440},
+                scale           = glasses[i][3] or 3,
+                width           = glasses[i][4] or 337,
+                heigth          = glasses[i][5] or 29,
+                borderColor     = glasses[i][6] or colors.darkGray,
+                primaryColor    = glasses[i][7] or colors.electricBlue,
+                accentColor     = glasses[i][8] or colors.magenta
+            })
+        end 
+    end
+    for i = 1, #hudObjects do
+        local h = hudObjects[i].heigth
+        local w = hudObjects[i].width
         local x = 0
-        local y = util.screensize(resolution, scale)[2] - h
-        local bar = math.ceil(h * 0.4)
-        local div = sizes.div
-        local rate = h-bar-2*div-1
-        sizes.x = x
-        sizes.y = y
-        sizes.bar = bar
-        sizes.energyBarLength = w-4-bar
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y}, w, h, borderColor, 0.6)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y-2}, w, 5+bar, borderColor, 0.6)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y-4}, w, 2, borderColor, 0.5)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y-6}, w, 2, borderColor, 0.4)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y-8}, w, 2, borderColor, 0.3)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y-10}, w, 2, borderColor, 0.2)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y}, w, div, borderColor)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y+div+bar}, w, div, borderColor)
-        hudObjects.static[#hudObjects.static+1] = ar.rectangle(glasses, {x, y+h-1}, w, 1, borderColor)
-        hudObjects.static[#hudObjects.static+1] = ar.quad(glasses, {x, y+div}, {x, y+div+bar}, {x+3+bar, y+div+bar}, {x+3, y+div}, borderColor)
-        hudObjects.static[#hudObjects.static+1] = ar.quad(glasses, {x+w-1-bar, y+div}, {x+w-1, y+div+bar}, {x+w, y+div+bar}, {x+w, y+div}, borderColor)
-        hudObjects.static[#hudObjects.static+1] = ar.quad(glasses, {x, y+2*div+bar}, {x, y+2*div+bar+rate}, {x+30+rate, y+2*div+bar+rate}, {x+30, y+2*div+bar}, borderColor)
-        hudObjects.static[#hudObjects.static+1] = ar.quad(glasses, {x+w-30-rate, y+2*div+bar}, {x+w-30, y+2*div+bar+rate}, {x+w, y+2*div+bar+rate}, {x+w, y+2*div+bar}, borderColor)
-        hudObjects.dynamic.energyBar = ar.quad(glasses, {x+3, y+div}, {x+3+bar, y+div+bar}, {x+3+bar, y+div+bar}, {x+3, y+div}, primaryColor)
-        hudObjects.dynamic.currentEU = ar.text(glasses, "", {x+2, y-9}, primaryColor)
-        hudObjects.dynamic.maxEU = ar.text(glasses, "", {x+w-90, y-9}, accentColor)
-        hudObjects.dynamic.percentage = ar.text(glasses, "", {x+w/2-5, y-9}, accentColor)
-        hudObjects.dynamic.filltime = ar.text(glasses, "Time to empty:", {x+30+rate, y+2*div+bar+3}, accentColor, 0.7)
-        hudObjects.dynamic.fillrate = ar.text(glasses, "", {x+w/2-10, y+2*div+bar+2}, borderColor)
-    end
-    hudObjects.dynamic.energyBar.setVertex(3, sizes.x+3+sizes.bar+sizes.energyBarLength*percentage, sizes.y+sizes.div+sizes.bar)
-    hudObjects.dynamic.energyBar.setVertex(4, sizes.x+3+sizes.energyBarLength*percentage, sizes.y+sizes.div)
-    hudObjects.dynamic.currentEU.setText(util.splitNumber(currentEU).." "..energyUnit)
-    if maxEU > 9000000000000000000 then
-        hudObjects.dynamic.maxEU.setText("∞ "..energyUnit)
-        hudObjects.dynamic.maxEU.setPosition(sizes.x+w-25, sizes.y-9)
-    else
-        hudObjects.dynamic.maxEU.setText(util.splitNumber(maxEU).." "..energyUnit)
-        hudObjects.dynamic.maxEU.setPosition(sizes.x+w-30-(4.5*#util.splitNumber(maxEU)), sizes.y-9)
-    end
-    hudObjects.dynamic.percentage.setText(util.percentage(percentage))
-    local rateString = util.splitNumber(energyData.currentRate)
-    hudObjects.dynamic.fillrate.setPosition(sizes.x+w/2-10-(#rateString*1.5), sizes.y+2*sizes.div+sizes.bar+2)
-    if energyData.currentRate >= 0 then
-        hudObjects.dynamic.fillrate.setText("+"..rateString.." "..energyUnit.."/t") 
-        hudObjects.dynamic.fillrate.setColor(util.RGB(colors.lime))
-    else
-        hudObjects.dynamic.fillrate.setText(rateString.." "..energyUnit.."/t")
-        hudObjects.dynamic.fillrate.setColor(util.RGB(colors.red))
-    end
-    local fillTimeString = ""
-    if w > 250 then
-        if energyData.currentRate >= 0 then
-            local fillTime = math.floor((maxEU-currentEU)/(energyData.currentRate*20))
-            fillTimeString = "Full: " .. util.time(math.abs(fillTime))
-        else
-            local fillTime = math.floor((currentEU)/(energyData.currentRate*20))
-            fillTimeString = "Empty: " .. util.time(math.abs(fillTime))
+        local y = util.screensize(hudObjects[i].resolution, hudObjects[i].scale)[2] - h
+        local hProgress = math.ceil(h * 0.4)
+        local energyBarLength = w-4-hProgress
+        local hDivisor = 3
+        local hIO = h-hProgress-2*hDivisor-1
+        if #hudObjects[i].static == 0 and #hudObjects[i].glasses ~= nil then
+            local borderColor = hudObjects[i].borderColor
+            local primaryColor = hudObjects[i].primaryColor
+            local accentColor = hudObjects[i].accentColor
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, h, borderColor, 0.6)) --Replace all "glasses" with hudObjects[i].glasses
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-2}, w, 5+hProgress, borderColor, 0.6))
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-4}, w, 2, borderColor, 0.5))
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-6}, w, 2, borderColor, 0.4))
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-8}, w, 2, borderColor, 0.3))
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-10}, w, 2, borderColor, 0.2))
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, hDivisor, borderColor))
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+hDivisor+hProgress}, w, hDivisor, borderColor))
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+h-1}, w, 1, borderColor))
+            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+hDivisor}, {x, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, borderColor))
+            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-1-hProgress, y+hDivisor}, {x+w-1, y+hDivisor+hProgress}, {x+w, y+hDivisor+hProgress}, {x+w, y+hDivisor}, borderColor))
+            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+2*hDivisor+hProgress}, {x, y+2*hDivisor+hProgress+hIO}, {x+30+hIO, y+2*hDivisor+hProgress+hIO}, {x+30, y+2*hDivisor+hProgress}, borderColor))
+            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-30-hIO, y+2*hDivisor+hProgress}, {x+w-30, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress}, borderColor))
+            hudObjects[i].dynamic.energyBar = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, primaryColor)
+            hudObjects[i].dynamic.currentEU = ar.text(hudObjects[i].glasses, "", {x+2, y-9}, primaryColor)
+            hudObjects[i].dynamic.maxEU = ar.text(hudObjects[i].glasses, "", {x+w-90, y-9}, accentColor)
+            hudObjects[i].dynamic.percentage = ar.text(hudObjects[i].glasses, "", {x+w/2-5, y-9}, accentColor)
+            hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
+            hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
         end
-    end 
-    hudObjects.dynamic.filltime.setText(fillTimeString)
-end
-
-function powerDisplay.remove(glasses)
-    for i = 1, #hudObjects.static do
-        glasses.removeObject(hudObjects.static[i].getID())
+        hudObjects[i].dynamic.energyBar.setVertex(3, x+3+hProgress+energyBarLength*percentage, y+hDivisor+hProgress)
+        hudObjects[i].dynamic.energyBar.setVertex(4, x+3+energyBarLength*percentage, y+hDivisor)
+        hudObjects[i].dynamic.currentEU.setText(util.splitNumber(currentEU).." "..energyUnit)
+        if maxEU > 9000000000000000000 then
+            hudObjects[i].dynamic.maxEU.setText("∞ "..energyUnit)
+            hudObjects[i].dynamic.maxEU.setPosition(x+w-25, y-9)
+        else
+            hudObjects[i].dynamic.maxEU.setText(util.splitNumber(maxEU).." "..energyUnit)
+            hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#util.splitNumber(maxEU)), y-9)
+        end
+        hudObjects[i].dynamic.percentage.setText(util.percentage(percentage))
+        local hIOString = util.splitNumber(energyData.energyPerTick)
+        hudObjects[i].dynamic.fillrate.setPosition(x+w/2-10-(#hIOString*1.5), y+2*hDivisor+hProgress+2)
+        if energyData.energyPerTick >= 0 then
+            hudObjects[i].dynamic.fillrate.setText("+"..hIOString.." "..energyUnit.."/t") 
+            hudObjects[i].dynamic.fillrate.setColor(util.RGB(colors.lime))
+        else
+            hudObjects[i].dynamic.fillrate.setText(hIOString.." "..energyUnit.."/t")
+            hudObjects[i].dynamic.fillrate.setColor(util.RGB(colors.red))
+        end
+        local fillTimeString = ""
+        if w > 250 then
+            if energyData.energyPerTick >= 0 then
+                local fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
+                fillTimeString = "Full: " .. util.time(math.abs(fillTime))
+            else
+                local fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
+                fillTimeString = "Empty: " .. util.time(math.abs(fillTime))
+            end
+        end 
+        hudObjects[i].dynamic.filltime.setText(fillTimeString)
     end
-    glasses.removeObject(hudObjects.dynamic.energyBar.getID())
-    glasses.removeObject(hudObjects.dynamic.currentEU.getID())
-    glasses.removeObject(hudObjects.dynamic.maxEU.getID())
-    glasses.removeObject(hudObjects.dynamic.percentage.getID())
-    glasses.removeObject(hudObjects.dynamic.filltime.getID())
-    glasses.removeObject(hudObjects.dynamic.fillrate.getID())
 end
 
-powerDisplay.widget(glasses, data, 337, 29, {2560, 1440}, 3)
+function powerDisplay.remove()
+    for i = 1, #hudObjects do
+        for j = 1, #hudObjects[i].static do
+            hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
+        end
+        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.energyBar.getID())
+        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.currentEU.getID())
+        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.maxEU.getID())
+        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.percentage.getID())
+        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.filltime.getID())
+        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.fillrate.getID())
+    end
+end
+
+return powerDisplay
