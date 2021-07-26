@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: tar -cvf NIDAS.tar configuration lib server setup-dev.lua tablet .shrc
-      - uses: meeDamian/github-release@2.0
+      - uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.TOKEN }}
           tag: v-1
