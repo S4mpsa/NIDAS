@@ -9,19 +9,11 @@ package.loaded.powerdisplay = nil
 local powerDisplay = require("powerdisplay")
 
 local glasses1 = util.machine("010717b2")
-local glasses2 = util.machine("f7c85e42")
-local glasses3 = 1
 ar.clear(glasses1)
-ar.clear(glasses2)
-local count = 1
-while count < 50 do 
+while true do 
     powerDisplay.widget({
-        {glasses1, {2560, 1440}, 3, 337, 29},
-        {glasses2}},
+        {glasses1, {2560, 1440}, 3, 337, 29}},
         data)
     os.sleep()
-    count = count + 1
-    
-end
 
-powerDisplay.remove()
+end
