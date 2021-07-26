@@ -56,6 +56,10 @@ function utility.time(number)
     end
 end
 
+function utility.getInteger(string)
+    return math.floor(string.gsub(string, "([^0-9]+)", "") + 0)
+end
+
 function utility.percentage(number)
     return (math.floor(number*1000)/10).."%"
 end
