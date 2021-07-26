@@ -18,7 +18,7 @@ local function exec(partialAdress, name)
         end
     )
     if not successfull then
-        if Filesystem.exists("/home/NIDAS/.gitignore") then -- Is in a development environment
+        if Component.ocemu then -- Is running on emulator
             machine = New(machineEntity, mock:new(partialAdress, name))
         else
             machine = New(machineEntity)
