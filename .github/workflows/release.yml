@@ -23,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
-        run: tar -cvf NIDAS.tar configuration lib server setup-dev.lua tablet .shrc
+        run: tar -cvf NIDAS.tar configuration lib server modules setup-dev.lua tablet .shrc
       - uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.TOKEN }}
