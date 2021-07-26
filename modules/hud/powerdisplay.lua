@@ -63,7 +63,7 @@ function powerDisplay.widget(glasses, data)
                 glasses         = glasses[i][1],
                 resolution      = glasses[i][2] or {2560, 1440},
                 scale           = glasses[i][3] or 3,
-                width           = glasses[i][4] or 337,
+                width           = glasses[i][4] or 335,
                 heigth          = glasses[i][5] or 29,
                 borderColor     = glasses[i][6] or colors.darkGray,
                 primaryColor    = glasses[i][7] or colors.electricBlue,
@@ -84,7 +84,7 @@ function powerDisplay.widget(glasses, data)
             local borderColor = hudObjects[i].borderColor
             local primaryColor = hudObjects[i].primaryColor
             local accentColor = hudObjects[i].accentColor
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, h, borderColor, 0.6)) --Replace all "glasses" with hudObjects[i].glasses
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, h, borderColor, 0.6))
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-2}, w, 5+hProgress, borderColor, 0.6))
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-4}, w, 2, borderColor, 0.5))
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-6}, w, 2, borderColor, 0.4))
