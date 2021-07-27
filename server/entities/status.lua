@@ -1,8 +1,16 @@
--- Iport section
+-- Import section
 
-local states = require("entities.states")
+Colors = require("graphics.colors")
 
 --
+
+local states = {
+    ON = {name = "ON"},
+    IDLE = {name = "IDLE"},
+    OFF = {name = "OFF"},
+    BROKEN = {name = "BROKEN"},
+    MISSING = {name = "NOT FOUND"}
+}
 
 local status = {
     progress = 0,
@@ -10,7 +18,8 @@ local status = {
     problems = 0,
     probablyUses = 0,
     efficiencyPercentage = 0,
-    state = states.MISSING,
+    state = states.OFF,
+    states = states
 }
 
 return status

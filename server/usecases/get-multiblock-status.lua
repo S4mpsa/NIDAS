@@ -1,11 +1,11 @@
 -- Import section
 
-local status = require("server.entities.status")
+local states = require("entities.states")
 
-local getMachine = require("get-machine")
-local getNumberOfProblems = require("get-number-of-problems")
-local getEnergyUsage = require("get-energy-usage")
-local getEfficiencyPercentage = require("get-efficiency-percentage")
+local getMachine = require("usecases.get-machine")
+local getNumberOfProblems = require("usecases.get-number-of-problems")
+local getEnergyUsage = require("usecases.get-energy-usage")
+local getEfficiencyPercentage = require("usecases.get-efficiency-percentage")
 
 --
 
@@ -20,21 +20,21 @@ local function exec(address, name)
     local state = {}
     if multiblock:isWorkAllowed() then
         if multiblock:hasWork() then
-            state = status.states.ON
+            state = states.ON
         else
-            state = status.states.IDLE
+            state = states.IDLE
         end
     else
-        state = status.states.OFF
+        state = states.OFF
     end
 
-    if problems > 0 then
-        state = status.states.BROKEN
+    if (problems or 0) > 0 then
+        state = states.BROKEN
     end
 
-    status = {
-        progress = multiblock.getWorkProgressProgress(),
-        maxProgress = multiblock.getWorkMaxProgressProgress(),
+    local status = {
+        progress = multiblock.getWorkProgress(),
+        maxProgress = multiblock.getWorkMaxProgress(),
         problems = problems,
         probablyUses = getEnergyUsage(multiblock),
         efficiencyPercentage = getEfficiencyPercentage(multiblock),
