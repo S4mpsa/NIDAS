@@ -1,3 +1,9 @@
+-- Import section
+
+local status = require("entities.status")
+
+--
+
 local machine = {
     name = "",
     workAllowed = false,
@@ -11,7 +17,9 @@ local machine = {
     workProgress = 0,
     workMaxProgress = 0,
     isBroken = false,
-    address = ""
+    address = "",
+    status = status,
+    coordinates = {}
 }
 
 function machine.setWorkAllowed(allow, machine)

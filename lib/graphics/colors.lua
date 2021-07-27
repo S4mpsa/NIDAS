@@ -32,8 +32,4 @@ local colors = {
     darkSlateGrey = 0x2F4F4F
 }
 
-for name, color in pairs(colors) do
-    colors[name] = color
-end
-
 return colors

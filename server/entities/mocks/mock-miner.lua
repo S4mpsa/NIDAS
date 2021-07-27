@@ -1,7 +1,7 @@
 -- Import section
 
 Inherits = require("utils.inherits")
-local mockMachine = require("data.mock.mock-machine")
+local mockMachine = require("entities.mocks.mock-machine")
 
 --
 
