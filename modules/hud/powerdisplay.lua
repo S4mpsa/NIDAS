@@ -36,6 +36,10 @@ function powerDisplay.widget(glasses, data)
         maxEU = math.abs(maxEU)
     end
     local percentage = math.min(currentEU/maxEU, 1.0)
+    if percentage >= 0.999 then
+        currentEU = maxEU
+        percentage = 1.0
+    end
     --Update I/O
     if energyData.intervalCounter == 1 then
         energyData.startTime = computer.uptime()
