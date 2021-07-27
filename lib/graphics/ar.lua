@@ -2,9 +2,7 @@ package.path = package.path..";/NIDAS/lib/graphics/?.lua"..";/NIDAS/lib/utils/?.
 local component = require("component")
 local computer = require("computer")
 local event = require("event")
-package.loaded.util = nil
 local util = require("utility")
-package.loaded.colors = nil
 local colors = require("colors")
 
 local arGraphics = {}

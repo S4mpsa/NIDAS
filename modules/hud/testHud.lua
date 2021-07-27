@@ -1,24 +1,17 @@
---Test Values
 package.path = package.path..";/NIDAS/lib/graphics/?.lua"..";/NIDAS/lib/utils/?.lua"..";/NIDAS/modules/hud/?.lua"
 local component = require("component")
-package.loaded.utility = nil
-local util = require("utility")
-local data = util.machine("53268277")
 local ar = require("ar")
-local colors = require("colors")
-package.loaded.powerdisplay = nil
 local powerDisplay = require("powerdisplay")
-package.loaded.toolbar = nil
 local toolbar = require("toolbar")
 
-local glasses1 = util.machine("010717b2")
-ar.clear(glasses1)
+local glasses = component.glasses
+local data = component.gt_machine
+ar.clear(glasses)
 
 while true do 
     powerDisplay.widget({
-        {glasses1}},
+        {glasses}},
         data)
-        toolbar.widget({{glasses1, _, _, 3}})
+    toolbar.widget({{glasses}})
     os.sleep()
-
 end
