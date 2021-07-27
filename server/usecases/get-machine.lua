@@ -11,13 +11,13 @@ local machineEntity = require("entities.machine")
 local function exec(partialAdress, name)
     local machine = nil
 
-    local successfull =
+    local successful =
         pcall(
         function()
             machine = New(machineEntity, Component.proxy(Component.get(partialAdress)), {name = name})
         end
     )
-    if not successfull then
+    if not successful then
         if Component.ocemu then -- Is running on emulator
             machine = New(machineEntity, mock:new(partialAdress, name))
         else
