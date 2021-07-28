@@ -11,7 +11,7 @@ shell.execute("wget -fq " .. tarMan)
 shell.setWorkingDirectory("/bin")
 shell.execute("wget -fq " .. tarBin)
 
-NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v-1/NIDAS.tar"
+NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v0/NIDAS.tar"
 
 local successfull =
     pcall(
