@@ -61,6 +61,7 @@ function toolbar.widget(glasses)
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+3}, 2, h-3, borderColor)) --Left Border
             table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+3, y}, {x, y+3}, {x+w+3, y+3}, {x+w, y}, borderColor)) -- Top Border
             table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w, y}, {x+w, y+h}, {x+w+rightTriangleSide, y+h}, {x+w+rightTriangleSide, y+rightTriangleSide}, borderColor)) --Right triangle
+            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x+w-1, y+15}, 2, h-15, borderColor)) --Right Toolbar Edge
             table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w/2-middleTriangleSide+5, y+3}, {x+w/2-2*middleTriangleSide+5, y+3+middleTriangleSide}, {x+w/2+2*middleTriangleSide-3, y+3+middleTriangleSide}, {x+w/2+middleTriangleSide-3, y+3}, borderColor)) --Middle Triangle
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+12}, w, 3, borderColor)) --Middle Divider
             table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+2, y+15}, {x+2+hExpBar, y+15+hExpBar}, {x+w, y+15+hExpBar}, {x+w-hExpBar, y+15}, primaryColor, 0.5)) --Experience Bar
