@@ -1,23 +1,20 @@
 -- Import section
+local parser = require "utils.parser"
 
 local states = require("entities.states")
 
 local getMachine = require("usecases.get-machine")
 local getNumberOfProblems = require("usecases.get-number-of-problems")
-local getEnergyUsage = require("usecases.get-energy-usage")
 local getEfficiencyPercentage = require("usecases.get-efficiency-percentage")
 
 --
 
 local function exec(address, name)
     local multiblock = getMachine(address, name)
-    if string.len(multiblock.address) == 0 then
-        return multiblock
-    end
-
+    if string.len(multiblock.address) == 0 then return multiblock end
 
     local sensorInformation = multiblock:getSensorInformation()
-    
+
     local problems = getNumberOfProblems(sensorInformation[5])
 
     local state = {}
@@ -31,15 +28,14 @@ local function exec(address, name)
         state = states.OFF
     end
 
-    if (problems or 0) > 0 then
-        state = states.BROKEN
-    end
+    if (problems or 0) > 0 then state = states.BROKEN end
 
     local status = {
-        progress = multiblock.getWorkProgress(),
-        maxProgress = multiblock.getWorkMaxProgress(),
+        progress = multiblock:getWorkProgress(),
+        maxProgress = multiblock:getWorkMaxProgress(),
         problems = problems,
-        probablyUses = multiblock:getWorkMaxProgress() and getEnergyUsage(sensorInformation[3]) or 0,
+        probablyUses = multiblock:getWorkMaxProgress() and
+            parser.getInteger(sensorInformation[3]) or 0,
         efficiencyPercentage = getEfficiencyPercentage(sensorInformation[5]),
         state = state
     }
