@@ -1,9 +1,5 @@
-package.path = package.path..";/NIDAS/lib/graphics/?.lua"..";/NIDAS/lib/utils/?.lua"
-local component = require("component")
-local computer = require("computer")
-local event = require("event")
-local util = require("utility")
-local colors = require("colors")
+local screen = require("utils.screen")
+local colors = require("graphics.colors")
 
 local arGraphics = {}
 
@@ -84,14 +80,14 @@ end
 
 function arGraphics.testGrid(glasses, resolution, scale)
     scale = scale or 3
-    local glassResolution = util.screensize(resolution, scale)
+    local glassResolution = screen.size(resolution, scale)
     arGraphics.rectangle(glasses, {glassResolution[1]/2, 0}, 1, glassResolution[2], colors.electricBlue)
     arGraphics.rectangle(glasses, {0, glassResolution[2]/2}, glassResolution[1], 1, colors.electricBlue)
 end
 
 function arGraphics.borders(glasses, resolution, scale)
     scale = scale or 3
-    local glassResolution = util.screensize(resolution, scale)
+    local glassResolution = screen.size(resolution, scale)
     arGraphics.rectangle(glasses, {0, 0}, glassResolution[1], 1, colors.electricBlue)
     arGraphics.rectangle(glasses, {0, 0}, 1, glassResolution[2], colors.electricBlue)
     arGraphics.rectangle(glasses, {0, glassResolution[2]-1}, glassResolution[1], 1, colors.electricBlue)

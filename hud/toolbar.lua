@@ -1,8 +1,8 @@
-package.path = package.path..";/NIDAS/lib/graphics/?.lua"..";/NIDAS/lib/utils/?.lua"
 local internet = require("internet")
-local colors = require("colors")
-local ar = require("ar")
-local util = require("utility")
+local colors = require("graphics.colors")
+local ar = require("graphics.ar")
+local screen = require("utils.screen")
+local time = require("utils.time")
 
 local toolbar = {}
 
@@ -40,18 +40,18 @@ function toolbar.widget(glasses)
     local month = timeString:sub(4, 5)
     local date = day + (month-1) * 30
     local year = timeString:sub(7, 8)
-    local time = timeString:sub(10, #timeString-3)
+    local hours = timeString:sub(10, #timeString-3)
     year = year - 70 + 0
-    timeString = time.." | ".."Day "..math.floor(date).." Year "..math.floor(year)
+    timeString = hours.." | ".."Day "..math.floor(date).." Year "..math.floor(year)
     if requestCounter == 500 then
         realtime = internet.request("http://worldclockapi.com/api/json/utc/now")()
         requestCounter = 1
     end
     for i = 1, #hudObjects do
-        local resolution = util.screensize(hudObjects[i].resolution, hudObjects[i].scale)
+        local resolution = screen.size(hudObjects[i].resolution, hudObjects[i].scale)
         local x = resolution[1] / 2 - w/2
         local y = resolution[2] - h
-        local formattedTime = util.offsetTime(hudObjects[i].offset, realtime)
+        local formattedTime = time.offset(hudObjects[i].offset, realtime)
         if #hudObjects[i].static == 0 and #hudObjects[i].glasses ~= nil then
             local borderColor = hudObjects[i].borderColor
             local primaryColor = hudObjects[i].primaryColor

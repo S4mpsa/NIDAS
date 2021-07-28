@@ -4,8 +4,8 @@ Component = require("component")
 Filesystem = require("filesystem")
 
 local findIn = require("utils.find-in")
-local mock = require("entities.mocks.mock-machine")
-local machineEntity = require("entities.machine")
+local mock = require("server.entities.mocks.mock-machine")
+local machineEntity = require("server.entities.machine")
 
 --
 

@@ -1,8 +1,9 @@
-package.path = package.path..";/NIDAS/lib/graphics/?.lua"..";/NIDAS/lib/utils/?.lua"
 local computer = require("computer")
-local colors = require("colors")
-local ar = require("ar")
-local util = require("utility")
+local colors = require("graphics.colors")
+local ar = require("graphics.ar")
+local parser = require("utils.parser")
+local time = require("utils.time")
+local screen = require("utils.screen")
 
 local powerDisplay = {}
 
@@ -16,13 +17,6 @@ local energyData = {
     energyPerTick = 0
 }
 
---Change these two functions if you want to adapt for other power sources.
-local function getCurrentEnergy(data)
-    return util.getInteger(data.getSensorInformation()[2])
-end
-local function getMaxEnergy(data)
-    return util.getInteger(data.getSensorInformation()[3])
-end
 local energyUnit = "EU"
 
 --Scales: Small = 1, Normal = 2, Large = hDivisor, Auto = 4x to 10x (Even)
@@ -30,8 +24,8 @@ local energyUnit = "EU"
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [width], [heigth], [borderColor], [primaryColor], [accentColor]}
 --Only the glass proxy is required, rest have default values.
 function powerDisplay.widget(glasses, data)
-    local currentEU = getCurrentEnergy(data)
-    local maxEU = getMaxEnergy(data)
+    local currentEU = math.floor(data.storedEU)
+    local maxEU = math.floor(data.EUCapacity)
     if maxEU < 0 then
         maxEU = math.abs(maxEU)
     end
@@ -79,7 +73,7 @@ function powerDisplay.widget(glasses, data)
         local h = hudObjects[i].heigth
         local w = hudObjects[i].width
         local x = 0
-        local y = util.screensize(hudObjects[i].resolution, hudObjects[i].scale)[2] - h
+        local y = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[2] - h
         local hProgress = math.ceil(h * 0.4)
         local energyBarLength = w-4-hProgress
         local hDivisor = 3
@@ -110,32 +104,32 @@ function powerDisplay.widget(glasses, data)
         end
         hudObjects[i].dynamic.energyBar.setVertex(3, x+3+hProgress+energyBarLength*percentage, y+hDivisor+hProgress)
         hudObjects[i].dynamic.energyBar.setVertex(4, x+3+energyBarLength*percentage, y+hDivisor)
-        hudObjects[i].dynamic.currentEU.setText(util.splitNumber(currentEU).." "..energyUnit)
+        hudObjects[i].dynamic.currentEU.setText(parser.splitNumber(currentEU).." "..energyUnit)
         if maxEU > 9000000000000000000 then
             hudObjects[i].dynamic.maxEU.setText("∞ "..energyUnit)
             hudObjects[i].dynamic.maxEU.setPosition(x+w-25, y-9)
         else
-            hudObjects[i].dynamic.maxEU.setText(util.splitNumber(maxEU).." "..energyUnit)
-            hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#util.splitNumber(maxEU)), y-9)
+            hudObjects[i].dynamic.maxEU.setText(parser.splitNumber(maxEU).." "..energyUnit)
+            hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#parser.splitNumber(maxEU)), y-9)
         end
-        hudObjects[i].dynamic.percentage.setText(util.percentage(percentage))
-        local hIOString = util.splitNumber(energyData.energyPerTick)
+        hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
+        local hIOString = parser.splitNumber(energyData.energyPerTick)
         hudObjects[i].dynamic.fillrate.setPosition(x+w/2-10-(#hIOString*1.5), y+2*hDivisor+hProgress+2)
         if energyData.energyPerTick >= 0 then
             hudObjects[i].dynamic.fillrate.setText("+"..hIOString.." "..energyUnit.."/t") 
-            hudObjects[i].dynamic.fillrate.setColor(util.RGB(colors.lime))
+            hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.lime))
         else
             hudObjects[i].dynamic.fillrate.setText(hIOString.." "..energyUnit.."/t")
-            hudObjects[i].dynamic.fillrate.setColor(util.RGB(colors.red))
+            hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
         end
         local fillTimeString = ""
         if w > 250 then
             if energyData.energyPerTick >= 0 then
                 local fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
-                fillTimeString = "Full: " .. util.time(math.abs(fillTime))
+                fillTimeString = "Full: " .. time.format(math.abs(fillTime))
             else
                 local fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
-                fillTimeString = "Empty: " .. util.time(math.abs(fillTime))
+                fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
             end
         end 
         hudObjects[i].dynamic.filltime.setText(fillTimeString)

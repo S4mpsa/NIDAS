@@ -1,5 +1,4 @@
-local function exec(multiblock)
-    local efficiencyString = multiblock:getSensorInformation()[5]
+local function exec(efficiencyString)
     local noParagraphMarkString = string.gsub(efficiencyString, "§r", "")
     local efficiency = "0.0"
     pcall(

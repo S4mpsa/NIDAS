@@ -1,5 +1,5 @@
 -- Paste this into OpenComputer terminal to download and set up NIDAS
--- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/develop/setup-dev.lua -f
+-- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/develop/setup-test.lua -f
 
 local shell = require("shell")
 
@@ -11,7 +11,7 @@ shell.execute("wget -fq " .. tarMan)
 shell.setWorkingDirectory("/bin")
 shell.execute("wget -fq " .. tarBin)
 
-NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v0/NIDAS.tar"
+NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v-1/NIDAS.tar"
 
 local successfull =
     pcall(
@@ -28,7 +28,7 @@ local successfull =
         shell.execute("rm -rf /home/lib")
         shell.execute("cp -r lib /home/lib")
         shell.execute("cp -f .shrc /home/.shrc")
-        shell.execute("cp -f setup-dev.lua /home/setup-dev.lua")
+        shell.execute("cp -f setup-test.lua /home/setup-test.lua")
 
         print("Success!\n")
     end
