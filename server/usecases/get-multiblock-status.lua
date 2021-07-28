@@ -15,7 +15,10 @@ local function exec(address, name)
         return multiblock
     end
 
-    local problems = getNumberOfProblems(multiblock)
+
+    local sensorInformation = multiblock:getSensorInformation()
+    
+    local problems = getNumberOfProblems(sensorInformation[5])
 
     local state = {}
     if multiblock:isWorkAllowed() then
@@ -36,8 +39,8 @@ local function exec(address, name)
         progress = multiblock.getWorkProgress(),
         maxProgress = multiblock.getWorkMaxProgress(),
         problems = problems,
-        probablyUses = getEnergyUsage(multiblock),
-        efficiencyPercentage = getEfficiencyPercentage(multiblock),
+        probablyUses = multiblock:getWorkMaxProgress() and getEnergyUsage(sensorInformation[3]) or 0,
+        efficiencyPercentage = getEfficiencyPercentage(sensorInformation[5]),
         state = state
     }
     return status

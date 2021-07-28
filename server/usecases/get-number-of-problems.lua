@@ -1,5 +1,4 @@
-local function exec(multiblock)
-    local problemsString = multiblock:getSensorInformation()[5]
+local function exec(problemsString)
     local problems = "0"
     pcall(
         function()
