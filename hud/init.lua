@@ -12,10 +12,12 @@ local hud = {}
 
 ar.clear(sampsaGlasses)
 ar.clear(gordoGlasses)
+local gordoAccent = math.floor(math.random() * 0xFFFFFF)
+local gordoPrimary = math.floor(math.random() * 0xFFFFFF)
 
 function hud.update(serverInfo)
-    powerDisplay.widget({{sampsaGlasses}, {gordoGlasses, {1920, 1080}}}, serverInfo.power)
-    toolbar.widget({{sampsaGlasses, _, _, 3}, {gordoGlasses, {1920, 1080}, _, -4}})
+    powerDisplay.widget({{sampsaGlasses}, {gordoGlasses, {1920, 1080}, 2, 389, _, _, gordoPrimary, gordoAccent}}, serverInfo.power)
+    toolbar.widget({{sampsaGlasses, _, _, 3}, {gordoGlasses, {1920, 1080}, 2, -4, _, gordoPrimary, gordoAccent}})
 end
 
 return hud
