@@ -1,18 +1,20 @@
 -- Import section
-local glasses = require("component").glasses
 local ar = require("graphics.ar")
+package.loaded.powerdisplay = nil
 local powerDisplay = require("hud.powerdisplay")
 local toolbar = require("hud.toolbar")
-
+local component = require("component")
 --
+
+local sampsaGlasses = component.proxy(component.get("af55dfbf"))
 
 local hud = {}
 
-ar.clear(glasses)
+ar.clear(sampsaGlasses)
 
 function hud.update(serverInfo)
-    powerDisplay.widget({{glasses}}, serverInfo.power)
-    toolbar.widget({{glasses}})
+    powerDisplay.widget({{sampsaGlasses}}, serverInfo.power)
+    toolbar.widget({{sampsaGlasses, _, _, 3}})
 end
 
 return hud
