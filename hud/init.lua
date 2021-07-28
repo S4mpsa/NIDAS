@@ -1,8 +1,8 @@
 -- Import section
 local glasses = require("component").glasses
-local ar = require("ar")
-local powerDisplay = require("powerdisplay")
-local toolbar = require("toolbar")
+local ar = require("graphics.ar")
+local powerDisplay = require("hud.powerdisplay")
+local toolbar = require("hud.toolbar")
 
 --
 

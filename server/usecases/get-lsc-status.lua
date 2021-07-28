@@ -1,10 +1,10 @@
 -- Import section
 local parser = require("utils.parser")
 
-local states = require("entities.states")
+local states = require("server.entities.states")
 
-local getMachine = require("usecases.get-machine")
-local getNumberOfProblems = require("usecases.get-number-of-problems")
+local getMachine = require("server.usecases.get-machine")
+local getNumberOfProblems = require("server.usecases.get-number-of-problems")
 
 --
 

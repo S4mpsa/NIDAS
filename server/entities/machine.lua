@@ -1,6 +1,6 @@
 -- Import section
 
-local status = require("entities.status")
+local status = require("server.entities.status")
 
 --
 

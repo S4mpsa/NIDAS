@@ -117,10 +117,10 @@ function powerDisplay.widget(glasses, data)
         hudObjects[i].dynamic.fillrate.setPosition(x+w/2-10-(#hIOString*1.5), y+2*hDivisor+hProgress+2)
         if energyData.energyPerTick >= 0 then
             hudObjects[i].dynamic.fillrate.setText("+"..hIOString.." "..energyUnit.."/t") 
-            hudObjects[i].dynamic.fillrate.setColor(screen.RGB(colors.lime))
+            hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.lime))
         else
             hudObjects[i].dynamic.fillrate.setText(hIOString.." "..energyUnit.."/t")
-            hudObjects[i].dynamic.fillrate.setColor(screen.RGB(colors.red))
+            hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
         end
         local fillTimeString = ""
         if w > 250 then
