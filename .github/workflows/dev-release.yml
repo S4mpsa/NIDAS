@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
-        run: tar -cvf NIDAS.tar configuration lib server modules setup-dev.lua tablet .shrc
+        run: tar -cvf NIDAS.tar .shrc configuration init.lua lib modules server setup-dev.lua setup-test.lua setup.lua tablet 
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"

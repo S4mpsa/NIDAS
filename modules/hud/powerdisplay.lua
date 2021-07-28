@@ -17,13 +17,6 @@ local energyData = {
     energyPerTick = 0
 }
 
---Change these two functions if you want to adapt for other power sources.
-local function getCurrentEnergy(data)
-    return parser.getInteger(data.getSensorInformation()[2])
-end
-local function getMaxEnergy(data)
-    return parser.getInteger(data.getSensorInformation()[3])
-end
 local energyUnit = "EU"
 
 --Scales: Small = 1, Normal = 2, Large = hDivisor, Auto = 4x to 10x (Even)
@@ -31,8 +24,8 @@ local energyUnit = "EU"
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [width], [heigth], [borderColor], [primaryColor], [accentColor]}
 --Only the glass proxy is required, rest have default values.
 function powerDisplay.widget(glasses, data)
-    local currentEU = getCurrentEnergy(data)
-    local maxEU = getMaxEnergy(data)
+    local currentEU = data.storedEU
+    local maxEU = data.EUCapacity
     if maxEU < 0 then
         maxEU = math.abs(maxEU)
     end
