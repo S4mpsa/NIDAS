@@ -21,7 +21,7 @@ local energyUnit = "EU"
 
 --Scales: Small = 1, Normal = 2, Large = hDivisor, Auto = 4x to 10x (Even)
 --Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
---Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [width], [heigth], [borderColor], [primaryColor], [accentColor]}
+--Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [heigth]}
 --Only the glass proxy is required, rest have default values.
 function powerDisplay.widget(glasses, data)
     local currentEU = math.floor(data.storedEU)
