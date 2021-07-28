@@ -24,8 +24,8 @@ local energyUnit = "EU"
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [width], [heigth], [borderColor], [primaryColor], [accentColor]}
 --Only the glass proxy is required, rest have default values.
 function powerDisplay.widget(glasses, data)
-    local currentEU = data.storedEU
-    local maxEU = data.EUCapacity
+    local currentEU = math.floor(data.storedEU)
+    local maxEU = math.floor(data.EUCapacity)
     if maxEU < 0 then
         maxEU = math.abs(maxEU)
     end
