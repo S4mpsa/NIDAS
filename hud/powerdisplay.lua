@@ -61,15 +61,16 @@ function powerDisplay.widget(glasses, data)
                 glasses         = glasses[i][1],
                 resolution      = glasses[i][2] or {2560, 1440},
                 scale           = glasses[i][3] or 3,
-                width           = glasses[i][4] or 335,
-                heigth          = glasses[i][5] or 29,
-                borderColor     = glasses[i][6] or colors.darkGray,
-                primaryColor    = glasses[i][7] or colors.electricBlue,
-                accentColor     = glasses[i][8] or colors.magenta
+                borderColor     = glasses[i][4] or colors.darkGray,
+                primaryColor    = glasses[i][5] or colors.electricBlue,
+                accentColor     = glasses[i][6] or colors.magenta,
+                width           = glasses[i][7] or 0,
+                heigth          = glasses[i][8] or 29
             })
         end 
     end
     for i = 1, #hudObjects do
+        if hudObjects[i].width == 0 then hudObjects[i].width = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[1]/2 - 91 end
         local h = hudObjects[i].heigth
         local w = hudObjects[i].width
         local x = 0
