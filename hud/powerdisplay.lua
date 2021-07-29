@@ -19,7 +19,7 @@ local energyData = {
 
 local energyUnit = "EU"
 
---Scales: Small = 1, Normal = 2, Large = hDivisor, Auto = 4x to 10x (Even)
+--Scales: Small = 1, Normal = 2, Large = 3, Auto = 4x to 10x (Even)
 --Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [heigth]}
 --Only the glass proxy is required, rest have default values.
@@ -83,6 +83,7 @@ function powerDisplay.widget(glasses, data)
             local borderColor = hudObjects[i].borderColor
             local primaryColor = hudObjects[i].primaryColor
             local accentColor = hudObjects[i].accentColor
+            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y-8}, {x, y+h}, {x+50, y+h}, {x+120, y+hProgress}, borderColor, 0.6))
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, h, borderColor, 0.6))
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-2}, w, 5+hProgress, borderColor, 0.6))
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-4}, w, 2, borderColor, 0.5))
