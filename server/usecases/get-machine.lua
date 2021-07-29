@@ -15,18 +15,16 @@ local function exec(partialAdress, name)
     if not knownMachines[partialAdress] then
 
         local address = Component.get(partialAdress)
-        if address then
-            knownMachines[partialAdress] = New(machineEntity,
-                                               Component.proxy(address),
-                                               {name = name})
-        else
-            if findIn(Component.list(), "ocemu") then -- Is running on emulator
-                knownMachines[partialAdress] =
-                    New(machineEntity, mock:new(partialAdress, name))
-            else
-                knownMachines[partialAdress] = New(machineEntity)
-            end
-        end
+
+        local machineComponent =
+            (address and Component.proxy(address)) -- Exists
+            or
+                (findIn(Component.list(), "ocemu") and
+                    mock:new(partialAdress, name)) -- Is running on emulator
+            or nil
+
+        knownMachines[partialAdress] = New(machineEntity, machineComponent,
+                                           {name = name})
     end
 
     return knownMachines[partialAdress]
