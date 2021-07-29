@@ -4,8 +4,12 @@ local function new(class, ...)
     for key, value in pairs(class) do newObject[key] = value end
 
     local parents = {...}
-    for i = 1, #parents do
-        for key, value in pairs(parents[i]) do newObject[key] = value end
+    if parents then
+        for i = 1, #parents do
+            for key, value in pairs(parents[i]) do
+                newObject[key] = value
+            end
+        end
     end
 
     setmetatable(newObject, {__index = class})
