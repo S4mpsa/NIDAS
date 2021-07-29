@@ -6,8 +6,10 @@ local function new(class, ...)
     local parents = {...}
     if parents then
         for i = 1, #parents do
-            for key, value in pairs(parents[i]) do
-                newObject[key] = value
+            if parents[i] then
+                for key, value in pairs(parents[i]) do
+                    newObject[key] = value
+                end
             end
         end
     end
