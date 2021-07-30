@@ -28,15 +28,15 @@ else
 end
 
 local successful = pcall(function()
-    if filesystem.exists("/home/NIDAS") then
+    if filesystem.exists("/home/NIDAS/configuration") then
         shell.execute(
-            "cp -r /home/NIDAS/configuration, /home/temp/configuration")
+            "cp -r /home/NIDAS/configuration /home/temp/configuration")
     end
     filesystem.remove("/home/NIDAS")
     filesystem.makeDirectory("/home/NIDAS")
 
     shell.setWorkingDirectory("/home/NIDAS")
-    print("Downloading NIDAS", release)
+    print("Downloading NIDAS " .. release)
     shell.execute("wget -fq " .. NIDAS .. " -f")
     print("Extracting")
     shell.execute("tar -xf NIDAS.tar")
@@ -48,7 +48,7 @@ local successful = pcall(function()
 
     if filesystem.exists("/home/temp/configuration") then
         shell.execute(
-            "cp -r /home/temp/configuration, /home/NIDAS/configuration")
+            "cp -r /home/temp/configuration /home/NIDAS/configuration")
         filesystem.remove("/home/temp/configuration")
     end
 
