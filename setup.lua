@@ -15,12 +15,13 @@ shell.execute("wget -fq " .. tarBin)
 
 local NIDAS
 local release
-if arg[1] == "dev" then
+local arg = {...}
+if arg[1] == "dev" or arg[1] == "staging" then
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v-1/NIDAS.tar"
-    release = "dev"
-elseif arg[1] == "test" then
+    release = "staging"
+elseif arg[1] == "test" or arg[1] == "latest" then
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v0/NIDAS.tar"
-    release = "test"
+    release = "latest"
 else
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/latest/download/NIDAS.tar"
     release = "\"stable\""
