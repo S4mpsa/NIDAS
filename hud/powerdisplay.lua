@@ -125,12 +125,14 @@ function powerDisplay.widget(glasses, data)
         end
         local fillTimeString = ""
         if w > 250 then
-            if energyData.energyPerTick >= 0 then
+            if energyData.energyPerTick > 0 then
                 local fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
                 fillTimeString = "Full: " .. time.format(math.abs(fillTime))
-            else
+            elseif energyData.energyPerTick < 0 then
                 local fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
                 fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
+            else
+                fillTimeString = ""
             end
         end 
         hudObjects[i].dynamic.filltime.setText(fillTimeString)
