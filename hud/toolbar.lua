@@ -41,11 +41,11 @@ function toolbar.widget(glasses)
     local timeString = os.date()
     local day = timeString:sub(1, 2)
     local month = timeString:sub(4, 5)
-    local date = day + (month-1) * 30
-    local year = timeString:sub(7, 8)
+    local year = math.floor(((((os.time()/60)/60)/24)/365)+1)
+    local date = math.floor((((os.time()/60)/60)/24)-((year-1)*365))
     local hours = timeString:sub(10, #timeString-3)
-    year = year - 70 + 0
-    timeString = hours.." | ".."Day "..math.floor(date).." Year "..math.floor(year)
+    --year = year - 70 + 0
+    timeString = hours.." | ".."Day "..date.." Year "..year
     if requestCounter == 500 then
         realtime = internet.request("http://worldclockapi.com/api/json/utc/now")()
         requestCounter = 1
