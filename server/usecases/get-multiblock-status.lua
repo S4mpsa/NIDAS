@@ -28,7 +28,7 @@ local function exec(address, name)
         state = states.OFF
     end
 
-    if (problems or 0) > 0 then state = states.BROKEN end
+    if problems > 0 then state = states.BROKEN end
 
     local status = {
         progress = multiblock:getWorkProgress(),
