@@ -14,8 +14,7 @@ local function exec(address, name)
 
     local sensorInformation = lsc:getSensorInformation()
 
-    --local problems = getNumberOfProblems(sensorInformation[9])
-    local problems = sensorInformation[9]
+    local problems = getNumberOfProblems(sensorInformation[9])
     
     local state = {}
     if lsc:isWorkAllowed() then
@@ -28,10 +27,7 @@ local function exec(address, name)
         state = states.OFF
     end
 
-    --if (problems or 0) > 0 then state = states.BROKEN end
-    if string.match(problems, "Problems") ~= nil then
-        state = states.BROKEN
-    end
+    if problems > 0 then state = states.BROKEN end
     
     local status = {
         storedEU = lsc:getStoredEU(),
