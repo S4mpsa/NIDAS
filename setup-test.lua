@@ -16,6 +16,10 @@ shell.execute("wget -fq " .. tarBin)
 NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v-1/NIDAS.tar"
 
 local successfull = pcall(function()
+    if filesystem.exists("/home/NIDAS") then
+        shell.execute(
+            "cp -r /home/NIDAS/configuration, /home/temp/configuration")
+    end
     filesystem.remove("/home/NIDAS")
     filesystem.makeDirectory("/home/NIDAS")
 
@@ -29,6 +33,12 @@ local successfull = pcall(function()
     shell.execute("cp -r lib /home/lib")
     filesystem.copy(".shrc", "/home/.shrc")
     filesystem.copy("setup-test.lua", "/home/setup-test.lua")
+
+    if filesystem.exists("/home/temp/configuration") then
+        shell.execute(
+            "cp -r /home/temp/configuration, /home/NIDAS/configuration")
+        filesystem.remove("/home/temp/configuration")
+    end
 
     print("Success!\n")
 end)
