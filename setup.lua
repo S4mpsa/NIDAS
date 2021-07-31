@@ -36,7 +36,7 @@ local successful = pcall(function()
 
     shell.setWorkingDirectory("/home/NIDAS")
     print("Downloading NIDAS-" .. release)
-    shell.execute("wget -fq " .. NIDAS .. " -f")
+    shell.execute("wget -fq " .. NIDAS)
     print("Extracting")
     shell.execute("tar -xf NIDAS.tar")
     filesystem.remove("NIDAS.tar")
