@@ -42,14 +42,14 @@ local function redBox()
     graphics.rectangle(10, 10, 10, 10, colors.red)
 end
 
-local strings = {{displayName = "Hello!", value = greenBox},
-                {displayName = "Greetings!", value = redBox}
+local strings = {{displayName = "Text Input", value = gui.textInput},
+                {displayName = "Number Input", value = gui.numberInput}
 }
 local function choose(_, _, X, Y, button)
     event.cancel(listener)
-    local string = gui.selectionBox(X, Y, strings)
-    if string ~= nil then
-        string()
+    local func = gui.selectionBox(X, Y, strings)
+    if func ~= nil then
+        local a = func(X, Y, 15)
     end
     listener = event.listen("touch", choose)
 end
