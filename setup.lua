@@ -2,6 +2,7 @@
 -- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/setup.lua -f
 local shell = require("shell")
 local filesystem = require("filesystem")
+local computer = require("computer")
 
 local tarMan =
     "https://raw.githubusercontent.com/mpmxyz/ocprograms/master/usr/man/tar.man"
@@ -51,5 +52,8 @@ local successful = pcall(function()
     end
 
     print("Success!\n")
+    print("Rebooting in 3s\n")
+    os.sleep(3)
+    computer.shutdown(true)
 end)
 if (not successful) then print("Update failed") end
