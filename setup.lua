@@ -51,6 +51,15 @@ local successful = pcall(function()
         filesystem.remove("/home/temp/configuration")
     end
 
+    for _, v in pairs(computer.getDeviceInfo()) do
+        if v.class == "system" then
+            if v.description == "Tablet" then
+                filesystem.copy("table/init.lua", "init.lua")
+            end
+            break
+        end
+    end
+
     print("Success!\n")
     print("Rebooting in 3s\n")
     os.sleep(3)
