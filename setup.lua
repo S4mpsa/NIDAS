@@ -53,18 +53,13 @@ local successful = pcall(function()
         filesystem.remove("/home/temp/configuration")
     end
 
-    for _, v in pairs(computer.getDeviceInfo()) do
-        if v.class == "system" then
-            if v.description == "Tablet" then
-                filesystem.copy(workDir .. "tablet/init.lua", workDir .. "init.lua")
-            end
-            break
-        end
-    end
-
-    print("Success!\n")
+    local rebootTime = 3
+    print("Success!")
     print("Rebooting in 3s\n")
-    os.sleep(3)
+    for i = 1, rebootTime do
+        io.write(".")
+        os.sleep(1)
+    end
     computer.shutdown(true)
 end)
 if (not successful) then print("Update failed") end
