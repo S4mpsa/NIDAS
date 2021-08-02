@@ -32,29 +32,31 @@ local successful = pcall(function()
     if filesystem.exists("/home/NIDAS/configuration") then
         shell.execute("cp -r /home/NIDAS/configuration /home/temp/configuration")
     end
-    filesystem.remove("/home/NIDAS")
-    filesystem.makeDirectory("/home/NIDAS")
+    local workDir = "/home/NIDAS/"
+    filesystem.remove(workDir)
+    filesystem.makeDirectory(workDir)
 
-    shell.setWorkingDirectory("/home/NIDAS")
+    shell.setWorkingDirectory(workDir)
     print("Downloading NIDAS-" .. release)
     shell.execute("wget -fq " .. NIDAS)
     print("Extracting")
     shell.execute("tar -xf NIDAS.tar")
-    filesystem.remove("NIDAS.tar")
+    filesystem.remove(workDir .. "NIDAS.tar")
     filesystem.remove("/home/lib")
     shell.execute("cp -r lib /home/lib")
-    filesystem.copy(".shrc", "/home/.shrc")
-    filesystem.copy("setup.lua", "/home/setup.lua")
+    filesystem.copy(workDir .. ".shrc", "/home/.shrc")
+    filesystem.copy(workDir .. "setup.lua", "/home/setup.lua")
 
     if filesystem.exists("/home/temp/configuration") then
-        shell.execute("cp -r /home/temp/configuration /home/NIDAS/configuration")
+        shell.execute("cp -r /home/temp/configuration " .. workDir ..
+                          "configuration")
         filesystem.remove("/home/temp/configuration")
     end
 
     for _, v in pairs(computer.getDeviceInfo()) do
         if v.class == "system" then
             if v.description == "Tablet" then
-                filesystem.copy("table/init.lua", "init.lua")
+                filesystem.copy(workDir .. "tablet/init.lua", workDir .. "init.lua")
             end
             break
         end
