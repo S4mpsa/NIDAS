@@ -25,8 +25,11 @@ end
 
 local function update(data, redstoneAddress)
     redstoneAddress = redstoneAddress or "NONE"
-    if redstone == nil then setRedstone(redstoneAddress) end
-    local level = getPercentage(data)
+    local level = getPercentage(data.power)
+    if redstone == nil then
+        setRedstone(redstoneAddress)
+        if level < 0.85 then engaged = false else engaged = true end
+    end
     if level < 0.85 then
         if not engaged then engage() end
     elseif level > 0.99 then

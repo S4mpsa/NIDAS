@@ -2,10 +2,6 @@
 --This creates limitations, but ensures the visuals look the same for everyone with no glitches.
 --It also forces a certain aesthetic to everything with black backgrounds on all text.
 --It supports doubled verticla resolution for square pixels.
-local computer = require("computer")
-local colors = require("colors")
-local component = require("component")
-
 local graphics = {}
 local context = {
     gpu = nil,

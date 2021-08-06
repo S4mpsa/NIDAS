@@ -1,19 +1,38 @@
 package.path = package.path .. ";/NIDAS/lib/utils/?.lua"
-local renderer = require("renderer")
-local graphics = require("graphics")
+--local renderer = require("renderer")
+local graphics = require("lib.graphics.graphics")
 local component = require("component")
-local colors    = require("colors")
+local colors    = require("lib.graphics.colors")
 local event = require("event")
 local uc = require("unicode")
-local parser = require("parser")
+local renderer = require("lib.graphics.renderer")
+local parser = require("lib.utils.parser")
 local gui = {}
 
 local borderColor = colors.darkGray
 local primaryColor = colors.electricBlue
 local accentColor = colors.magenta
 
-function gui.configurationMenu(objects)
-
+function gui.bigButton(x, y, text, onClick, args, width)
+    width = width or #text+2
+    local gpu = graphics.context().gpu
+    local page = renderer.createObject(x, y, width, 3)
+    gpu.setActiveBuffer(page)
+    local top = "╭"
+    local middle = "│"
+    local bottom = "╰"
+    for i = 1, width-2 do
+        top = top .. "─"
+        middle = middle .. " "
+        bottom = bottom .. "─"
+    end
+    top = top .. "╮"
+    middle = middle .. "│"
+    bottom = bottom .. "╯"
+    graphics.outline(1, 1, {top, middle, bottom}, primaryColor)
+    graphics.text(width/2 - #text/2 + 1, 3, text, accentColor)
+    renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+3})
+    gpu.setActiveBuffer(0)
 end
 
 function gui.textInput(x, y, maxWidth, startValue)
@@ -21,8 +40,6 @@ function gui.textInput(x, y, maxWidth, startValue)
     y = y or 1
     maxWidth = maxWidth or 15
     startValue = startValue or ""
-    local context = graphics.context()
-    local gpu = context.gpu
     local returnString = startValue
     graphics.text(x, -1+2*y, returnString.."_", accentColor)
     local value = 0
@@ -118,7 +135,6 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft)
             graphics.text(x, -1+2*y, padded, accentColor)
         end
     end
-    print("Ending loop")
     event.cancel(focusListener)
     if value == 13 then
         padded = parser.splitNumber(tonumber(number), " ")
@@ -170,12 +186,15 @@ function gui.selectionBox(x, y, choices)
     gpu.bitblt(_, x, y, maxX, maxY, page)
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
     gpu.bitblt(0, x, y, maxX, maxY, background)
+    gpu.freeBuffer(page)
     if touchX > x and touchX < x+longestName+1 and touchY > y and touchY < y+heigth then
         return choices[touchY-y].value
     else
         return nil
     end
 end
+
+
 
 local function compareColors(a,b)
     return a[2] < b[2]
@@ -209,6 +228,7 @@ function gui.colorSelection(x, y, colorList)
     gpu.bitblt(_, x, y, maxX, maxY, page)
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
     gpu.bitblt(0, x, y, maxX, maxY, background)
+    gpu.freeBuffer(page)
     if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+heigth then
         return colorTable[touchY-y][2]
     else
