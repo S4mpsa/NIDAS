@@ -33,6 +33,8 @@ function renderer.leaveFocus()
     focused = false
 end
 
+--An object is created by calling renderer.createObject(x, y, width, height)
+--This returns a page number which can be used to manipulate the object.
 function renderer.createObject(x, y, width, heigth)
     local gpu = graphics.context().gpu
     local object = gpu.allocateBuffer(width, heigth)
@@ -53,6 +55,8 @@ function renderer.createObject(x, y, width, heigth)
     return object
 end
 
+--Objects can be removed by calling renderer.removeObject(pages)
+--They can be removed one-by-one, or as a bulk operation by passing a table of pages.
 function renderer.removeObject(pages)
     if type(pages) == "table" then
         for i = 1, #pages do
@@ -76,6 +80,11 @@ function renderer.removeObject(pages)
     end
 end
 
+--All objects (or parts of the objects) can be made to react to clicks. This is done by calling renderer.setClickable(page, function, arguments, v1, v2)
+--page is the identifier given by createObject() to select which object you want to make clickable.
+--Function is the function that is called with function(arguments) on click of the area.
+--Arguments is a table {arg1, arg2, arg3, ...} which is passed to the function given.
+--v1 and v2 are the top left and bottom right bounds of the clickable area, given as a pair {x1, y1} and {x2, y2}
 function renderer.setClickable(object, onClick, args, v1, v2)
     for i = 1, #objects do
         if objects[i].page == object then
@@ -88,6 +97,9 @@ function renderer.setClickable(object, onClick, args, v1, v2)
     end
     return false
 end
+
+--All changes are buffered in video memory and only rendered on calling renderer.update()
+--This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
 function renderer.update()
     local gpu = graphics.context().gpu
     for i = 1, #objects do

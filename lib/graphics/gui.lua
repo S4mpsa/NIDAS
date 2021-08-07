@@ -200,6 +200,26 @@ function gui.tableView(x, y)
 
 end
 
+--There are two drop-down menus: Color selection and arbitrary list
+--These have prioritized click capture and are rendered without the need to call renderer.update(), and are removed as soon as the screen is clicked.
+
+--Arbitrary list returns the value of the object that was clicked, or calls the function assigned with predeteremined arguments.
+--
+--To use the arbitrary list, you need to provide it with objects in the following format:
+--dropDownChoices = {
+--        {
+--            displayName = "Name on the dropdown menu"),
+--            value = theFunctionToCall or "Value to return"
+--            args = {arg1, arg2, arg3, ...} or nil
+--        },
+--        {
+--            displayName = "Name on the dropdown menu"),
+--            value = theFunctionToCall or "Value to return"
+--            args = {arg1, arg2, arg3, ...} or nil
+--        }
+--    }
+--The drop-down menu is then created as follows:
+--gui.selectionMenu(x, y, dropDownChoices)
 function gui.selectionBox(x, y, choices)
     local context = graphics.context()
     local maxX = context.width
@@ -248,6 +268,7 @@ end
 local function compareColors(a,b)
     return a[2] < b[2]
   end
+--Color selection return the color value that was selected, or nil if click was not in the box.
 function gui.colorSelection(x, y, colorList)
     local context = graphics.context()
     local maxX = context.width
