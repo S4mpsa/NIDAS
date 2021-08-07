@@ -15,6 +15,10 @@ Rendering objects:
     All changes are buffered in video memory and only rendered on calling renderer.update()
     This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
 
+Removing objects:
+    Objects can be removed by calling renderer.removeObject(pages)
+    They can be removed one-by-one, or as a bulk operation by passing a table of numbers.
+
 Clickable objects:
     All objects (or parts of the objects) can be made to react to clicks. This is done by calling renderer.setClickable(page, function, arguments, v1, v2)
     page is the identifier given by createObject() to select which object you want to make clickable.
@@ -24,7 +28,7 @@ Clickable objects:
 
 Drop-down menus:
     There are two drop-down menus: Color selection and arbitrary list
-    These have prioritized click capture and are required without the need to call renderer.update(), and are removed as soon as the screen is clicked.
+    These have prioritized click capture and are rendered without the need to call renderer.update(), and are removed as soon as the screen is clicked.
     Color selection return the color value that was selected, or nil if click was not in the box.
     Arbitrary list returns the value of the object that was clicked, or calls the function assigned with predeteremined arguments.
 
