@@ -23,6 +23,15 @@ local testObject = {
 
 
 local objects = {}
+local focused = false
+
+function renderer.setFocus()
+    focused = true
+end
+
+function renderer.leaveFocus()
+    focused = false
+end
 
 function renderer.createObject(x, y, width, heigth)
     local gpu = graphics.context().gpu
@@ -42,6 +51,29 @@ function renderer.createObject(x, y, width, heigth)
         boundScreens = 0
     })
     return object
+end
+
+function renderer.removeObject(pages)
+    if type(pages) == "table" then
+        for i = 1, #pages do
+            local j = 1
+            while objects[j] ~= nil do
+                if objects[j].page == pages[i] then
+                    objects[j].gpu.freeBuffer(pages[i])
+                    table.remove(objects, j)
+                else
+                    j = j + 1
+                end
+            end
+        end
+    elseif type(pages) == "integer" then
+        for j = 1, #objects do
+            if objects[j].page == pages then
+                objects[j].gpu.freeBuffer(pages)
+                table.remove(objects, j)
+            end
+        end
+    end
 end
 
 function renderer.setClickable(object, onClick, args, v1, v2)
@@ -65,16 +97,30 @@ function renderer.update()
 end
 
 local function checkClick(_, _, X, Y)
-    for i = 1, #objects do
-        local o = objects[i]
-        if o.clickable then
-            local v1 = o.clickArea[1]
-            local v2 = o.clickArea[2]
-            if X >= v1[1] and X <= v2[1] and Y >= v1[2] and Y <= v2[2] then
-                o.clickFunction(o.args[1], o.args[2], o.args[3], o.args[4], o.args[5], o.args[6], o.args[7])
+    if not focused then
+        for i = 1, #objects do
+            local o = objects[i]
+            if o ~= nil then
+                if o.clickable then
+                    local v1 = o.clickArea[1]
+                    local v2 = o.clickArea[2]
+                    if X >= v1[1] and X < v2[1] and Y >= v1[2] and Y < v2[2] then
+                        if o.args ~= nil then
+                            o.clickFunction(table.unpack(o.args))
+                            return
+                        else
+                            o.clickFunction()
+                            return
+                        end
+                    end
+                end
             end
         end
     end
+end
+
+function event.onError(message)
+    print(message)
 end
 
 event.listen("touch", checkClick)

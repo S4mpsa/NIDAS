@@ -33,6 +33,49 @@ function gui.bigButton(x, y, text, onClick, args, width)
     graphics.text(width/2 - #text/2 + 1, 3, text, accentColor)
     renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+3})
     gpu.setActiveBuffer(0)
+    return page
+end
+
+function gui.smallButton(x, y, text, onClick, args, width)
+    width = width or #text+2
+    local gpu = graphics.context().gpu
+    local page = renderer.createObject(x, y, width, 1)
+    gpu.setActiveBuffer(page)
+    graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, primaryColor)
+    renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+1})
+    gpu.setActiveBuffer(0)
+    return page
+end
+
+function gui.listFrame(x, y, width, heigth)
+    local gpu = graphics.context().gpu
+    local page = renderer.createObject(x, y, width, heigth)
+    local top = "╭"
+    local middle = "│"
+    local bottom = "╰"
+    for i = 1, width-2 do
+        top = top .. "─"
+        middle = middle .. " "
+        bottom = bottom .. "─"
+    end
+    top = top .. "╮"
+    middle = middle .. "│"
+    bottom = bottom .. "╯"
+    local borders = {top, bottom}
+    for i = 1, heigth-2 do table.insert(borders, 2, middle) end
+    gpu.setActiveBuffer(page)
+    graphics.outline(1, 1, borders, borderColor)
+    gpu.setActiveBuffer(0)
+    return page
+end
+
+function gui.multiButtonList(x, y, buttons, width, heigth)
+    local pages = {}
+    table.insert(pages, gui.listFrame(x, y, width, heigth))
+    for i = 0, #buttons-1 do
+        table.insert(pages, gui.smallButton(x+1, y+i+1, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2))
+    end
+    return pages
 end
 
 function gui.textInput(x, y, maxWidth, startValue)
@@ -184,11 +227,17 @@ function gui.selectionBox(x, y, choices)
     local background = gpu.allocateBuffer(longestName+2, heigth)
     gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
     gpu.bitblt(_, x, y, maxX, maxY, page)
+    renderer.setFocus()
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
+    renderer.leaveFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
     if touchX > x and touchX < x+longestName+1 and touchY > y and touchY < y+heigth then
-        return choices[touchY-y].value
+        if type(choices[touchY-y].value) == "function" then
+            choices[touchY-y].value(table.unpack(choices[touchY-y].args))
+        else
+            return choices[touchY-y].value
+        end
     else
         return nil
     end
@@ -226,7 +275,9 @@ function gui.colorSelection(x, y, colorList)
     local background = gpu.allocateBuffer(longestName+5, heigth)
     gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
     gpu.bitblt(_, x, y, maxX, maxY, page)
+    renderer.setFocus()
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
+    renderer.leavFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
     if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+heigth then

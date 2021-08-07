@@ -1,5 +1,5 @@
 -- Import section
-local ar = require("graphics.ar")
+local ar = require("lib.graphics.ar")
 package.loaded.powerdisplay = nil
 local powerDisplay = require("hud.powerdisplay")
 local toolbar = require("hud.toolbar")

@@ -63,6 +63,7 @@ function graphics.clear()
 end
 
 function graphics.text(x, y, text, color)
+    color = color or 0xFFFFFF
     if y % 2 == 0 then
         error("Y must be odd.")
     else

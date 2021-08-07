@@ -1,5 +1,5 @@
 -- Import section
-local parser = require("utils.parser")
+local parser = require("lib.utils.parser")
 
 local states = require("server.entities.states")
 
