@@ -13,6 +13,11 @@ local borderColor = colors.darkGray
 local primaryColor = colors.electricBlue
 local accentColor = colors.magenta
 
+--Creates a bounded 3-tall button.
+--  text = Text to display on button
+--  onClick = Function to call when button is pressed
+--  args = Arguments to pass to the button
+--  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
 function gui.bigButton(x, y, text, onClick, args, width)
     width = width or #text+2
     local gpu = graphics.context().gpu
@@ -36,6 +41,11 @@ function gui.bigButton(x, y, text, onClick, args, width)
     return page
 end
 
+--Creates a small, 1-tall button.
+--  text = Text to display on button
+--  onClick = Function to call when button is pressed
+--  args = Arguments to pass to the button
+--  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
 function gui.smallButton(x, y, text, onClick, args, width)
     width = width or #text+2
     local gpu = graphics.context().gpu
@@ -46,7 +56,7 @@ function gui.smallButton(x, y, text, onClick, args, width)
     gpu.setActiveBuffer(0)
     return page
 end
-
+--Creates a rectangular frame, starting from x, y and going to x+width, y+heigth
 function gui.listFrame(x, y, width, heigth)
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, heigth)
@@ -69,6 +79,9 @@ function gui.listFrame(x, y, width, heigth)
     return page
 end
 
+--Creates a list of multiple small buttons at x, y, with borders.
+--Buttons are passed as a table of tables:
+--Each button is of the form {name = "Name", func = functionToCall, args = argsToPass}
 function gui.multiButtonList(x, y, buttons, width, heigth)
     local pages = {}
     table.insert(pages, gui.listFrame(x, y, width, heigth))
@@ -77,7 +90,9 @@ function gui.multiButtonList(x, y, buttons, width, heigth)
     end
     return pages
 end
-
+--Creates an undecorated text input box at x, y, with optional max width.
+--The start value of the text box is passed in startValue.
+--Returns the value inserted when pressing ENTER, or nil if focus is lost (touch signal not in box).
 function gui.textInput(x, y, maxWidth, startValue)
     x = x or 1
     y = y or 1
@@ -123,7 +138,10 @@ function gui.textInput(x, y, maxWidth, startValue)
         return nil
     end
 end
-
+--Creates an undecorated number input box at x, y, with optional max width.
+--The start value of the number box is passed in startValue. Defaults to 0.
+--The number can either expand right or left, depending on startLeft. True = Number grows to the right, False = Number grows to the left. Defaults to false.
+--Returns the value inserted when pressing ENTER, or nil if focus is lost (touch signal not in box).
 function gui.numberInput(x, y, maxWidth, startValue, startLeft)
     x = x or 1
     y = y or 1
