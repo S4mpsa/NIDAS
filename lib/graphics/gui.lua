@@ -277,7 +277,7 @@ function gui.colorSelection(x, y, colorList)
     gpu.bitblt(_, x, y, maxX, maxY, page)
     renderer.setFocus()
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
-    renderer.leavFocus()
+    renderer.leaveFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
     if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+heigth then
