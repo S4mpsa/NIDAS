@@ -21,6 +21,10 @@ Event.listen("component_added", updateMachineList)
 
 local statuses = {multiblocks = {}, power = {}}
 
+function server.configure(x, y)
+
+end
+
 function server.update()
     for address, name in pairs(machineAddresses) do
         statuses.multiblocks[address] = getMultiblockStatus(address, name)

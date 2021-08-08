@@ -64,10 +64,10 @@ function gui.smallButton(x, y, text, onClick, args, width)
     gpu.setActiveBuffer(0)
     return page
 end
---Creates a rectangular frame, starting from x, y and going to x+width, y+heigth
-function gui.listFrame(x, y, width, heigth, title)
+--Creates a rectangular frame, starting from x, y and going to x+width, y+height
+function gui.listFrame(x, y, width, height, title)
     local gpu = graphics.context().gpu
-    local page = renderer.createObject(x, y, width, heigth)
+    local page = renderer.createObject(x, y, width, height)
     local top = "╭"
     local middle = "│"
     local bottom = "╰"
@@ -80,7 +80,7 @@ function gui.listFrame(x, y, width, heigth, title)
     middle = middle .. "│"
     bottom = bottom .. "╯"
     local borders = {top, bottom}
-    for i = 1, heigth-2 do table.insert(borders, 2, middle) end
+    for i = 1, height-2 do table.insert(borders, 2, middle) end
     gpu.setActiveBuffer(page)
     graphics.outline(1, 1, borders, borderColor)
     if title ~= nil then
@@ -93,9 +93,9 @@ end
 --Creates a list of multiple small buttons at x, y, with borders.
 --Buttons are passed as a table of tables:
 --Each button is of the form {name = "Name", func = functionToCall, args = argsToPass}
-function gui.multiButtonList(x, y, buttons, width, heigth, title)
+function gui.multiButtonList(x, y, buttons, width, height, title)
     local pages = {}
-    table.insert(pages, gui.listFrame(x, y, width, heigth, title))
+    table.insert(pages, gui.listFrame(x, y, width, height, title))
     local titleOffset = 0
     if title ~= nil then titleOffset = 1 end
     for i = 0, #buttons-1 do
@@ -152,21 +152,19 @@ function gui.textInput(x, y, maxWidth, startValue)
     end
 end
 
-local function mysplit (inputstr, sep)
-    if sep == nil then
-            sep = "%s"
+local function split(string, sep)
+    if sep == nil then sep = "%s" end
+    local words = {}
+    for str in string.gmatch(string, "([^"..sep.."]+)") do
+        table.insert(words, str)
     end
-    local t={}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-            table.insert(t, str)
-    end
-    return t
+    return words
 end
-
-function gui.wrappedTextBox(x, y, width, heigth, text, title)
-    local page = gui.listFrame(x, y, width, heigth, title)
+--Creates a a bounded text box that wraps the text.
+function gui.wrappedTextBox(x, y, width, height, text, title)
+    local page = gui.listFrame(x, y, width, height, title)
     local gpu = graphics.context().gpu
-    local words = mysplit(text, " ")
+    local words = split(text, " ")
     local lines = {}
     local line = ""
     for i = 1, #words do
@@ -185,6 +183,11 @@ function gui.wrappedTextBox(x, y, width, heigth, text, title)
         graphics.text(2, 5+i*2, lines[i])
     end
     gpu.setActiveBuffer(0)
+    return page
+end
+
+function gui.configMenu(x, y, width, height, title, data)
+    local page = gui.listFrame(x, y, width, height, title)
     return page
 end
 
@@ -264,8 +267,61 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft)
     end
 end
 
-function gui.tableView(x, y)
+function gui.logo(x, y)
+    local logo1 = {
+        "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
+        "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
+        "█ ◥◣█  █  █   █ █   █ █    ",
+        "█  ◥█  █  █   █ █▃▃▃█ ◥███◣",
+        "█   █  █  █   █ █   █     █",
+        "█   █  █  █  ◢◤ █   █     █",
+        "█   █  ◤  ███◤  █   █ ◢███◤"
+    }
+    local logo2 ={
+        " ◢█◣ ",
+        "◢◤ ◥◣",
+        "█   █",
+        "█▃▃▃█",
+        "█   █",
+        "█   █",
+        "█   █"
+    }
+    local page = renderer.createObject(x, y, 29, 8)
+    local gpu = graphics.context().gpu
+    gpu.setActiveBuffer(page)
+    graphics.text(1, 3, "◢", borderColor)
+    graphics.rectangle(1, 5, 1, 12, borderColor)
+    graphics.rectangle(2, 16, 27, 1, borderColor)
+    graphics.outline(3, 1, logo1, primaryColor)
+    graphics.outline(19, 1, logo2, accentColor)
+    graphics.text(27, 3, "Ver", accentColor)
+    graphics.text(27, 5, "0.9", accentColor)
+    gpu.setActiveBuffer(0)
+end
 
+function gui.smallLogo(x, y)
+    local logo1 = {
+        "▙ ▌▐ ▛▚▗▀▖▞▀",
+        "▌▚▌▐ ▌▐▐▄▌▘▗",
+        "▌ ▌▐ ▙▞▐ ▌▄▞"
+    }
+    local logo2 ={
+        "▗▀▖",
+        "▐▄▌",
+        "▐ ▌",
+    }
+    local page = renderer.createObject(x, y, 20, 4)
+    local gpu = graphics.context().gpu
+    gpu.setActiveBuffer(page)
+    graphics.text(1, 3, "◢", borderColor)
+    graphics.rectangle(1, 5, 1, 4, borderColor)
+    graphics.rectangle(2, 8, 18, 1, borderColor)
+    graphics.outline(3, 1, logo1, primaryColor)
+    graphics.outline(10, 1, logo2, accentColor)
+    graphics.text(16, 5, "0.9", accentColor)
+    graphics.text(20, 5, "◢", borderColor)
+    graphics.text(20, 7, "◤", borderColor)
+    gpu.setActiveBuffer(0)
 end
 
 --There are two drop-down menus: Color selection and arbitrary list
@@ -291,17 +347,17 @@ end
 function gui.selectionBox(x, y, choices)
     local context = graphics.context()
     local maxX = context.width
-    local maxY = context.heigth
+    local maxY = context.height
     local gpu = context.gpu
     local longestName = 0
     for i = 1, #choices do
         if #choices[i].displayName > longestName then longestName = #choices[i].displayName end
     end
     longestName = longestName + 2
-    local heigth = #choices + 2
+    local height = #choices + 2
     if maxX <= (x+longestName+5) then x = maxX-(longestName+4) end
-    if maxY <= (y+heigth) then y = maxY-(heigth-1) end
-    local page = gpu.allocateBuffer(longestName+2, heigth)
+    if maxY <= (y+height) then y = maxY-(height-1) end
+    local page = gpu.allocateBuffer(longestName+2, height)
     gpu.setActiveBuffer(page)
     graphics.rectangle(1, 1, 2+longestName, 1, borderColor)
     graphics.rectangle(1, 4+2*#choices, 2+longestName, 1, borderColor)
@@ -312,7 +368,7 @@ function gui.selectionBox(x, y, choices)
         graphics.text(3, 1+2*i, choices[i].displayName, accentColor)
     end
     gpu.setActiveBuffer(0)
-    local background = gpu.allocateBuffer(longestName+2, heigth)
+    local background = gpu.allocateBuffer(longestName+2, height)
     gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
     gpu.bitblt(_, x, y, maxX, maxY, page)
     renderer.setFocus()
@@ -320,7 +376,8 @@ function gui.selectionBox(x, y, choices)
     renderer.leaveFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
-    if touchX > x and touchX < x+longestName+1 and touchY > y and touchY < y+heigth then
+    gpu.freeBuffer(background)
+    if touchX > x and touchX < x+longestName+1 and touchY > y and touchY < y+height then
         if type(choices[touchY-y].value) == "function" then
             choices[touchY-y].value(table.unpack(choices[touchY-y].args))
         else
@@ -340,7 +397,7 @@ local function compareColors(a,b)
 function gui.colorSelection(x, y, colorList)
     local context = graphics.context()
     local maxX = context.width
-    local maxY = context.heigth
+    local maxY = context.height
     local gpu = context.gpu
     local colorTable = {}
     local longestName = 0
@@ -349,10 +406,10 @@ function gui.colorSelection(x, y, colorList)
         table.insert(colorTable, {name, value})
     end
     table.sort(colorTable, compareColors)
-    local heigth = #colorTable + 2
+    local height = #colorTable + 2
     if maxX <= (x+longestName+5) then x = maxX-(longestName+4) end
-    if maxY <= (y+heigth) then y = maxY-(heigth-1) end
-    local page = gpu.allocateBuffer(longestName+5, heigth)
+    if maxY <= (y+height) then y = maxY-(height-1) end
+    local page = gpu.allocateBuffer(longestName+5, height)
     gpu.setActiveBuffer(page)
     graphics.rectangle(1, 1, 5+longestName, 4+2*#colorTable, borderColor)
     graphics.rectangle(5, 3, longestName, 2*#colorTable, colors.black)
@@ -361,7 +418,7 @@ function gui.colorSelection(x, y, colorList)
         graphics.rectangle(2, 1+2*i, 2, 2, colorTable[i][2])
     end
     gpu.setActiveBuffer(0)
-    local background = gpu.allocateBuffer(longestName+5, heigth)
+    local background = gpu.allocateBuffer(longestName+5, height)
     gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
     gpu.bitblt(_, x, y, maxX, maxY, page)
     renderer.setFocus()
@@ -369,7 +426,8 @@ function gui.colorSelection(x, y, colorList)
     renderer.leaveFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
-    if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+heigth then
+    gpu.freeBuffer(background)
+    if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+height then
         return colorTable[touchY-y][2]
     else
         return nil

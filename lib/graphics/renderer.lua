@@ -13,7 +13,7 @@ local testObject = {
     x = 0,
     y = 0,
     width = 160,
-    heigth = 50,
+    height = 50,
     state = 0,
     clickable = false,
     clickArea = {{0, 0}, {0, 0}},
@@ -36,16 +36,17 @@ end
 
 --An object is created by calling renderer.createObject(x, y, width, height)
 --This returns a page number which can be used to manipulate the object.
-function renderer.createObject(x, y, width, heigth)
+function renderer.createObject(x, y, width, height)
+    if width < 0 or height < 0 then error("Dimensions must be positive") end
     local gpu = graphics.context().gpu
-    local object = gpu.allocateBuffer(width, heigth)
+    local object = gpu.allocateBuffer(width, height)
     table.insert(objects, {
         gpu = gpu,
         page = object,
         x = x,
         y = y,
         width = width,
-        heigth = heigth,
+        height = height,
         state = 0,
         clickable = false,
         clickArea = {{0, 0}, {0, 0}},
@@ -64,18 +65,19 @@ function renderer.removeObject(pages)
             local j = 1
             while objects[j] ~= nil do
                 if objects[j].page == pages[i] then
-                    objects[j].gpu.freeBuffer(pages[i])
+                    local removed = objects[j].gpu.freeBuffer(pages[i])
                     table.remove(objects, j)
                 else
                     j = j + 1
                 end
             end
         end
-    elseif type(pages) == "integer" then
+    elseif type(pages) == "number" then
         for j = 1, #objects do
             if objects[j].page == pages then
-                objects[j].gpu.freeBuffer(pages)
+                local removed = objects[j].gpu.freeBuffer(pages)
                 table.remove(objects, j)
+                return
             end
         end
     end
@@ -103,23 +105,41 @@ end
 --This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
 --Passing a list of pages only updates those pages.
 local whitelist = {}
+local debug = true
 function renderer.update(pages)
     local gpu = graphics.context().gpu
     for i = 1, #objects do
         local o = objects[i]
+        if o.page == nil then error("Object page is nil") end
         if pages ~= nil then
             for p = 1, #pages do
                 if pages[p] == o.page then
-                    gpu.bitblt(0, o.x, o.y, o.width, o.heigth, o.page, 1, 1)
+                    gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
                 end
             end
         else
-            gpu.bitblt(0, o.x, o.y, o.width, o.heigth, o.page, 1, 1)
+            gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
         end
+    end
+    if debug then
+        local str = ""
+        local bufferSum = 0
+        for i = 1, #objects do
+            local o = objects[i]
+            if o.page ~= nil then
+                bufferSum = bufferSum + gpu.getBufferSize(objects[i].page)
+                str = str .. math.floor(objects[i].page) .."("..gpu.getBufferSize(objects[i].page)..") "
+            else
+                str = str .. "nil "
+            end
+        end
+        local _, y = gpu.getResolution()
+        graphics.text(1, y*2-5, str)
+        graphics.text(1, y*2-3, "Memory free: "..gpu.freeMemory().."      ")
+        graphics.text(1, y*2-1, "Memory used by buffers: "..bufferSum.."      ")
     end
 end
 
-latestFunc = nil
 local function checkClick(_, _, X, Y)
     if not focused then
         for i = 1, #objects do

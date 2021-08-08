@@ -2,15 +2,13 @@ package.path = package.path.."/NIDAS/server/?.lua;/home/NIDAS/?.lua;/home/NIDAS/
 
 local gui = require("lib.graphics.gui")
 local graphics = require("lib.graphics.graphics")
-local component = require("component")
-local colors = require("lib.graphics.colors")
 local renderer = require("lib.graphics.renderer")
 local serialization = require("serialization")
-local shell = require("shell")
+
 graphics.setContext()
 
 local maxWidth = graphics.context().width
-local maxHeigth = graphics.context().heigth
+local maxheight = graphics.context().height
 local selectionBoxWidth = 25
 local location = {x = 2, y = 1}
 local configurationData = {}
@@ -34,9 +32,7 @@ local function save()
     for i = 1, #processes do
         table.insert(configurationData.processes, {name = processes[i].name, module = processes[i].module, desc = processes[i].desc})
     end
-    shell.setWorkingDirectory("/home/NIDAS/configuration")
-    local file = io.open("enabledModules", "w")
-    print(file)
+    local file = io.open("/home/NIDAS/configurationenabledModules", "w")
     file:write(serialization.serialize(configurationData))
     file:close()
 end
@@ -55,8 +51,8 @@ local function activate(module, displayName, desc)
         end
     end
     if found ~= 0 then table.remove(modules, found) end
-    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxHeigth-10)
-    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxHeigth-10)
+    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-10)
+    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-10)
     renderer.update()
 end
 
@@ -71,8 +67,8 @@ local function deactivate(module)
     if found ~= 0 then
         table.remove(processes, found)
     end
-    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxHeigth-10)
-    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxHeigth-10)
+    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-10)
+    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-10)
     renderer.update()
 end
 
@@ -91,20 +87,34 @@ local function load()
     end
 end
 
-local function showInfo(module)
-
+local currentTab = nil
+local function flush()
+    if currentTab ~= nil then
+        renderer.removeObject(currentTab)
+    end
 end
 
-local currentTab = {}
-local function infoScreen(x, y, width, heigth, text, title)
-    if currentTab ~= nil then renderer.removeObject(currentTab) end
-    currentTab = gui.wrappedTextBox(x, y, width, heigth, text, title)
+--Modules for configuring start here
+local function infoScreen(x, y, width, height, text, title)
+    flush()
+    currentTab = gui.wrappedTextBox(x, y, width, height, text, title)
+    renderer.update()
+end
+
+local function configScreen(x, y, width, height, title, data)
+    flush()
+    currentTab = gui.configMenu(x, y, width, height, title, data)
+    graphics.context().gpu.setActiveBuffer(currentTab)
+    data.configure(x, y, gui, graphics, renderer, currentTab)
+    graphics.context().gpu.setActiveBuffer(0)
     renderer.update()
 end
 
 local selector = nil
-local function moduleSelector(x, y, width, heigth)
-    if selector ~= nil then renderer.removeObject(selector) end
+local function moduleSelector(x, y, width, height)
+    if selector ~= nil then
+        renderer.removeObject(selector)
+    end
     local buttons = {}
     for i = 1, #modules do
         local onActivation =
@@ -114,16 +124,19 @@ local function moduleSelector(x, y, width, heigth)
             args = {modules[i].module, modules[i].name, modules[i].desc}},
             {displayName = "Info",
             value = infoScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxHeigth-10, modules[i].desc, modules[i].name}}
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, modules[i].desc, modules[i].name}},
+            {displayName = "Configure",
+            value = configScreen,
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, modules[i].name, require(modules[i].module)}}
         }
         table.insert(buttons, {name = modules[i].name, desc = modules[i].desc, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
     end
-    selector = gui.multiButtonList(x, y, buttons, width, heigth, "Available")
+    selector = gui.multiButtonList(x, y, buttons, width, height, "Available ".."("..math.floor(#buttons)..")")
 end
 moduleSelectorVar = moduleSelector
 
 local deSelector = nil
-local function moduleDeSelector(x, y, width, heigth)
+local function moduleDeSelector(x, y, width, height)
     if deSelector ~= nil then renderer.removeObject(deSelector) end
     local buttons = {}
     for i = 1, #processes do
@@ -134,16 +147,38 @@ local function moduleDeSelector(x, y, width, heigth)
             args = {processes[i].module, processes[i].name, processes[i].desc}},
             {displayName = "Info",
             value = infoScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxHeigth-10, processes[i].desc, processes[i].name}}
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, processes[i].desc, processes[i].name}},
+            {displayName = "Configure",
+            value = configScreen,
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, processes[i].name, require(processes[i].module)}}
         }
         table.insert(buttons, {name = processes[i].name, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
     end
-    deSelector = gui.multiButtonList(x, y, buttons, width, heigth, "Active")
+    deSelector = gui.multiButtonList(x, y, buttons, width, height, "Active ".."("..math.floor(#buttons)..")")
 end
 moduleDeSelectorVar = moduleDeSelector
 
 local running = false
 local serverData = nil
+
+local function switch()
+    running = not running
+end
+
+local function reboot()
+    require("computer").shutdown(true)
+end
+
+local function generateMenu()
+    moduleSelector(location.x, location.y, selectionBoxWidth, maxheight-10)
+    moduleDeSelector(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-10)
+    gui.bigButton(location.x, location.y+maxheight-10, "Run", switch)
+    gui.bigButton(location.x+5, location.y+maxheight-10, "Save", save)
+    gui.bigButton(location.x+11, location.y+maxheight-10, "Reboot", reboot)
+    gui.smallLogo(maxWidth-20, maxheight-4)
+    renderer.update()
+end
+
 local function main()
     if #processes > 0 and running then
         serverData = processes[1].func.update()
@@ -159,25 +194,12 @@ local function main()
     os.sleep()
 end
 
-local function switch()
-    running = not running
-end
-
-local function reboot()
-    require("computer").shutdown(true)
-end
-
-local function generateMenu()
+local function update()
     load()
-    moduleSelector(location.x, location.y, selectionBoxWidth, maxHeigth-10)
-    moduleDeSelector(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxHeigth-10)
-    gui.bigButton(location.x, location.y+maxHeigth-10, "Run", switch)
-    gui.bigButton(location.x+5, location.y+maxHeigth-10, "Save", save)
-    gui.bigButton(location.x+11, location.y+maxHeigth-10, "Reboot", reboot)
-    renderer.update()
+    generateMenu()
     while true do
         main()
     end
 end
 
-return generateMenu
+return update

@@ -6,20 +6,20 @@ local graphics = {}
 local context = {
     gpu = nil,
     width = 0,
-    heigth = 0
+    height = 0
 }
 
 function graphics.setContext(rendererObject)
     if rendererObject ~= nil then
         context.gpu = rendererObject.gpu
         context.width = rendererObject.width
-        context.heigth = rendererObject.heigth
+        context.height = rendererObject.height
     else
         local gpu = require("component").gpu
-        local width, heigth = gpu.getResolution()
+        local width, height = gpu.getResolution()
         context.gpu = gpu
         context.width = width
-        context.heigth = heigth
+        context.height = height
     end
 end
 
@@ -38,9 +38,9 @@ local function pixel(x, y, color)
     end
 end
 
-function graphics.rectangle(x, y, width, heigth, color)
+function graphics.rectangle(x, y, width, height, color)
     local gpu = context.gpu
-    local hLeft = heigth
+    local hLeft = height
         if x > 0 and y > 0 then
         if y % 2 == 0 then
             for i = x, x+width-1 do
@@ -50,12 +50,12 @@ function graphics.rectangle(x, y, width, heigth, color)
         end
         gpu.setForeground(color)
         if hLeft % 2 == 1 then
-            gpu.fill(x, math.ceil(y/2)+(heigth-hLeft), width, (hLeft-1)/2, "█")
+            gpu.fill(x, math.ceil(y/2)+(height-hLeft), width, (hLeft-1)/2, "█")
             for j = x, x+width-1 do
-                pixel(j, y+heigth-1, color)
+                pixel(j, y+height-1, color)
             end
         else
-            gpu.fill(x, math.ceil(y/2)+(heigth-hLeft), width, hLeft/2, "█")
+            gpu.fill(x, math.ceil(y/2)+(height-hLeft), width, hLeft/2, "█")
         end
     end
 end
@@ -67,7 +67,7 @@ function graphics.outline(x, y,lines, color)
 end
 
 function graphics.clear()
-    context.gpu.fill(1, 1, context.width, context.heigth, " ")
+    context.gpu.fill(1, 1, context.width, context.height, " ")
 end
 
 function graphics.text(x, y, text, color)

@@ -23,6 +23,9 @@ local function engage()
     engaged = true
 end
 
+function powerControl.configure(x, y)
+    
+end
 
 function powerControl.update(data, redstoneAddress)
     redstoneAddress = redstoneAddress or "NONE"
