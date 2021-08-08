@@ -1,5 +1,7 @@
 local component = require("component")
 
+local powerControl = {}
+
 local redstone = nil
 
 local function getPercentage(data)
@@ -7,23 +9,22 @@ local function getPercentage(data)
 end
 
 local function setRedstone(address)
-    redstone = component.proxy(component.get(address)) or component.redstone
+    --redstone = component.proxy(component.get(address)) or component.redstone
+    redstone = component.redstone
 end
 
 local engaged = false
 local function disengage()
-    print("Disengaging generators.")
     redstone.setOutput({0, 0, 0, 0, 0, 0})
     engaged = false
 end
 local function engage()
-    print("Engaging generators.")
     redstone.setOutput({15, 15, 15, 15, 15, 15})
     engaged = true
 end
 
 
-local function update(data, redstoneAddress)
+function powerControl.update(data, redstoneAddress)
     redstoneAddress = redstoneAddress or "NONE"
     local level = getPercentage(data.power)
     if redstone == nil then
@@ -37,4 +38,4 @@ local function update(data, redstoneAddress)
     end
 end
 
-return update
+return powerControl

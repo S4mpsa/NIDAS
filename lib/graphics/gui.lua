@@ -36,7 +36,15 @@ function gui.bigButton(x, y, text, onClick, args, width)
     bottom = bottom .. "╯"
     graphics.outline(1, 1, {top, middle, bottom}, primaryColor)
     graphics.text(width/2 - #text/2 + 1, 3, text, accentColor)
-    renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+3})
+    local function flash()
+        graphics.outline(x, y*2-1, {top, middle, bottom}, accentColor)
+        graphics.text(x+width/2 - #text/2, y*2+1, text, accentColor)
+        local function done()
+            gpu.bitblt(0, x, y, width, 3, page, 1, 1)
+        end
+        event.timer(0.3, done, 1)
+    end
+    renderer.setClickable(page, {flash, onClick}, args, {x, y}, {x+width, y+3})
     gpu.setActiveBuffer(0)
     return page
 end
@@ -57,7 +65,7 @@ function gui.smallButton(x, y, text, onClick, args, width)
     return page
 end
 --Creates a rectangular frame, starting from x, y and going to x+width, y+heigth
-function gui.listFrame(x, y, width, heigth)
+function gui.listFrame(x, y, width, heigth, title)
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, heigth)
     local top = "╭"
@@ -75,6 +83,9 @@ function gui.listFrame(x, y, width, heigth)
     for i = 1, heigth-2 do table.insert(borders, 2, middle) end
     gpu.setActiveBuffer(page)
     graphics.outline(1, 1, borders, borderColor)
+    if title ~= nil then
+        graphics.text(math.ceil(1+width/2-#title/2), 3, title, borderColor)
+    end
     gpu.setActiveBuffer(0)
     return page
 end
@@ -82,11 +93,13 @@ end
 --Creates a list of multiple small buttons at x, y, with borders.
 --Buttons are passed as a table of tables:
 --Each button is of the form {name = "Name", func = functionToCall, args = argsToPass}
-function gui.multiButtonList(x, y, buttons, width, heigth)
+function gui.multiButtonList(x, y, buttons, width, heigth, title)
     local pages = {}
-    table.insert(pages, gui.listFrame(x, y, width, heigth))
+    table.insert(pages, gui.listFrame(x, y, width, heigth, title))
+    local titleOffset = 0
+    if title ~= nil then titleOffset = 1 end
     for i = 0, #buttons-1 do
-        table.insert(pages, gui.smallButton(x+1, y+i+1, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2))
+        table.insert(pages, gui.smallButton(x+1, y+i+1+titleOffset, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2))
     end
     return pages
 end
@@ -138,6 +151,43 @@ function gui.textInput(x, y, maxWidth, startValue)
         return nil
     end
 end
+
+local function mysplit (inputstr, sep)
+    if sep == nil then
+            sep = "%s"
+    end
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+            table.insert(t, str)
+    end
+    return t
+end
+
+function gui.wrappedTextBox(x, y, width, heigth, text, title)
+    local page = gui.listFrame(x, y, width, heigth, title)
+    local gpu = graphics.context().gpu
+    local words = mysplit(text, " ")
+    local lines = {}
+    local line = ""
+    for i = 1, #words do
+        if #line+#words[i] < width-3 then
+            line = line .. " " .. words[i]
+        else
+            table.insert(lines, line)
+            line = ""
+        end
+    end
+    if #line > 0 then
+        table.insert(lines, line)
+    end
+    gpu.setActiveBuffer(page)
+    for i = 1, #lines do
+        graphics.text(2, 5+i*2, lines[i])
+    end
+    gpu.setActiveBuffer(0)
+    return page
+end
+
 --Creates an undecorated number input box at x, y, with optional max width.
 --The start value of the number box is passed in startValue. Defaults to 0.
 --The number can either expand right or left, depending on startLeft. True = Number grows to the right, False = Number grows to the left. Defaults to false.

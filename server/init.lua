@@ -10,6 +10,8 @@ local getPowerStatus = require("server.usecases.get-lsc-status")
 
 --
 
+local server = {}
+
 local function updateMachineList(_, address, _)
     local comp = Component.proxy(address)
     if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type ==
@@ -19,7 +21,7 @@ Event.listen("component_added", updateMachineList)
 
 local statuses = {multiblocks = {}, power = {}}
 
-local function update()
+function server.update()
     for address, name in pairs(machineAddresses) do
         statuses.multiblocks[address] = getMultiblockStatus(address, name)
     end
@@ -27,4 +29,4 @@ local function update()
     return statuses
 end
 
-return update
+return server

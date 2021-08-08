@@ -10,9 +10,17 @@ local context = {
 }
 
 function graphics.setContext(rendererObject)
-    context.gpu = rendererObject.gpu
-    context.width = rendererObject.width
-    context.heigth = rendererObject.heigth
+    if rendererObject ~= nil then
+        context.gpu = rendererObject.gpu
+        context.width = rendererObject.width
+        context.heigth = rendererObject.heigth
+    else
+        local gpu = require("component").gpu
+        local width, heigth = gpu.getResolution()
+        context.gpu = gpu
+        context.width = width
+        context.heigth = heigth
+    end
 end
 
 function graphics.context()

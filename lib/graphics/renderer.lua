@@ -23,12 +23,13 @@ local testObject = {
 
 
 local objects = {}
-local focused = false
 
+local focused = false
+--To disable click detection
 function renderer.setFocus()
     focused = true
 end
-
+--To re-enable click detection
 function renderer.leaveFocus()
     focused = false
 end
@@ -100,14 +101,25 @@ end
 
 --All changes are buffered in video memory and only rendered on calling renderer.update()
 --This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
-function renderer.update()
+--Passing a list of pages only updates those pages.
+local whitelist = {}
+function renderer.update(pages)
     local gpu = graphics.context().gpu
     for i = 1, #objects do
         local o = objects[i]
-        gpu.bitblt(0, o.x, o.y, o.width, o.heigth, o.page, 1, 1)
+        if pages ~= nil then
+            for p = 1, #pages do
+                if pages[p] == o.page then
+                    gpu.bitblt(0, o.x, o.y, o.width, o.heigth, o.page, 1, 1)
+                end
+            end
+        else
+            gpu.bitblt(0, o.x, o.y, o.width, o.heigth, o.page, 1, 1)
+        end
     end
 end
 
+latestFunc = nil
 local function checkClick(_, _, X, Y)
     if not focused then
         for i = 1, #objects do
@@ -118,10 +130,23 @@ local function checkClick(_, _, X, Y)
                     local v2 = o.clickArea[2]
                     if X >= v1[1] and X < v2[1] and Y >= v1[2] and Y < v2[2] then
                         if o.args ~= nil then
-                            o.clickFunction(table.unpack(o.args))
+                            if type(o.clickFunction) == "function" then
+                                o.clickFunction(table.unpack(o.args))
+                            elseif type(o.clickFunction) == "table" then
+                                print("Starting multiple function calls")
+                                for f = 1, #o.clickFunction do
+                                    o.clickFunction[f](table.unpack(o.args))
+                                end
+                            end
                             return
                         else
-                            o.clickFunction()
+                            if type(o.clickFunction) == "function" then
+                                o.clickFunction()
+                            elseif type(o.clickFunction) == "table" then
+                                for f = 1, #o.clickFunction do
+                                    o.clickFunction[f]()
+                                end
+                            end
                             return
                         end
                     end
