@@ -59,6 +59,19 @@ function renderer.createObject(x, y, width, height, alwaysVisible)
     return page
 end
 
+function renderer.getScreenCoordinates(bufferX, bufferY)
+    local currentObject = nil
+    local currentPage = graphics.context().gpu.getActiveBuffer()
+    for object in objects do
+        if object.page == currentPage then
+            currentObject = object
+        end
+    end
+    if currentObject ~= nil then
+        return bufferX + currentObject.x, bufferY + currentObject.y
+    end
+end
+
 --Objects can be removed by calling renderer.removeObject(pages)
 --They can be removed one-by-one, or as a bulk operation by passing a table of pages.
 function renderer.removeObject(pages)
@@ -107,7 +120,7 @@ end
 --This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
 --Passing a list of pages only updates those pages.
 local whitelist = {}
-local debug = true
+local debug = false
 function renderer.update(pages)
     local gpu = graphics.context().gpu
     local renderOnTop = {}
@@ -145,14 +158,18 @@ function renderer.update(pages)
             end
         end
         local _, y = gpu.getResolution()
-        graphics.text(1, y*2-5, str)
+        --graphics.text(1, y*2-5, str)
         graphics.text(1, y*2-3, "Memory free: "..gpu.freeMemory().."      ")
-        graphics.text(1, y*2-1, "Memory used by buffers: "..bufferSum.."      ")
+        graphics.text(1, y*2-1, "Memory used by buffers: "..bufferSum.."    ")
     end
 end
 
 local function checkClick(_, _, X, Y)
     if not focused then
+        if debug then
+            local _, y = graphics.context().gpu.getResolution()
+            graphics.text(35, y*2-1, "Registered click at: "..X.." "..Y.."      ")
+        end
         for i = 1, #objects do
             local o = objects[i]
             if o ~= nil then
@@ -189,7 +206,7 @@ end
 
 function event.onError(message)
     print(message)
-    graphics.text(1, 56, message)
+    graphics.text(1, graphics.context().heigth, message)
 end
 
 event.listen("touch", checkClick)

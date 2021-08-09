@@ -54,13 +54,14 @@ end
 --  onClick = Function to call when button is pressed
 --  args = Arguments to pass to the button
 --  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
-function gui.smallButton(x, y, text, onClick, args, width)
+function gui.smallButton(x, y, text, onClick, args, width, color)
+    color = color or primaryColor
     text = tostring(text)
     width = width or #text+2
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, 1, true)
     gpu.setActiveBuffer(page)
-    graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, primaryColor)
+    graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, color)
     renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+1})
     gpu.setActiveBuffer(0)
     return page
@@ -123,7 +124,7 @@ function gui.textInput(x, y, maxWidth, startValue)
         end
     end
     local focusListener = event.listen("touch", checkExit)
-    while value ~= 13 and value ~= -1 do
+    while value ~= 13 and value ~= -1 and value ~= 9 do
         local _, _, key, _, _ = event.pull(0.05, "key_down")
         if key ~= nil then
             value = key
@@ -144,8 +145,11 @@ function gui.textInput(x, y, maxWidth, startValue)
         end
     end
     event.cancel(focusListener)
-    if value == 13 then
+    if value == 13 or value == 9 then
         graphics.text(x, -1+2*y, returnString.." ", primaryColor)
+        if value == 9 then
+            event.push("touch", _, x, y+1)
+        end
         return returnString
     else
         local padded = startValue
@@ -223,7 +227,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
         end
     end
     local focusListener = event.listen("touch", checkExit)
-    while value ~= 13 and value ~= -1 do
+    while value ~= 13 and value ~= -1 and value ~= 9 do
         local _, _, key, _, _ = event.pull(0.05, "key_down")
         if key ~= nil then
             value = key
@@ -257,12 +261,15 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
         end
     end
     event.cancel(focusListener)
-    if value == 13 then
+    if value == 13 or value == 9 then
         padded = parser.splitNumber(tonumber(number), delim)
         if not startLeft then
             for i = 1, maxWidth-#padded do padded = " "..padded end
         end
         graphics.text(x, -1+2*y, padded.." ", primaryColor)
+        if value == 9 then
+            event.push("touch", _, x, y+1)
+        end
         return number
     else
         padded = parser.splitNumber(tonumber(startValue),delim)
@@ -270,6 +277,52 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
             for i = 1, maxWidth-#padded do padded = " "..padded end
         end
         graphics.text(x, -1+2*y, padded.." ", primaryColor)
+        return nil
+    end
+end
+
+local function compareColors(a,b)
+    return a[2] < b[2]
+  end
+--Color selection return the color value that was selected, or nil if click was not in the box.
+function gui.colorSelection(x, y, colorList)
+    local context = graphics.context()
+    local maxX = context.width
+    local maxY = context.height
+    local gpu = context.gpu
+    local colorTable = {}
+    local longestName = 0
+    for name, value in pairs(colorList) do
+        if type(name) == "string" then
+            if #name > longestName then longestName = #name end
+            table.insert(colorTable, {name, value})
+        end
+    end
+    table.sort(colorTable, compareColors)
+    local height = #colorTable + 2
+    if maxX <= (x+longestName+5) then x = maxX-(longestName+4) end
+    if maxY <= (y+height) then y = maxY-(height-1) end
+    local page = gpu.allocateBuffer(longestName+5, height)
+    gpu.setActiveBuffer(page)
+    graphics.rectangle(1, 1, 5+longestName, 4+2*#colorTable, borderColor)
+    graphics.rectangle(5, 3, longestName, 2*#colorTable, colors.black)
+    for i = 1, #colorTable do
+        graphics.text(5, 1+2*i, colorTable[i][1], colorTable[i][2])
+        graphics.rectangle(2, 1+2*i, 2, 2, colorTable[i][2])
+    end
+    gpu.setActiveBuffer(0)
+    local background = gpu.allocateBuffer(longestName+5, height)
+    gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
+    gpu.bitblt(_, x, y, maxX, maxY, page)
+    renderer.setFocus()
+    local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
+    renderer.leaveFocus()
+    gpu.bitblt(0, x, y, maxX, maxY, background)
+    gpu.freeBuffer(page)
+    gpu.freeBuffer(background)
+    if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+height then
+        return colorTable[touchY-y][2], colorTable[touchY-y][1], longestName
+    else
         return nil
     end
 end
@@ -307,12 +360,43 @@ local function setNumberAttribute(x, y, tableToModify, tableValue, attribute)
     end
 end
 
+local function setColorAttribute(x, y, tableToModify, tableValue, attribute)
+    local value, name, longest = gui.colorSelection(x, y, colors)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+            for i = 1, longest-#name do name = name .. " " end
+            graphics.text(x, 2*y-1, name, value)
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+
+local function setBooleanAttribute(x, y, tableToModify, tableValue, attribute)
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or false
+    else
+        startValue = tableToModify[attribute] or false
+    end
+    local value = not startValue
+    local color = borderColor
+    local displayName = ""
+    if value then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
+    graphics.text(x, y*2-1, displayName.." ", color)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+
 --Creates a named list of attributes to change, given in attributeData in the format {name="Name", attribute="attr", type="string|number"}
 --The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
 --If dataValue is nil, then the main dataTable.attribute is modified instead.
-function gui.multiAttributeList(x, y, page, attributeData, dataTable, dataValue)
-    local pages = {}
-    table.insert(pages, page)
+function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue)
     local longestAttribute = 0
     for i = 1, #attributeData do
         if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end
@@ -322,16 +406,24 @@ function gui.multiAttributeList(x, y, page, attributeData, dataTable, dataValue)
         local name = attributeData[i].name
         local type = attributeData[i].type
         local displayName = ""
-        if dataValue ~= nil then displayName = dataTable[dataValue][attribute] else  displayName = dataTable[attribute] end
+        if dataValue ~= nil then displayName = dataTable[dataValue][attribute] else displayName = dataTable[attribute] end
         graphics.context().gpu.setActiveBuffer(page)
-        graphics.text(3, 2*y+2*i-1, name..":")
+        graphics.text(3, 2*y+2*i-1, name)
         if type == "string" then
-            table.insert(pages, gui.smallButton(x+longestAttribute+1, y+i, displayName or "None", setTextAttribute, {x+longestAttribute+2, y+i, dataTable, dataValue, attribute}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
         elseif type == "number" then
-            table.insert(pages, gui.smallButton(x+longestAttribute+1, y+i, displayName or "None", setNumberAttribute, {x+longestAttribute+2, y+i, dataTable, dataValue, attribute}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or"None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
+        elseif type == "color" then
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or colors[attributeData[i].defaultValue] or "None", setColorAttribute,
+            {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
+        elseif type == "boolean" then
+            local color = borderColor
+            if displayName then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName, setBooleanAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, color))
+        elseif type == "header" then --Do nothing
         end
     end
-    return pages
+    return pageTable
 end
 
 function gui.logo(x, y)
@@ -444,58 +536,12 @@ function gui.selectionBox(x, y, choices)
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
     gpu.freeBuffer(background)
-    if touchX > x and touchX < x+longestName+1 and touchY > y and touchY < y+height then
+    if touchX > x and touchX < x+longestName and touchY > y and touchY < y+height-1 then
         if type(choices[touchY-y].value) == "function" then
             choices[touchY-y].value(table.unpack(choices[touchY-y].args))
         else
             return choices[touchY-y].value
         end
-    else
-        return nil
-    end
-end
-
-
-
-local function compareColors(a,b)
-    return a[2] < b[2]
-  end
---Color selection return the color value that was selected, or nil if click was not in the box.
-function gui.colorSelection(x, y, colorList)
-    local context = graphics.context()
-    local maxX = context.width
-    local maxY = context.height
-    local gpu = context.gpu
-    local colorTable = {}
-    local longestName = 0
-    for name, value in pairs(colorList) do
-        if #name > longestName then longestName = #name end
-        table.insert(colorTable, {name, value})
-    end
-    table.sort(colorTable, compareColors)
-    local height = #colorTable + 2
-    if maxX <= (x+longestName+5) then x = maxX-(longestName+4) end
-    if maxY <= (y+height) then y = maxY-(height-1) end
-    local page = gpu.allocateBuffer(longestName+5, height)
-    gpu.setActiveBuffer(page)
-    graphics.rectangle(1, 1, 5+longestName, 4+2*#colorTable, borderColor)
-    graphics.rectangle(5, 3, longestName, 2*#colorTable, colors.black)
-    for i = 1, #colorTable do
-        graphics.text(5, 1+2*i, colorTable[i][1], colorTable[i][2])
-        graphics.rectangle(2, 1+2*i, 2, 2, colorTable[i][2])
-    end
-    gpu.setActiveBuffer(0)
-    local background = gpu.allocateBuffer(longestName+5, height)
-    gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
-    gpu.bitblt(_, x, y, maxX, maxY, page)
-    renderer.setFocus()
-    local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
-    renderer.leaveFocus()
-    gpu.bitblt(0, x, y, maxX, maxY, background)
-    gpu.freeBuffer(page)
-    gpu.freeBuffer(background)
-    if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+height then
-        return colorTable[touchY-y][2]
     else
         return nil
     end

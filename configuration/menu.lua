@@ -5,6 +5,7 @@ local graphics = require("lib.graphics.graphics")
 local renderer = require("lib.graphics.renderer")
 local serialization = require("serialization")
 
+require("component").gpu.setResolution(120, 35)
 graphics.setContext()
 
 local maxWidth = graphics.context().width
@@ -51,8 +52,8 @@ local function activate(module, displayName, desc)
         end
     end
     if found ~= 0 then table.remove(modules, found) end
-    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-10)
-    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-10)
+    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-5)
+    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5)
     renderer.update()
 end
 
@@ -67,8 +68,8 @@ local function deactivate(module)
     if found ~= 0 then
         table.remove(processes, found)
     end
-    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-10)
-    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-10)
+    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-5)
+    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5)
     renderer.update()
 end
 
@@ -109,7 +110,6 @@ local function configScreen(x, y, width, height, title, data)
     local configurationTab = data.configure(x, y, gui, graphics, renderer, currentTab)
     currentTab = {currentTab}
     if configurationTab ~= nil then for i = 1, #configurationTab do table.insert(currentTab, configurationTab[i]) end end
-    graphics.context().gpu.setActiveBuffer(0)
 end
 
 local selector = nil
@@ -126,10 +126,10 @@ local function moduleSelector(x, y, width, height)
             args = {modules[i].module, modules[i].name, modules[i].desc}},
             {displayName = "Info",
             value = infoScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, modules[i].desc, modules[i].name}},
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, modules[i].desc, modules[i].name}},
             {displayName = "Configure",
             value = configScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, modules[i].name, require(modules[i].module)}}
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, modules[i].name, require(modules[i].module)}}
         }
         table.insert(buttons, {name = modules[i].name, desc = modules[i].desc, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
     end
@@ -149,10 +149,10 @@ local function moduleDeSelector(x, y, width, height)
             args = {processes[i].module, processes[i].name, processes[i].desc}},
             {displayName = "Info",
             value = infoScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, processes[i].desc, processes[i].name}},
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, processes[i].desc, processes[i].name}},
             {displayName = "Configure",
             value = configScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-10, processes[i].name, require(processes[i].module)}}
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, processes[i].name, require(processes[i].module)}}
         }
         table.insert(buttons, {name = processes[i].name, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
     end
@@ -172,11 +172,11 @@ local function reboot()
 end
 
 local function generateMenu()
-    moduleSelector(location.x, location.y, selectionBoxWidth, maxheight-10)
-    moduleDeSelector(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-10)
-    gui.bigButton(location.x, location.y+maxheight-10, "Run", switch)
-    gui.bigButton(location.x+5, location.y+maxheight-10, "Save", save)
-    gui.bigButton(location.x+11, location.y+maxheight-10, "Reboot", reboot)
+    moduleSelector(location.x, location.y, selectionBoxWidth, maxheight-5)
+    moduleDeSelector(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5)
+    gui.bigButton(location.x, location.y+maxheight-5, "Run", switch)
+    gui.bigButton(location.x+5, location.y+maxheight-5, "Save", save)
+    gui.bigButton(location.x+11, location.y+maxheight-5, "Reboot", reboot)
     gui.smallLogo(maxWidth-20, maxheight-4)
     renderer.update()
 end

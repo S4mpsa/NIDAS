@@ -13,7 +13,6 @@ local colors = {
     darkOliveGreen = 0x556B2F,
     indigo = 0x4B0082,
     purple = 0x800080,
-    deepSkyBlue = 0x00BFFF,
     electricBlue = 0x00A6FF,
     dodgerBlue = 0x1E90FF,
     steelBlue = 0x4682B4,
@@ -31,5 +30,9 @@ local colors = {
     darkGray = 0x181828,
     darkSlateGrey = 0x2F4F4F
 }
+
+for name, value in pairs(colors) do
+    colors[value] = name
+end
 
 return colors
