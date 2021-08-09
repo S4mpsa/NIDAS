@@ -33,7 +33,7 @@ local function save()
     for i = 1, #processes do
         table.insert(configurationData.processes, {name = processes[i].name, module = processes[i].module, desc = processes[i].desc})
     end
-    local file = io.open("/home/NIDAS/configurationenabledModules", "w")
+    local file = io.open("/home/NIDAS/configuration/enabledModules", "w")
     file:write(serialization.serialize(configurationData))
     file:close()
 end
