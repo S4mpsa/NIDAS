@@ -15,6 +15,7 @@ local function load()
         glassData = serialization.unserialize(file:read("*a"))
         file:close()
     end
+    if glassData == nil then glassData = {} end
 end
 local function save()
     local file = io.open("/home/NIDAS/configuration/hudConfig", "w")
@@ -39,10 +40,12 @@ local pages = {}
 local selectedGlasses = "None"
 local glassSelector = nil
 local refresh = nil
+
+local currentConfigWindow = {}
 local function changeGlasses(glassAddress, data)
     selectedGlasses = glassAddress
     local x, y, gui, graphics, renderer, page = table.unpack(data)
-    renderer.removeObject(pages)
+    renderer.removeObject(currentConfigWindow)
     graphics.context().gpu.setActiveBuffer(page)
     refresh(x, y, gui, graphics, renderer, page)
 end
@@ -50,17 +53,32 @@ end
 function hud.configure(x, y, gui, graphics, renderer, page)
     local renderingData = {x, y, gui, graphics, renderer, page}
     graphics.text(3, 5, "Selected Glasses:")
-    local availableGlasses = {}
     local onActivation = {}
     for address, componentType in component.list() do
         if componentType == "glasses" then
-            table.insert(availableGlasses, address)
-            table.insert(onActivation, {displayName = address, value = changeGlasses, args = {address, renderingData}})
+            if glassData[address] == nil then
+                glassData[address] = {}
+            end
+            local displayName = glassData[address].owner or address
+            table.insert(onActivation, {displayName = displayName, value = changeGlasses, args = {address, renderingData}})
         end
     end
-    table.insert(pages, gui.smallButton(x+20, y+2, selectedGlasses, gui.selectionBox, {x+24, y+2, onActivation}))
+    local _, ySize = graphics.context().gpu.getBufferSize(page)
+    table.insert(currentConfigWindow, gui.smallButton(x+19, y+2, selectedGlasses, gui.selectionBox, {x+24, y+2, onActivation}))
+    table.insert(currentConfigWindow, gui.bigButton(x+2, y+ySize-4, "Save Configuration", save))
+
+    if selectedGlasses ~= "None" then
+        local attributeChangeList = {
+            {name = "Glass Owner",      attribute = "owner",    type = "string"},
+            {name = "Resolution (X)",   attribute = "xRes",     type = "number"},
+            {name = "Resolution (Y)",   attribute = "yRes",     type = "number"},
+            {name = "Scale",            attribute = "scale",    type = "number"}
+        }
+        currentConfigWindow =  gui.multiAttributeList(x+3, y+3, page, attributeChangeList, glassData, selectedGlasses)
+    end
+
     renderer.update()
-    return pages
+    return currentConfigWindow
 end
 refresh = hud.configure
 

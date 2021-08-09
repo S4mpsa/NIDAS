@@ -92,6 +92,7 @@ local function flush()
     if currentTab ~= nil then
         renderer.removeObject(currentTab)
     end
+    currentTab = nil
 end
 
 --Modules for configuring start here
@@ -105,9 +106,10 @@ local function configScreen(x, y, width, height, title, data)
     flush()
     currentTab = gui.configMenu(x, y, width, height, title, data)
     graphics.context().gpu.setActiveBuffer(currentTab)
-    data.configure(x, y, gui, graphics, renderer, currentTab)
+    local configurationTab = data.configure(x, y, gui, graphics, renderer, currentTab)
+    currentTab = {currentTab}
+    if configurationTab ~= nil then for i = 1, #configurationTab do table.insert(currentTab, configurationTab[i]) end end
     graphics.context().gpu.setActiveBuffer(0)
-    renderer.update()
 end
 
 local selector = nil
