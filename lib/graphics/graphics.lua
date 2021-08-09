@@ -60,7 +60,8 @@ function graphics.rectangle(x, y, width, height, color)
     end
 end
 
-function graphics.outline(x, y,lines, color)
+function graphics.outline(x, y, lines, color)
+    color = color or 0xFFFFFF
     for i = 0, #lines-1 do
         graphics.text(x, y+i*2, lines[i+1], color)
     end
