@@ -21,7 +21,7 @@ local accentColor = colors.magenta
 function gui.bigButton(x, y, text, onClick, args, width)
     width = width or #text+2
     local gpu = graphics.context().gpu
-    local page = renderer.createObject(x, y, width, 3)
+    local page = renderer.createObject(x, y, width, 3, true)
     gpu.setActiveBuffer(page)
     local top = "╭"
     local middle = "│"
@@ -55,15 +55,17 @@ end
 --  args = Arguments to pass to the button
 --  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
 function gui.smallButton(x, y, text, onClick, args, width)
+    text = tostring(text)
     width = width or #text+2
     local gpu = graphics.context().gpu
-    local page = renderer.createObject(x, y, width, 1)
+    local page = renderer.createObject(x, y, width, 1, true)
     gpu.setActiveBuffer(page)
     graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, primaryColor)
     renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+1})
     gpu.setActiveBuffer(0)
     return page
 end
+
 --Creates a rectangular frame, starting from x, y and going to x+width, y+height
 function gui.listFrame(x, y, width, height, title)
     local gpu = graphics.context().gpu
@@ -103,6 +105,7 @@ function gui.multiButtonList(x, y, buttons, width, height, title)
     end
     return pages
 end
+
 --Creates an undecorated text input box at x, y, with optional max width.
 --The start value of the text box is passed in startValue.
 --Returns the value inserted when pressing ENTER, or nil if focus is lost (touch signal not in box).
@@ -160,7 +163,8 @@ local function split(string, sep)
     end
     return words
 end
---Creates a a bounded text box that wraps the text.
+
+--Creates a bounded text box that wraps the text.
 function gui.wrappedTextBox(x, y, width, height, text, title)
     local page = gui.listFrame(x, y, width, height, title)
     local gpu = graphics.context().gpu
@@ -195,16 +199,18 @@ end
 --The start value of the number box is passed in startValue. Defaults to 0.
 --The number can either expand right or left, depending on startLeft. True = Number grows to the right, False = Number grows to the left. Defaults to false.
 --Returns the value inserted when pressing ENTER, or nil if focus is lost (touch signal not in box).
-function gui.numberInput(x, y, maxWidth, startValue, startLeft)
+function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
     x = x or 1
     y = y or 1
     maxWidth = maxWidth or 15
     startValue = startValue or 0
     startLeft = startLeft or false
+    delim = delim or " "
     local number = startValue
-    local padded = parser.splitNumber(tonumber(number), " ")
+    local padded = parser.splitNumber(tonumber(number), delim)
     if startLeft then
-        graphics.text(x, -1+2*y, padded.."_", accentColor)
+        padded = padded.."_"
+        for i = 1, maxWidth-#padded do padded = padded.." " end
     else
         for i = 1, maxWidth-#padded do padded = " "..padded end
         padded = padded.."_"
@@ -221,7 +227,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft)
         local _, _, key, _, _ = event.pull(0.05, "key_down")
         if key ~= nil then
             value = key
-            if #parser.splitNumber(tonumber(number), " ") < maxWidth then
+            if #parser.splitNumber(tonumber(number), delim) < maxWidth then
                 if (key >= 48 and key <= 57) or key == 45 then
                     if key == 45 then
                         number = -number
@@ -237,34 +243,95 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft)
                     number = 0
                 end
             end
-            padded = parser.splitNumber(tonumber(number), " ")
+            padded = parser.splitNumber(tonumber(number), delim)
             if #padded ~= maxWidth then
                 if startLeft then
+                    padded = padded.."_"
                     for i = 1, maxWidth-#padded do padded = padded.." " end
                 else
                     for i = 1, maxWidth-#padded do padded = " "..padded end
+                    padded = padded.."_"
                 end
-                padded = padded.."_"
             end
             graphics.text(x, -1+2*y, padded, accentColor)
         end
     end
     event.cancel(focusListener)
     if value == 13 then
-        padded = parser.splitNumber(tonumber(number), " ")
+        padded = parser.splitNumber(tonumber(number), delim)
         if not startLeft then
             for i = 1, maxWidth-#padded do padded = " "..padded end
         end
         graphics.text(x, -1+2*y, padded.." ", primaryColor)
         return number
     else
-        padded = parser.splitNumber(tonumber(startValue), " ")
+        padded = parser.splitNumber(tonumber(startValue),delim)
         if not startLeft then
             for i = 1, maxWidth-#padded do padded = " "..padded end
         end
         graphics.text(x, -1+2*y, padded.." ", primaryColor)
         return nil
     end
+end
+
+local function setTextAttribute(x, y, tableToModify, tableValue, attribute)
+    local startValue = ""
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or "None"
+    else
+        startValue = tableToModify[attribute] or "None"
+    end
+    local value = gui.textInput(x, y, 50, startValue)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+local function setNumberAttribute(x, y, tableToModify, tableValue, attribute)
+    local startValue = 0
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or 0
+    else
+        startValue = tableToModify[attribute] or 0
+    end
+    local value = gui.numberInput(x, y, 50, startValue, true, "")
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+
+--Creates a named list of attributes to change, given in attributeData in the format {name="Name", attribute="attr", type="string|number"}
+--The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
+--If dataValue is nil, then the main dataTable.attribute is modified instead.
+function gui.multiAttributeList(x, y, page, attributeData, dataTable, dataValue)
+    local pages = {}
+    table.insert(pages, page)
+    local longestAttribute = 0
+    for i = 1, #attributeData do
+        if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end
+    end
+    for i = 1, #attributeData do
+        local attribute = attributeData[i].attribute
+        local name = attributeData[i].name
+        local type = attributeData[i].type
+        local displayName = ""
+        if dataValue ~= nil then displayName = dataTable[dataValue][attribute] else  displayName = dataTable[attribute] end
+        graphics.context().gpu.setActiveBuffer(page)
+        graphics.text(3, 2*y+2*i-1, name..":")
+        if type == "string" then
+            table.insert(pages, gui.smallButton(x+longestAttribute+1, y+i, displayName or "None", setTextAttribute, {x+longestAttribute+2, y+i, dataTable, dataValue, attribute}))
+        elseif type == "number" then
+            table.insert(pages, gui.smallButton(x+longestAttribute+1, y+i, displayName or "None", setNumberAttribute, {x+longestAttribute+2, y+i, dataTable, dataValue, attribute}))
+        end
+    end
+    return pages
 end
 
 function gui.logo(x, y)
