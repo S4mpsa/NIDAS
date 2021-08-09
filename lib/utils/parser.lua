@@ -3,6 +3,7 @@ local parser = {}
 -- Returns given number formatted as XXX,XXX,XXX
 function parser.splitNumber(number, delim)
     delim = delim or ","
+    if delim == "" then return tostring(number) end
     local formattedNumber = {}
     local string = tostring(math.abs(number))
     local sign = number / math.abs(number)
