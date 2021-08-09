@@ -18,7 +18,6 @@ local testObject = {
     clickArea = {{0, 0}, {0, 0}},
     clickFunction = nil,
     boundScreens = 0
-
 }
 graphics.setContext(testObject)
 graphics.clear()

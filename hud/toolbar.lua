@@ -1,11 +1,11 @@
 local internet = require("internet")
-local colors = require("graphics.colors")
-local ar = require("graphics.ar")
-local screen = require("utils.screen")
-local time = require("utils.time")
+local colors = require("lib.graphics.colors")
+local ar = require("lib.graphics.ar")
+local screen = require("lib.utils.screen")
+local time = require("lib.utils.time")
 --
 local computer = require("computer")
-local parser = require("utils.parser")
+local parser = require("lib.utils.parser")
 --
 local toolbar = {}
 

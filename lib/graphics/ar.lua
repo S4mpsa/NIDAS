@@ -1,5 +1,5 @@
-local screen = require("utils.screen")
-local colors = require("graphics.colors")
+local screen = require("lib.utils.screen")
+local colors = require("lib.graphics.colors")
 
 local arGraphics = {}
 

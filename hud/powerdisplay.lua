@@ -1,9 +1,9 @@
 local computer = require("computer")
-local colors = require("graphics.colors")
-local ar = require("graphics.ar")
-local parser = require("utils.parser")
-local time = require("utils.time")
-local screen = require("utils.screen")
+local colors = require("lib.graphics.colors")
+local ar = require("lib.graphics.ar")
+local parser = require("lib.utils.parser")
+local time = require("lib.utils.time")
+local screen = require("lib.utils.screen")
 
 local powerDisplay = {}
 
