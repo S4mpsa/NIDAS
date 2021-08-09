@@ -5,6 +5,7 @@ Event = require("event")
 Component = require("component")
 Modem = Component.modem
 Constants = require("configuration.constants")
+Serialization = require("serialization")
 
 --
 
@@ -38,22 +39,12 @@ local function rewriteAddressFile()
     local filePath = package.searchpath(addressesConfigFile, package.path)
     Filesystem.remove(filePath)
     local configFile = io.open(filePath, "w")
-    configFile:write("local addresses = {\n")
+    configFile:write("local addresses =\n")
 
-    for address, properties in pairs(knownMachines) do
-        configFile:write('    ["' .. address .. '"] = {\n')
-        configFile:write("        name = " .. (properties.name or "Unknown") .. ",\n")
-        if properties.coordinates then
-            configFile:write("        coordinates = {\n")
-            configFile:write("            " .. properties.coordinates[1] .. ",\n")
-            configFile:write("            " .. properties.coordinates[2] .. ",\n")
-            configFile:write("            " .. properties.coordinates[3] .. "\n")
-            configFile:write("        }\n")
-        end
-        configFile:write("    },\n")
-    end
-    configFile:write("}\n\n")
-    configFile:write("return addresses\n\n")
+    configFile:write(Serialization.serialize(knownMachines, true))
+
+    configFile:write("\n\n")
+    configFile:write("return addresses\n")
     configFile:close()
 
     reloadAddressesConfigFile()
