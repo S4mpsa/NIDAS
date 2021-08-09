@@ -36,13 +36,14 @@ end
 
 --An object is created by calling renderer.createObject(x, y, width, height)
 --This returns a page number which can be used to manipulate the object.
-function renderer.createObject(x, y, width, height)
+function renderer.createObject(x, y, width, height, alwaysVisible)
     if width < 0 or height < 0 then error("Dimensions must be positive") end
+    alwaysVisible = alwaysVisible or false
     local gpu = graphics.context().gpu
-    local object = gpu.allocateBuffer(width, height)
+    local page = gpu.allocateBuffer(width, height)
     table.insert(objects, {
         gpu = gpu,
-        page = object,
+        page = page,
         x = x,
         y = y,
         width = width,
@@ -52,9 +53,10 @@ function renderer.createObject(x, y, width, height)
         clickArea = {{0, 0}, {0, 0}},
         clickFunction = nil,
         args = nil,
-        boundScreens = 0
+        boundScreens = 0,
+        alwaysVisible = alwaysVisible
     })
-    return object
+    return page
 end
 
 --Objects can be removed by calling renderer.removeObject(pages)
@@ -108,6 +110,7 @@ local whitelist = {}
 local debug = true
 function renderer.update(pages)
     local gpu = graphics.context().gpu
+    local renderOnTop = {}
     for i = 1, #objects do
         local o = objects[i]
         if o.page == nil then error("Object page is nil") end
@@ -118,8 +121,16 @@ function renderer.update(pages)
                 end
             end
         else
-            gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
+            if o.alwaysVisible then
+                table.insert(renderOnTop, o)
+            else
+                gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
+            end
         end
+    end
+    for i = 1, #renderOnTop do
+        local o = renderOnTop[i]
+        gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
     end
     if debug then
         local str = ""
@@ -178,6 +189,7 @@ end
 
 function event.onError(message)
     print(message)
+    graphics.text(1, 56, message)
 end
 
 event.listen("touch", checkClick)
