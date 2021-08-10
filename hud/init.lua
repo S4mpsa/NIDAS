@@ -33,7 +33,7 @@ local function save()
     toolbarUsers = {}
     for address, data in pairs(glassData) do
         if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes, data.yRes}, data.scale, data.offset, data.backgroundColor, data.primaryColor, data.accentColor}) end
+        if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
     end
     package.loaded.powerdisplay = nil
     powerDisplay = require("hud.powerdisplay")
