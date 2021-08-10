@@ -151,6 +151,10 @@ function gui.textInput(x, y, maxWidth, startValue)
         if value == 9 then
             event.push("touch", _, x, y+1)
         end
+        if returnString == "" then
+            graphics.text(x, -1+2*y, "None".." ", primaryColor)
+            return "None"
+        end
         return returnString
     else
         local padded = startValue
