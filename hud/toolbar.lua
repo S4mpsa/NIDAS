@@ -78,15 +78,14 @@ function toolbar.widget(glasses)
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x+w+5, y+11}, clockWidth-2, clockheight-2, borderColor)) --Clock Panel
             hudObjects[i].dynamic.clock = ar.text(hudObjects[i].glasses, "", {x+w+7, y+13}, accentColor, 0.65)
             hudObjects[i].dynamic.realtime = ar.text(hudObjects[i].glasses, "", {x+w+3, y+30}, primaryColor, 0.8)
-            --Following is temporary
-            hudObjects[i].dynamic.memory = ar.text(hudObjects[i].glasses, "", {x+20, y-7}, primaryColor, 0.8)
+            --Uncomment to debug memory usage
+            --hudObjects[i].dynamic.memory = ar.text(hudObjects[i].glasses, "", {x+20, y-7}, primaryColor, 0.8)
         end
         hudObjects[i].dynamic.clock.setText(timeString)
-        --Following is temporary
-        local maxMemory = computer.totalMemory()
-        local usedMemory = maxMemory - computer.freeMemory()
-        hudObjects[i].dynamic.memory.setText("Memory used: "..parser.percentage(usedMemory/maxMemory))
-        --
+        --Uncomment to debug memory usage
+        --local maxMemory = computer.totalMemory()
+        --local usedMemory = maxMemory - computer.freeMemory()
+        --hudObjects[i].dynamic.memory.setText("Memory used: "..parser.percentage(usedMemory/maxMemory))
         if formattedTime ~= nil then
             hudObjects[i].dynamic.realtime.setText(formattedTime)
         end

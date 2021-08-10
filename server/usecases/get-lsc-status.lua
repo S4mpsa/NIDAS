@@ -16,7 +16,7 @@ local function exec(address, name)
 
     local problems = getNumberOfProblems(sensorInformation[9])
     
-    local state = {}
+    local state = nil
     if lsc:isWorkAllowed() then
         if lsc:hasWork() then
             state = states.ON
@@ -28,13 +28,12 @@ local function exec(address, name)
     end
 
     if problems > 0 then state = states.BROKEN end
-    
+
     local status = {
-        storedEU = math.floor(string.gsub(lsc.getSensorInformation()[2], "([^0-9]+)", "")),
-        EUCapacity = math.floor(string.gsub(lsc.getSensorInformation()[3], "([^0-9]+)", "") + 0),
+        storedEU = math.floor(string.gsub(sensorInformation[2], "([^0-9]+)", "")),
+        EUCapacity = math.floor(string.gsub(sensorInformation[3], "([^0-9]+)", "") + 0),
         problems = problems,
-        passiveLoss = lsc:getWorkMaxProgress() and
-            parser.getInteger(sensorInformation[4]) or 0,
+        passiveLoss = parser.getInteger(sensorInformation[4]) or 0,
         state = state
     }
     return status
