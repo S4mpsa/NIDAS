@@ -32,8 +32,14 @@ local function save()
     powerDisplayUsers = {}
     toolbarUsers = {}
     for address, data in pairs(glassData) do
-        if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+        if data.energyDisplay then
+            table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+            powerDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+        end
+        if data.toolbar then
+            table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+            toolbar.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+        end
     end
     package.loaded.powerdisplay = nil
     powerDisplay = require("hud.powerdisplay")
@@ -62,7 +68,8 @@ function hud.configure(x, y, gui, graphics, renderer, page)
             if glassData[address] == nil then
                 glassData[address] = {}
             end
-            local displayName = glassData[address].owner or address
+            local displayName = glassData[address].owner or component.proxy(address).getBindPlayers() or address
+            if glassData[address].owner == "None" then displayName = address end
             table.insert(onActivation, {displayName = displayName, value = changeGlasses, args = {address, renderingData}})
         end
     end
@@ -72,7 +79,7 @@ function hud.configure(x, y, gui, graphics, renderer, page)
 
     if selectedGlasses ~= "None" then
         local attributeChangeList = {
-            {name = "Glass Owner",      attribute = "owner",            type = "string",    defaultValue = nil},
+            {name = "Glass Owner",      attribute = "owner",            type = "string",    defaultValue = component.proxy(selectedGlasses).getBindPlayers()},
             {name = "Resolution (X)",   attribute = "xRes",             type = "number",    defaultValue = 2560},
             {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 1440},
             {name = "Scale",            attribute = "scale",            type = "number",    defaultValue = 3},
