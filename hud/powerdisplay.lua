@@ -20,6 +20,29 @@ local energyData = {
 
 local energyUnit = "EU"
 
+function powerDisplay.changeColor(glasses, backgroundColor, primaryColor, accentColor)
+    local graphics = require("lib.graphics.graphics")
+    for i = 1, #hudObjects do
+        if hudObjects[i].glasses ~= nil then
+            if hudObjects[i].glasses.address == glasses then
+                if backgroundColor ~= nil then
+                    for j = 1, #hudObjects[i].static do
+                        hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
+                    end
+                end
+                if primaryColor ~= nil then
+                    hudObjects[i].dynamic.energyBar.setColor(screen.toRGB(primaryColor))
+                    hudObjects[i].dynamic.currentEU.setColor(screen.toRGB(primaryColor))
+                end
+                if accentColor ~= nil then
+                    hudObjects[i].dynamic.maxEU.setColor(screen.toRGB(accentColor))
+                    hudObjects[i].dynamic.percentage.setColor(screen.toRGB(accentColor))
+                    hudObjects[i].dynamic.filltime.setColor(screen.toRGB(accentColor))
+                end
+            end
+        end
+    end
+end
 --Scales: Small = 1, Normal = 2, Large = 3, Auto = 4x to 10x (Even)
 --Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [heigth]}
@@ -146,17 +169,24 @@ function powerDisplay.widget(glasses, data)
     end
 end
 
-function powerDisplay.remove()
+function powerDisplay.remove(glassAddress)
     for i = 1, #hudObjects do
-        for j = 1, #hudObjects[i].static do
-            hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
+        local hudObject = hudObjects[i]
+        local glasses = hudObject.glasses
+        if glasses ~= nil then
+            if glasses.address == glassAddress then
+                for j = 1, #hudObjects[i].static do
+                    hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
+                end
+                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.energyBar.getID())
+                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.currentEU.getID())
+                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.maxEU.getID())
+                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.percentage.getID())
+                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.filltime.getID())
+                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.fillrate.getID())
+                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.state.getID())
+            end
         end
-        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.energyBar.getID())
-        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.currentEU.getID())
-        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.maxEU.getID())
-        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.percentage.getID())
-        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.filltime.getID())
-        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.fillrate.getID())
     end
 end
 

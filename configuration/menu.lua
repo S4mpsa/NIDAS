@@ -5,12 +5,12 @@ local graphics = require("lib.graphics.graphics")
 local renderer = require("lib.graphics.renderer")
 local serialization = require("serialization")
 
-require("component").gpu.setResolution(120, 35)
+require("component").gpu.setResolution(125, 35)
 graphics.setContext()
 
 local maxWidth = graphics.context().width
 local maxheight = graphics.context().height
-local selectionBoxWidth = 25
+local selectionBoxWidth = 20
 local location = {x = 2, y = 1}
 local configurationData = {}
 

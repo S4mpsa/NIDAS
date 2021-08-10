@@ -32,8 +32,14 @@ local function save()
     powerDisplayUsers = {}
     toolbarUsers = {}
     for address, data in pairs(glassData) do
-        if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+        if data.energyDisplay then
+            table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+            powerDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+        end
+        if data.toolbar then
+            table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+            toolbar.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+        end
     end
     package.loaded.powerdisplay = nil
     powerDisplay = require("hud.powerdisplay")

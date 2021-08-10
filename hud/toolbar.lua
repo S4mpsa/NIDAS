@@ -10,6 +10,32 @@ local parser = require("lib.utils.parser")
 local toolbar = {}
 
 local hudObjects = {}
+
+function toolbar.changeColor(glasses, backgroundColor, primaryColor, accentColor)
+    for i = 1, #hudObjects do
+        if hudObjects[i].glasses ~= nil then
+            if hudObjects[i].glasses.address == glasses then
+                if backgroundColor ~= nil then
+                    for j = 1, #hudObjects[i].static do
+                        hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
+                    end
+                end
+                if primaryColor ~= nil then
+                    hudObjects[i].dynamic.xpbar.setColor(screen.toRGB(primaryColor))
+                    hudObjects[i].dynamic.topstrip.setColor(screen.toRGB(primaryColor))
+                    hudObjects[i].dynamic.diagonal.setColor(screen.toRGB(primaryColor))
+                    hudObjects[i].dynamic.rightstrip.setColor(screen.toRGB(primaryColor))
+                    hudObjects[i].dynamic.clockEdge.setColor(screen.toRGB(primaryColor))
+                    hudObjects[i].dynamic.realtime.setColor(screen.toRGB(primaryColor))
+                end
+                if accentColor ~= nil then
+                    hudObjects[i].dynamic.clock.setColor(screen.toRGB(accentColor))
+                end
+            end
+        end
+    end
+end
+
 local realtime = ""
 local requestCounter = 500
 function toolbar.widget(glasses)
@@ -67,14 +93,14 @@ function toolbar.widget(glasses)
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x+w-1, y+15}, 2, h-15, borderColor)) --Right Toolbar Edge
             table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w/2-middleTriangleSide+5, y+3}, {x+w/2-2*middleTriangleSide+5, y+3+middleTriangleSide}, {x+w/2+2*middleTriangleSide-3, y+3+middleTriangleSide}, {x+w/2+middleTriangleSide-3, y+3}, borderColor)) --Middle Triangle
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+12}, w, 3, borderColor)) --Middle Divider
-            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+2, y+15}, {x+2+hExpBar, y+15+hExpBar}, {x+w, y+15+hExpBar}, {x+w-hExpBar, y+15}, primaryColor, 0.5)) --Experience Bar
+            hudObjects[i].dynamic.xpbar = ar.quad(hudObjects[i].glasses, {x+2, y+15}, {x+2+hExpBar, y+15+hExpBar}, {x+w, y+15+hExpBar}, {x+w-hExpBar, y+15}, primaryColor, 0.5) --Experience Bar
             table.insert(hudObjects[i].static, ar.triangle(hudObjects[i].glasses, {x+2, y+15}, {x+2, y+15+hExpBar},{x+2+hExpBar, y+15+hExpBar}, borderColor)) -- Experience Left
             table.insert(hudObjects[i].static, ar.triangle(hudObjects[i].glasses, {x+w-hExpBar, y+15}, {x+w, y+15+hExpBar},{x+w, y+15}, borderColor)) -- Experience Right
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+19}, w, 2, borderColor)) --Bottom Divider
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x+4, y+1}, w-4, 1, primaryColor)) -- Top Strip
-            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w, y+1}, {x+w, y+2}, {x+w+rightTriangleSide-1, y+1+rightTriangleSide},  {x+w+rightTriangleSide-1, y+rightTriangleSide}, primaryColor)) --Diagonal Strip
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x+w+rightTriangleSide-2, y+rightTriangleSide}, 1, h-rightTriangleSide, primaryColor)) --Right Strip
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x+w+4, y+10}, clockWidth, clockheight, primaryColor)) --Clock Edge
+            hudObjects[i].dynamic.topstrip = ar.rectangle(hudObjects[i].glasses, {x+4, y+1}, w-4, 1, primaryColor) -- Top Strip
+            hudObjects[i].dynamic.diagonal = ar.quad(hudObjects[i].glasses, {x+w, y+1}, {x+w, y+2}, {x+w+rightTriangleSide-1, y+1+rightTriangleSide},  {x+w+rightTriangleSide-1, y+rightTriangleSide}, primaryColor) --Diagonal Strip
+            hudObjects[i].dynamic.rightstrip = ar.rectangle(hudObjects[i].glasses, {x+w+rightTriangleSide-2, y+rightTriangleSide}, 1, h-rightTriangleSide, primaryColor) --Right Strip
+            hudObjects[i].dynamic.clockEdge =  ar.rectangle(hudObjects[i].glasses, {x+w+4, y+10}, clockWidth, clockheight, primaryColor) --Clock Edge
             table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x+w+5, y+11}, clockWidth-2, clockheight-2, borderColor)) --Clock Panel
             hudObjects[i].dynamic.clock = ar.text(hudObjects[i].glasses, "", {x+w+7, y+13}, accentColor, 0.65)
             hudObjects[i].dynamic.realtime = ar.text(hudObjects[i].glasses, "", {x+w+3, y+30}, primaryColor, 0.8)
