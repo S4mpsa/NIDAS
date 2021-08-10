@@ -334,7 +334,7 @@ function gui.colorSelection(x, y, colorList)
                 return nil
             end
         end
-        return colorTable[touchY-y][2], colorTable[touchY-y][1], longestName
+        return colorTable[touchY-y-1][2], colorTable[touchY-y-1][1], longestName
     else
         return nil
     end
