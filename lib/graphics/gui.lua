@@ -144,10 +144,12 @@ function gui.textInput(x, y, maxWidth, startValue)
             end
             graphics.text(x, -1+2*y, padded, accentColor)
         end
+        renderer.multicast()
     end
     event.cancel(focusListener)
     if value == 13 or value == 9 then
         graphics.text(x, -1+2*y, returnString.." ", primaryColor)
+        renderer.multicast()
         if value == 9 then
             event.push("touch", _, x, y+1)
         end
@@ -160,6 +162,7 @@ function gui.textInput(x, y, maxWidth, startValue)
         local padded = startValue
         for i = 1, maxWidth-#padded+1 do padded = padded.." " end
         graphics.text(x, -1+2*y, padded, primaryColor)
+        renderer.multicast()
         return nil
     end
 end
@@ -225,6 +228,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
         padded = padded.."_"
     end
     graphics.text(x, -1+2*y, padded, accentColor)
+    renderer.multicast()
     local value = 0
     local function checkExit(_, _, X, Y)
         if X < x or X > x+maxWidth or Y ~= y then
@@ -264,6 +268,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
             end
             graphics.text(x, -1+2*y, padded, accentColor)
         end
+        renderer.multicast()
     end
     event.cancel(focusListener)
     if value == 13 or value == 9 then
@@ -272,6 +277,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
             for i = 1, maxWidth-#padded do padded = " "..padded end
         end
         graphics.text(x, -1+2*y, padded.." ", primaryColor)
+        renderer.multicast()
         if value == 9 then
             event.push("touch", _, x, y+1)
         end
@@ -282,6 +288,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
             for i = 1, maxWidth-#padded do padded = " "..padded end
         end
         graphics.text(x, -1+2*y, padded.." ", primaryColor)
+        renderer.multicast()
         return nil
     end
 end
@@ -321,6 +328,7 @@ function gui.colorSelection(x, y, colorList)
     gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
     gpu.bitblt(_, x, y, maxX, maxY, page)
     renderer.setFocus()
+    renderer.multicast()
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
     local customColor = nil
     if touchY == y + 1 then
@@ -328,6 +336,7 @@ function gui.colorSelection(x, y, colorList)
     end
     renderer.leaveFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
+    renderer.multicast()
     gpu.freeBuffer(page)
     gpu.freeBuffer(background)
     if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+height then
@@ -547,12 +556,14 @@ function gui.selectionBox(x, y, choices)
     local background = gpu.allocateBuffer(longestName+2, height)
     gpu.bitblt(background, 1, 1, maxY, maxX, 0, y, x)
     gpu.bitblt(_, x, y, maxX, maxY, page)
+    renderer.multicast()
     renderer.setFocus()
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
     renderer.leaveFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
     gpu.freeBuffer(background)
+    renderer.multicast()
     if touchX > x and touchX < x+longestName and touchY > y and touchY < y+height-1 then
         if type(choices[touchY-y].value) == "function" then
             choices[touchY-y].value(table.unpack(choices[touchY-y].args))

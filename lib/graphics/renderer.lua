@@ -34,6 +34,34 @@ function renderer.leaveFocus()
     focused = false
 end
 
+function event.onError(message)
+    print(message)
+    graphics.text(1, graphics.context().heigth, message)
+end
+
+function renderer.multicast()
+    local screens = 0
+    for address, t in component.list() do
+        if t == "screen" then screens = screens + 1 end
+    end
+    if screens > 1 then
+        local gpu = graphics.context().gpu
+        local primary = component.screen
+        local width, height = gpu.getResolution()
+        local screenBuffer = gpu.allocateBuffer(width, height)
+        gpu.bitblt(screenBuffer, 1, 1, width, height, 0, 1, 1)
+        for address, t in component.list() do
+            if t == "screen" and address ~= primary.address then
+                gpu.bind(address, false)
+                gpu.setResolution(width, height)
+                gpu.bitblt(0, 1, 1, width, width, screenBuffer, 1, 1)
+            end
+        end
+        gpu.bind(primary.address, false)
+        gpu.freeBuffer(screenBuffer)
+    end
+end
+
 --An object is created by calling renderer.createObject(x, y, width, height)
 --This returns a page number which can be used to manipulate the object.
 function renderer.createObject(x, y, width, height, alwaysVisible)
@@ -145,6 +173,7 @@ function renderer.update(pages)
         local o = renderOnTop[i]
         gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
     end
+    renderer.multicast()
     if debug then
         local str = ""
         local bufferSum = 0
@@ -202,11 +231,6 @@ local function checkClick(_, _, X, Y)
             end
         end
     end
-end
-
-function event.onError(message)
-    print(message)
-    graphics.text(1, graphics.context().heigth, message)
 end
 
 event.listen("touch", checkClick)
