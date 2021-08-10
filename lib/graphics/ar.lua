@@ -52,6 +52,7 @@ end
 
 function arGraphics.text(glasses, string, v1, color, scale)
     scale = scale or 1
+    color = color or 0xFFFFFF
     local text = glasses.addTextLabel()
     text.setText(string)
     text.setPosition(v1[1], v1[2])
@@ -92,6 +93,18 @@ function arGraphics.borders(glasses, resolution, scale)
     arGraphics.rectangle(glasses, {0, 0}, 1, glassResolution[2], colors.electricBlue)
     arGraphics.rectangle(glasses, {0, glassResolution[2]-1}, glassResolution[1], 1, colors.electricBlue)
     arGraphics.rectangle(glasses, {glassResolution[1]-1, 0}, 1, glassResolution[2], colors.electricBlue)
+end
+
+function arGraphics.testHud(glasses)
+    local component = require("component")
+    local glasses = component.proxy(component.get(glasses))
+    arGraphics.text(glasses, "HUD Test", {1, 1})
+    local c = glasses.addFloatingText()
+    c.setText("Machine Disabled")
+    c.set3DPos(0.5, 1.5, 0.5)
+    c.setScale(0.1)
+    c.setAlpha(1)
+    c.setColor(RGB(0xFF0000))
 end
 
 return arGraphics
