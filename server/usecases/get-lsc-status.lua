@@ -30,8 +30,8 @@ local function exec(address, name)
     if problems > 0 then state = states.BROKEN end
     
     local status = {
-        storedEU = lsc:getStoredEU(),
-        EUCapacity = lsc:getEUCapacity(),
+        storedEU = math.floor(string.gsub(lsc.getSensorInformation()[2], "([^0-9]+)", "")),
+        EUCapacity = math.floor(string.gsub(lsc.getSensorInformation()[3], "([^0-9]+)", "") + 0),
         problems = problems,
         passiveLoss = lsc:getWorkMaxProgress() and
             parser.getInteger(sensorInformation[4]) or 0,
