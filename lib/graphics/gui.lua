@@ -116,6 +116,7 @@ function gui.textInput(x, y, maxWidth, startValue)
     maxWidth = maxWidth or 15
     startValue = startValue or ""
     local returnString = startValue
+    graphics.rectangle(x, -1+2*y, maxWidth, 2, colors.black)
     graphics.text(x, -1+2*y, returnString.."_", accentColor)
     local value = 0
     local function checkExit(_, _, X, Y)
@@ -299,16 +300,17 @@ function gui.colorSelection(x, y, colorList)
         end
     end
     table.sort(colorTable, compareColors)
-    local height = #colorTable + 2
+    local height = #colorTable + 4
     if maxX <= (x+longestName+5) then x = maxX-(longestName+4) end
     if maxY <= (y+height) then y = maxY-(height-1) end
     local page = gpu.allocateBuffer(longestName+5, height)
     gpu.setActiveBuffer(page)
-    graphics.rectangle(1, 1, 5+longestName, 4+2*#colorTable, borderColor)
-    graphics.rectangle(5, 3, longestName, 2*#colorTable, colors.black)
+    graphics.rectangle(1, 1, 5+longestName, 6+2*#colorTable, borderColor)
+    graphics.rectangle(5, 3, longestName, 2+2*#colorTable, colors.black)
+    graphics.text(5, 3, "Custom")
     for i = 1, #colorTable do
-        graphics.text(5, 1+2*i, colorTable[i][1], colorTable[i][2])
-        graphics.rectangle(2, 1+2*i, 2, 2, colorTable[i][2])
+        graphics.text(5, 3+2*i, colorTable[i][1], colorTable[i][2])
+        graphics.rectangle(2, 3+2*i, 2, 2, colorTable[i][2])
     end
     gpu.setActiveBuffer(0)
     local background = gpu.allocateBuffer(longestName+5, height)
@@ -316,11 +318,22 @@ function gui.colorSelection(x, y, colorList)
     gpu.bitblt(_, x, y, maxX, maxY, page)
     renderer.setFocus()
     local _, _, touchX, touchY, button, _ = event.pull(_, "touch")
+    local customColor = nil
+    if touchY == y + 1 then
+        customColor = gui.textInput(x+4, y+1, 8, "0x")
+    end
     renderer.leaveFocus()
     gpu.bitblt(0, x, y, maxX, maxY, background)
     gpu.freeBuffer(page)
     gpu.freeBuffer(background)
     if touchX > x and touchX < x+longestName+4 and touchY > y and touchY < y+height then
+        if touchY == y + 1 then
+            if customColor ~= nil then
+                return tonumber(customColor), "Custom", longestName
+            else
+                return nil
+            end
+        end
         return colorTable[touchY-y][2], colorTable[touchY-y][1], longestName
     else
         return nil
@@ -414,7 +427,7 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
         elseif type == "number" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or"None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
         elseif type == "color" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or colors[attributeData[i].defaultValue] or "None", setColorAttribute,
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or colors[attributeData[i].defaultValue] or "Custom", setColorAttribute,
             {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
         elseif type == "boolean" then
             local color = borderColor
