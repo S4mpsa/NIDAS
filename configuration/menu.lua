@@ -167,6 +167,21 @@ local function switch()
     running = not running
 end
 
+local function update()
+    require("shell").execute("cd /home")
+    require("shell").execute("setup dev")
+end
+
+local function updateAvailable()
+    local version = require("nidas_version")
+    require("shell").execute("wget https://raw.githubusercontent.com/S4mpsa/NIDAS/develop/nidas_version.lua /home/NIDAS/available_version.lua -f -q")
+    local availableVersion = require("available_version")
+    if tonumber(version) < tonumber(availableVersion) then
+        return true
+    end
+    return false
+end
+
 local function reboot()
     require("computer").shutdown(true)
 end
@@ -177,7 +192,8 @@ local function generateMenu()
     gui.bigButton(location.x, location.y+maxheight-5, "Run", switch)
     gui.bigButton(location.x+5, location.y+maxheight-5, "Save", save)
     gui.bigButton(location.x+11, location.y+maxheight-5, "Reboot", reboot)
-    gui.smallLogo(maxWidth-20, maxheight-4)
+    if updateAvailable() then gui.smallButton(maxWidth-21, maxheight, "Update available!", update) end
+    gui.smallLogo(maxWidth-20, maxheight-4, require("nidas_version"))
     renderer.update()
 end
 

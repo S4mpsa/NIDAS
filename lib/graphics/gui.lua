@@ -452,7 +452,7 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
     return pageTable
 end
 
-function gui.logo(x, y)
+function gui.logo(x, y, version)
     local logo1 = {
         "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
         "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
@@ -480,11 +480,11 @@ function gui.logo(x, y)
     graphics.outline(3, 1, logo1, primaryColor)
     graphics.outline(19, 1, logo2, accentColor)
     graphics.text(27, 3, "Ver", accentColor)
-    graphics.text(27, 5, "0.9", accentColor)
+    graphics.text(27, 5, version, accentColor)
     gpu.setActiveBuffer(0)
 end
 
-function gui.smallLogo(x, y)
+function gui.smallLogo(x, y, version)
     local logo1 = {
         "▙ ▌▐ ▛▚▗▀▖▞▀",
         "▌▚▌▐ ▌▐▐▄▌▘▗",
@@ -503,7 +503,7 @@ function gui.smallLogo(x, y)
     graphics.rectangle(2, 8, 18, 1, borderColor)
     graphics.outline(3, 1, logo1, primaryColor)
     graphics.outline(10, 1, logo2, accentColor)
-    graphics.text(16, 5, "0.9", accentColor)
+    graphics.text(16, 5, version, accentColor)
     graphics.text(20, 5, "◢", borderColor)
     graphics.text(20, 7, "◤", borderColor)
     gpu.setActiveBuffer(0)
