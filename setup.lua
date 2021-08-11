@@ -23,7 +23,7 @@ if arg[1] == "test" or arg[1] == "latest" then
     release = "latest"
 elseif arg[1] == "dev" or arg[1] == "staging" then
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v0/NIDAS.tar"
-    release = "staging"
+    release = "dev"
 else
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/latest/download/NIDAS.tar"
     release = "\"stable\""
@@ -43,15 +43,14 @@ local successful = pcall(function()
     print("Extracting")
     shell.execute("tar -xf NIDAS.tar")
     filesystem.remove(workDir .. "NIDAS.tar")
-    --filesystem.remove("/home/lib")
-    --shell.execute("cp -r lib /home/lib")
+    filesystem.remove("/home/lib")
+    shell.execute("cp -r lib /home/lib")
     filesystem.copy(workDir .. ".shrc", "/home/.shrc")
     filesystem.copy(workDir .. "setup.lua", "/home/setup.lua")
 
-    if filesystem.exists("/home/temp/settings") then
-        shell.execute("cp -r /home/temp/settings " .. workDir ..
-                          "settings")
-        filesystem.remove("/home/temp/settings")
+    if filesystem.exists("/home/temp") then
+        shell.execute("cp -r /home/temp/settings " .. workDir)
+        filesystem.remove("/home/temp/")
     end
 
     local rebootTime = 3
