@@ -1,5 +1,5 @@
 -- Paste this into OpenComputer terminal to download and set up NIDAS
--- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/setup.lua -f
+-- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/develop/setup.lua -f
 
 local shell = require("shell")
 local filesystem = require("filesystem")
@@ -30,8 +30,8 @@ else
 end
 
 local successful = pcall(function()
-    if filesystem.exists("/home/NIDAS/configuration") then
-        shell.execute("cp -r /home/NIDAS/configuration /home/temp/configuration")
+    if filesystem.exists("/home/NIDAS/settings") then
+        shell.execute("cp -r /home/NIDAS/settings /home/temp/settings")
     end
     local workDir = "/home/NIDAS/"
     filesystem.remove(workDir)
@@ -48,10 +48,10 @@ local successful = pcall(function()
     filesystem.copy(workDir .. ".shrc", "/home/.shrc")
     filesystem.copy(workDir .. "setup.lua", "/home/setup.lua")
 
-    if filesystem.exists("/home/temp/configuration") then
-        shell.execute("cp -r /home/temp/configuration " .. workDir ..
-                          "configuration")
-        filesystem.remove("/home/temp/configuration")
+    if filesystem.exists("/home/temp/settings") then
+        shell.execute("cp -r /home/temp/settings " .. workDir ..
+                          "settings")
+        filesystem.remove("/home/temp/settings")
     end
 
     local rebootTime = 3

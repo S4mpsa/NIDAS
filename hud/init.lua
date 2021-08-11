@@ -13,7 +13,7 @@ local glassData = {}
 local powerDisplayUsers = {}
 local toolbarUsers = {}
 local function load()
-    local file = io.open("/home/NIDAS/configuration/hudConfig", "r")
+    local file = io.open("/home/NIDAS/settings/hudConfig", "r")
     if file ~= nil then
         glassData = serialization.unserialize(file:read("*a"))
         file:close()
@@ -26,7 +26,7 @@ local function load()
     end
 end
 local function save()
-    local file = io.open("/home/NIDAS/configuration/hudConfig", "w")
+    local file = io.open("/home/NIDAS/settings/hudConfig", "w")
     file:write(serialization.serialize(glassData))
     file:close()
     powerDisplayUsers = {}

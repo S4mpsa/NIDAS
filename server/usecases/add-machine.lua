@@ -4,7 +4,7 @@ Filesystem = require("filesystem")
 Event = require("event")
 Component = require("component")
 Modem = Component.modem
-Constants = require("configuration.constants")
+Constants = require("settings.constants")
 Serialization = require("serialization")
 
 --
