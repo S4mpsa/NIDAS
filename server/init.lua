@@ -1,9 +1,9 @@
 -- Import section
 Event = require("event")
 
-local addressesConfigFile = "configuration.machine-addresses"
+local addressesConfigFile = "settings.machine-addresses"
 local machineAddresses = require(addressesConfigFile)
-local powerAddress = require("configuration.power-address")
+local powerAddress = require("settings.power-address")
 local addMachine = require("server.usecases.add-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")

@@ -33,7 +33,7 @@ local function save()
     for i = 1, #processes do
         table.insert(configurationData.processes, {name = processes[i].name, module = processes[i].module, desc = processes[i].desc})
     end
-    local file = io.open("/home/NIDAS/configuration/enabledModules", "w")
+    local file = io.open("/home/NIDAS/settings/enabledModules", "w")
     file:write(serialization.serialize(configurationData))
     file:close()
 end
@@ -74,7 +74,7 @@ local function deactivate(module)
 end
 
 local function load()
-    local file = io.open("/home/NIDAS/configuration/enabledModules", "r")
+    local file = io.open("/home/NIDAS/settings/enabledModules", "r")
     if file ~= nil then
         configurationData = serialization.unserialize(file:read("*a"))
         if configurationData ~= nil then

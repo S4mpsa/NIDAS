@@ -126,7 +126,7 @@ function powerDisplay.widget(glasses, data)
             hudObjects[i].dynamic.percentage = ar.text(hudObjects[i].glasses, "", {x+w/2-5, y-9}, accentColor)
             hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
             hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
-            hudObjects[i].dynamic.state = ar.text(hudObjects[i].glasses, "", {x+w-80, y+2*hDivisor+hProgress+2}, colors.red)
+            hudObjects[i].dynamic.state = ar.text(hudObjects[i].glasses, "", {x+w-95, y+2*hDivisor+hProgress+2}, colors.red)
         end
         hudObjects[i].dynamic.energyBar.setVertex(3, x+3+hProgress+energyBarLength*percentage, y+hDivisor+hProgress)
         hudObjects[i].dynamic.energyBar.setVertex(4, x+3+energyBarLength*percentage, y+hDivisor)
@@ -163,7 +163,11 @@ function powerDisplay.widget(glasses, data)
         if data.state == states.OFF then
             hudObjects[i].dynamic.state.setText("Disabled")
         else
-            hudObjects[i].dynamic.state.setText("")
+            if data.problems > 0 then
+                hudObjects[i].dynamic.state.setText("Maintenance")
+            else
+                hudObjects[i].dynamic.state.setText("")
+            end
         end
         hudObjects[i].dynamic.filltime.setText(fillTimeString)
     end
