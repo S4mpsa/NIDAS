@@ -182,7 +182,7 @@ function powerDisplay.remove(glassAddress)
                 for j = 1, #hudObjects[i].static do
                     hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
                 end
-                for name, value in hudObjects[i].dynamic do
+                for name, value in pairs(hudObjects[i].dynamic) do
                     hudObjects[i].glasses.removeObject(hudObjects[i].dynamic[name].getID())
                 end
             end
