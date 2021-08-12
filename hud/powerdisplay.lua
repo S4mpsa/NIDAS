@@ -14,7 +14,7 @@ local energyData = {
     readings = {},
     startTime = 0,
     endTime = 0,
-    updateInterval = 100,
+    updateInterval = 500,
     energyPerTick = 0
 }
 
@@ -182,13 +182,9 @@ function powerDisplay.remove(glassAddress)
                 for j = 1, #hudObjects[i].static do
                     hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
                 end
-                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.energyBar.getID())
-                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.currentEU.getID())
-                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.maxEU.getID())
-                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.percentage.getID())
-                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.filltime.getID())
-                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.fillrate.getID())
-                hudObjects[i].glasses.removeObject(hudObjects[i].dynamic.state.getID())
+                for name, value in hudObjects[i].dynamic do
+                    hudObjects[i].glasses.removeObject(hudObjects[i].dynamic[name].getID())
+                end
             end
         end
     end

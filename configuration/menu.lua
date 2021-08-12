@@ -1,5 +1,3 @@
-package.path = package.path.."/NIDAS/server/?.lua;/home/NIDAS/?.lua;/home/NIDAS/?/init.lua"
-
 local gui = require("lib.graphics.gui")
 local graphics = require("lib.graphics.graphics")
 local renderer = require("lib.graphics.renderer")
@@ -21,8 +19,9 @@ local modules = {
 }
 local processes = {}
 
-local moduleSelectorVar = nil
-local moduleDeSelectorVar = nil
+local activatorVar = nil
+local selector = nil
+local deselector = nil
 
 local function save()
     configurationData.modules = {}
@@ -38,6 +37,7 @@ local function save()
     file:close()
 end
 
+local deactivateVar = nil
 local function activate(module, displayName, desc)
     displayName = displayName or module
     if module == "server" or module == "local" then --Server or primary process is always #1
@@ -52,8 +52,8 @@ local function activate(module, displayName, desc)
         end
     end
     if found ~= 0 then table.remove(modules, found) end
-    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-5)
-    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5)
+    selector = activatorVar(location.x, location.y, selectionBoxWidth, maxheight-5, "Activate", activate, modules, "Available", selector)
+    deselector = activatorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5, "Disable", deactivateVar, processes, "Active", deselector)
     renderer.update()
 end
 
@@ -68,10 +68,11 @@ local function deactivate(module)
     if found ~= 0 then
         table.remove(processes, found)
     end
-    moduleSelectorVar(location.x, location.y, selectionBoxWidth, maxheight-5)
-    moduleDeSelectorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5)
+    selector = activatorVar(location.x, location.y, selectionBoxWidth, maxheight-5, "Activate", activate, modules, "Available", selector)
+    deselector = activatorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5, "Disable", deactivate, processes, "Active", deselector)
     renderer.update()
 end
+deactivateVar = deactivate
 
 local function load()
     local file = io.open("/home/NIDAS/settings/enabledModules", "r")
@@ -96,7 +97,6 @@ local function flush()
     currentTab = nil
 end
 
---Modules for configuring start here
 local function infoScreen(x, y, width, height, text, title)
     flush()
     currentTab = gui.wrappedTextBox(x, y, width, height, text, title)
@@ -112,59 +112,38 @@ local function configScreen(x, y, width, height, title, data)
     if configurationTab ~= nil then for i = 1, #configurationTab do table.insert(currentTab, configurationTab[i]) end end
 end
 
-local selector = nil
-local function moduleSelector(x, y, width, height)
-    if selector ~= nil then
-        renderer.removeObject(selector)
-    end
+local function activator(x, y, width, height, functionName, mainFunction, dataSource, listName, storageVariable)
+    if storageVariable ~= nil then renderer.removeObject(storageVariable) end
     local buttons = {}
-    for i = 1, #modules do
+    for i = 1, #dataSource do
         local onActivation =
         {
-            {displayName = "Activate",
-            value = activate,
-            args = {modules[i].module, modules[i].name, modules[i].desc}},
+            {displayName = functionName,
+            value = mainFunction,
+            args = {dataSource[i].module, dataSource[i].name, dataSource[i].desc}},
             {displayName = "Info",
             value = infoScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, modules[i].desc, modules[i].name}},
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, dataSource[i].desc, dataSource[i].name}},
             {displayName = "Configure",
             value = configScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, modules[i].name, require(modules[i].module)}}
+            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, dataSource[i].name, require(dataSource[i].module)}}
         }
-        table.insert(buttons, {name = modules[i].name, desc = modules[i].desc, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
+        table.insert(buttons, {name = dataSource[i].name, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
     end
-    selector = gui.multiButtonList(x, y, buttons, width, height, "Available ".."("..math.floor(#buttons)..")")
+    return gui.multiButtonList(x, y, buttons, width, height, listName.." ".."("..math.floor(#buttons)..")")
 end
-moduleSelectorVar = moduleSelector
-
-local deSelector = nil
-local function moduleDeSelector(x, y, width, height)
-    if deSelector ~= nil then renderer.removeObject(deSelector) end
-    local buttons = {}
-    for i = 1, #processes do
-        local onActivation =
-        {
-            {displayName = "Deactivate",
-            value = deactivate,
-            args = {processes[i].module, processes[i].name, processes[i].desc}},
-            {displayName = "Info",
-            value = infoScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, processes[i].desc, processes[i].name}},
-            {displayName = "Configure",
-            value = configScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, processes[i].name, require(processes[i].module)}}
-        }
-        table.insert(buttons, {name = processes[i].name, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
-    end
-    deSelector = gui.multiButtonList(x, y, buttons, width, height, "Active ".."("..math.floor(#buttons)..")")
-end
-moduleDeSelectorVar = moduleDeSelector
+activatorVar = activator
 
 local running = false
 local serverData = nil
-
+local interrupted = false
 local function switch()
     running = not running
+end
+
+local function interrupt()
+    graphics.rectangle(1, 1, maxWidth, 2*(maxheight-5), 0x000000)
+    interrupted = true
 end
 
 local function update()
@@ -187,11 +166,12 @@ local function reboot()
 end
 
 local function generateMenu()
-    moduleSelector(location.x, location.y, selectionBoxWidth, maxheight-5)
-    moduleDeSelector(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5)
+    selector = activator(location.x, location.y, selectionBoxWidth, maxheight-5, "Activate", activate, modules, "Available", selector)
+    deselector = activator(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5, "Disable", deactivate, processes, "Active", deselector)
     gui.bigButton(location.x, location.y+maxheight-5, "Run", switch)
     gui.bigButton(location.x+5, location.y+maxheight-5, "Save", save)
     gui.bigButton(location.x+11, location.y+maxheight-5, "Reboot", reboot)
+    gui.bigButton(location.x+19, location.y+maxheight-5, "Shell", interrupt)
     if updateAvailable() then gui.smallButton(maxWidth-21, maxheight, "Update available!", update) end
     gui.smallLogo(maxWidth-20, maxheight-4, require("nidas_version"))
     renderer.update()
@@ -202,11 +182,7 @@ local function main()
         serverData = processes[1].func.update()
         for i = 2, #processes do
             local p = processes[i]
-            if p.args == nil then
-                processes[i].returnValue = p.func.update(serverData)
-            else
-                processes[i].returnValue = p.func.update(serverData, table.unpack(p.args))
-            end
+            processes[i].returnValue = p.func.update(serverData, table.unpack(p.args or {}))
         end
     end
     os.sleep()
@@ -215,7 +191,7 @@ end
 local function update()
     load()
     generateMenu()
-    while true do
+    while not interrupted do
         main()
     end
 end
