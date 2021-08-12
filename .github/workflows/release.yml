@@ -1,11 +1,15 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: CI-master
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push events on the develop branch
   push:
+    branches:
+      - master
+    tags:
+      - '*'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,12 +27,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
-        run: tar -cvf NIDAS.tar configuration lib server modules settings setup-dev.lua tablet .shrc
+        run: tar -cvf NIDAS.tar --exclude-from=tar-exclude.txt *
+      - name: Extract tag name
+        shell: bash
+        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
+        id: get_tag_name
       - uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.RELEASE_SECRET }}
-          tag: v-1
-          prerelease: true
+          tag: ${{ steps.get_tag_name.outputs.tag }}
+          prerelease: false
           gzip: false
           files: NIDAS.tar
           allow_override: true
