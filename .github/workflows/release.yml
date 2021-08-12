@@ -6,13 +6,8 @@ name: CI-master
 on:
   # Triggers the workflow on push events on the develop branch
   push:
-    branches:
-      - master
     tags:
       - '*'
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -30,12 +25,12 @@ jobs:
         run: tar -cvf NIDAS.tar --exclude-from=tar-exclude.txt *
       - name: Extract tag name
         shell: bash
-        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/tags/})"
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
         id: get_tag_name
       - uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.RELEASE_SECRET }}
-          tag: ${{ steps.get_tag_name.outputs.tag }}
+          tag: ${{ steps.get_tag_name.outputs.VERSION }}
           prerelease: false
           gzip: false
           files: NIDAS.tar
