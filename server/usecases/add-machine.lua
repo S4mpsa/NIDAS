@@ -14,7 +14,7 @@ local componentAddresses = {}
 local addressesConfigFile = ""
 local knownMachines = {}
 
-local inputTimeout = Constants.inputTimeout
+local inputTimeout = Constants.tabletInputTimeout
 local tabletResponseTime = Constants.tabletResponseTime
 
 local relativeCoordinates = {math.huge, math.huge, math.huge}

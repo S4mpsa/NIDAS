@@ -43,7 +43,7 @@ end
 local function getMachineName(server)
     local timeout =
         Event.timer(
-        Constants.inputTimeout,
+        Constants.tabletInputTimeout,
         -- Presses ^C
         function()
             Event.push("key_down", "", 13.0, 46.0)
@@ -53,7 +53,7 @@ local function getMachineName(server)
         end
     )
     print("Please enter a name for the machine")
-    print("PS: If you take longer then " .. Constants.inputTimeout .. ' seconds, machine will be named "Unknown"')
+    print("PS: If you take longer then " .. Constants.tabletInputTimeout .. ' seconds, machine will be named "Unknown"')
     local name = io.read()
     if name then
         Event.cancel(timeout)
