@@ -11,10 +11,15 @@ local addMachine = require("server.usecases.add-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
 
-local portNumber = require("configuration.constants").machineAddPort
+local serverData = require("settings.serverData") or {}
+local constants = require("configuration.constants")
+local portNumber = constants.machineStatusPort
+local serverResponseTime = constants.networkResponseTime
+
 --
 
 local server = {}
+local statuses = {multiblocks = {}, power = {}}
 
 local function updateMachineList(_, address, _)
     local comp = component.proxy(address)
@@ -24,7 +29,44 @@ local function updateMachineList(_, address, _)
 end
 event.listen("component_added", updateMachineList)
 
-local statuses = {multiblocks = {}, power = {}}
+if serverData.isMain == nil then
+    -- Server not configured yet
+    local function filter(eventName, ...)
+        local signalParams = {...}
+        local port = signalParams[4]
+        local args = signalParams[6]
+        return eventName == "modem_message" and port == portNumber and args and args[1] == "I_am_the_main_server"
+    end
+
+    modem.broadcast(portNumber, "are_you_the_main_server")
+
+    local response = event.pullFiltered(serverResponseTime, filter)
+    if response == nil then
+        -- There's no other main server
+        serverData.isMain = true
+        local function identifyAsMainServer(_evName, _localAddress, sender, port, _distance, ...)
+            local args = {...}
+            if port == portNumber and args[1] == "are_you_the_main_server" then
+                modem.send(sender, portNumber, "I_am_the_main_server")
+            end
+        end
+        event.listen("modem_message", identifyAsMainServer)
+    end
+end
+
+if serverData.isMain then
+    modem.broadcast(portNumber, "get_status")
+end
+
+local function sendStatuses(_evName, _localAddress, sender, port, _distance, ...)
+    local args = {...}
+    if port == portNumber and args[1] == "get_status" then
+        modem.send(sender, portNumber, "local_multiblock_statuses", serialization.serialize(statuses.multiblocks))
+    end
+end
+if not serverData.isMain then
+    event.listen("modem_message", sendStatuses)
+end
 
 local function updateMachineStatuses(_evName, _localAddress, sender, port, _distance, ...)
     local args = {...}
@@ -34,7 +76,9 @@ local function updateMachineStatuses(_evName, _localAddress, sender, port, _dist
         end
     end
 end
-event.listen("modem_message", updateMachineStatuses)
+if serverData.isMain then
+    event.listen("modem_message", updateMachineStatuses)
+end
 
 local function updatePowerStatus(_evName, _localAddress, sender, port, _distance, ...)
     local args = {...}
@@ -45,21 +89,19 @@ end
 event.listen("modem_message", updatePowerStatus)
 
 function server.configure(x, y)
-    -- TODO: Code for GUI configuration of machines:
+    -- TODO: Code for GUI configuration of server:
     ---- Machine renaming
-    ---- Machine widgets layout
+    ---- Machine widgets layout?
+    ---- Selecting server type: main or local
 end
 
-function server.load()
-    -- TODO: Ping other servers for their statuses on boot up
-    ---- Check if there's no response and determine if this is the main server
-end
-
+-- TODO: Persist to file
 function server.update()
     local shouldBroadcastStatuses = false
     for address, name in pairs(machineAddresses) do
         local multiblockStatus = getMultiblockStatus(address, name)
-        shouldBroadcastStatuses = statuses.multiblocks[address].state ~= multiblockStatus.state
+        shouldBroadcastStatuses =
+            statuses.multiblocks[address].state ~= multiblockStatus.state and not serverData.isMain
         statuses.multiblocks[address] = multiblockStatus
     end
     if shouldBroadcastStatuses then

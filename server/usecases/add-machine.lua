@@ -15,7 +15,7 @@ local addressesConfigFile = ""
 local knownMachines = {}
 
 local inputTimeout = constants.tabletInputTimeout
-local tabletResponseTime = constants.tabletResponseTime
+local tabletResponseTime = constants.networkResponseTime
 
 local relativeCoordinates = {math.huge, math.huge, math.huge}
 local tabletAddress = ""
