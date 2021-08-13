@@ -6,6 +6,7 @@ local navigation = component.navigation
 local term = require("term")
 local event = require("event")
 local constants = require("configuration.constants")
+local serialization = require("serialization")
 
 --
 
@@ -28,16 +29,14 @@ local function getWaypointRelativeCoordinates(server, waypointAddress)
             server,
             portNumber,
             "waypoint_relative_coordinates",
-            waypointRelativeCoordinates[1],
-            waypointRelativeCoordinates[2],
-            waypointRelativeCoordinates[3]
+            serialization.serialize(waypointRelativeCoordinates)
         )
     end
 end
 
 local function getMyCoordinates(server)
     local myCoordinates = {navigation.getPosition()}
-    modem.send(server, portNumber, "my_coordinates", myCoordinates[1], myCoordinates[2], myCoordinates[3])
+    modem.send(server, portNumber, "my_coordinates", serialization.serialize(myCoordinates))
 end
 
 local function getMachineName(server)
@@ -57,7 +56,7 @@ local function getMachineName(server)
     local name = io.read()
     if name then
         event.cancel(timeout)
-        modem.send(server, portNumber, "machine_name", name)
+        modem.send(server, portNumber, "machine_name", serialization.serialize(name))
         term.clear()
     end
 end

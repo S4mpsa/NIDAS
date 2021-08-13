@@ -55,7 +55,7 @@ local function registerMachineNameListener(machineAddress)
     local function machineNameListener(_evName, _serverAddress, sender, port, _distance, ...)
         local args = {...}
         if sender == tabletAddress and port == portNumber and args[1] == "machine_name" then
-            local name = args[2]
+            local name = serialization.unserialize(args[2])
             knownMachines[machineAddress].name = name
         end
     end
@@ -76,7 +76,7 @@ local function registerTabletCoordinatesListener(machineAddress)
     local function tabletCoordinatesListener(_evName, _serverAddress, sender, port, _distance, ...)
         local args = {...}
         if sender == tabletAddress and port == portNumber and args[1] == "my_coordinates" then
-            local tabletCoordinates = {args[2], args[3], args[4]}
+            local tabletCoordinates = serialization.unserialize(args[2])
             knownMachines[machineAddress].coordinates = {
                 math.floor(tabletCoordinates[1] + relativeCoordinates[1]),
                 math.floor(tabletCoordinates[2] + relativeCoordinates[2]),
@@ -102,7 +102,7 @@ local function registerWaypointRelativeCoordinatesListener()
     local function relativeCoordinatesListener(_evName, _serverAddress, sender, port, _distance, ...)
         local args = {...}
         if port == portNumber and args[1] == "waypoint_relative_coordinates" then
-            local senderRelativeCoordinates = {args[2], args[3], args[4]}
+            local senderRelativeCoordinates = serialization.unserialize(args[2])
             local senderDistance =
                 senderRelativeCoordinates[1] ^ 2 + senderRelativeCoordinates[2] ^ 2 + senderRelativeCoordinates[3] ^ 2
             if minDistance > senderDistance then
