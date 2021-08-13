@@ -30,8 +30,8 @@ local function exec(address, name)
     if problems > 0 then state = states.BROKEN end
 
     local status = {
-        storedEU = math.floor(string.gsub(sensorInformation[2], "([^0-9]+)", "")),
-        EUCapacity = math.floor(string.gsub(sensorInformation[3], "([^0-9]+)", "") + 0),
+        storedEU = parser.getInteger(sensorInformation[2]),
+        EUCapacity = parser.getInteger(sensorInformation[3]),
         problems = problems,
         passiveLoss = parser.getInteger(sensorInformation[4]) or 0,
         state = state

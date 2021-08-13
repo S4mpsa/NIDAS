@@ -1,7 +1,4 @@
-package.path = package.path .. ";/NIDAS/lib/utils/?.lua"
---local renderer = require("renderer")
 local graphics = require("lib.graphics.graphics")
-local component = require("component")
 local colors    = require("lib.graphics.colors")
 local event = require("event")
 local uc = require("unicode")

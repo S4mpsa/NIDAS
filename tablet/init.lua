@@ -1,22 +1,22 @@
 -- Import section
 
-Component = require("component")
-Modem = Component.modem
-Navigation = Component.navigation
-Term = require("term")
-Event = require("event")
-Constants = require("configuration.constants")
+local component = require("component")
+local modem = component.modem
+local navigation = component.navigation
+local term = require("term")
+local event = require("event")
+local constants = require("configuration.constants")
 
 --
 
-Modem.setWakeMessage("wakeup_tablet")
+modem.setWakeMessage("wakeup_tablet")
 
-local portNumber = Constants.machineAddPort
-Modem.open(portNumber)
+local portNumber = constants.machineAddPort
+modem.open(portNumber)
 
 local function getWaypointRelativeCoordinates(server, waypointAddress)
     local waypointRelativeCoordinates = nil
-    local waypoints = Navigation.findWaypoints(20)
+    local waypoints = navigation.findWaypoints(20)
     for _, waypoint in ipairs(waypoints) do
         if waypoint.address == waypointAddress then
             waypointRelativeCoordinates = waypoint.position
@@ -24,7 +24,7 @@ local function getWaypointRelativeCoordinates(server, waypointAddress)
     end
     waypointRelativeCoordinates = waypoints[1].position
     if waypointRelativeCoordinates then
-        Modem.send(
+        modem.send(
             server,
             portNumber,
             "waypoint_relative_coordinates",
@@ -36,33 +36,33 @@ local function getWaypointRelativeCoordinates(server, waypointAddress)
 end
 
 local function getMyCoordinates(server)
-    local myCoordinates = {Navigation.getPosition()}
-    Modem.send(server, portNumber, "my_coordinates", myCoordinates[1], myCoordinates[2], myCoordinates[3])
+    local myCoordinates = {navigation.getPosition()}
+    modem.send(server, portNumber, "my_coordinates", myCoordinates[1], myCoordinates[2], myCoordinates[3])
 end
 
 local function getMachineName(server)
     local timeout =
-        Event.timer(
-        Constants.tabletInputTimeout,
+        event.timer(
+        constants.tabletInputTimeout,
         -- Presses ^C
         function()
-            Event.push("key_down", "", 13.0, 46.0)
-            Event.push("key_down", "", 0.0, 29.0)
-            Event.push("key_up", "", 13.0, 46.0)
-            Event.push("key_up", "", 0.0, 29.0)
+            event.push("key_down", "", 13.0, 46.0)
+            event.push("key_down", "", 0.0, 29.0)
+            event.push("key_up", "", 13.0, 46.0)
+            event.push("key_up", "", 0.0, 29.0)
         end
     )
     print("Please enter a name for the machine")
-    print("PS: If you take longer then " .. Constants.tabletInputTimeout .. ' seconds, machine will be named "Unknown"')
+    print("PS: If you take longer then " .. constants.tabletInputTimeout .. ' seconds, machine will be named "Unknown"')
     local name = io.read()
     if name then
-        Event.cancel(timeout)
-        Modem.send(server, portNumber, "machine_name", name)
-        Term.clear()
+        event.cancel(timeout)
+        modem.send(server, portNumber, "machine_name", name)
+        term.clear()
     end
 end
 
-Event.listen(
+event.listen(
     "modem_message",
     function(_evName, _tabletAddress, sender, port, _distance, ...)
         local args = {...}
@@ -72,7 +72,7 @@ Event.listen(
     end
 )
 
-Event.listen(
+event.listen(
     "modem_message",
     function(_evName, _tabletAddress, sender, port, _distance, ...)
         local args = {...}
@@ -82,7 +82,7 @@ Event.listen(
     end
 )
 
-Event.listen(
+event.listen(
     "modem_message",
     function(_evName, _tabletAddress, sender, port, _distance, ...)
         local args = {...}

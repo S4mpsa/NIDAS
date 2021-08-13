@@ -4,9 +4,7 @@ local ar = require("lib.graphics.ar")
 local screen = require("lib.utils.screen")
 local time = require("lib.utils.time")
 --
-local computer = require("computer")
-local parser = require("lib.utils.parser")
---
+
 local toolbar = {}
 
 local hudObjects = {}

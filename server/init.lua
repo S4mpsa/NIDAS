@@ -1,5 +1,6 @@
 -- Import section
-Event = require("event")
+local event = require("event")
+local component = require("component")
 
 local addressesConfigFile = "settings.machine-addresses"
 local machineAddresses = require(addressesConfigFile)
@@ -13,12 +14,12 @@ local getPowerStatus = require("server.usecases.get-lsc-status")
 local server = {}
 
 local function updateMachineList(_, address, _)
-    local comp = Component.proxy(address)
+    local comp = component.proxy(address)
     if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
         addMachine(address, addressesConfigFile)
     end
 end
-Event.listen("component_added", updateMachineList)
+event.listen("component_added", updateMachineList)
 
 local statuses = {multiblocks = {}, power = {}}
 
