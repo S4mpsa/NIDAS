@@ -98,14 +98,17 @@ end
 -- TODO: Persist to file
 function server.update()
     local shouldBroadcastStatuses = false
+    local updatedMultiblocks = {}
     for address, name in pairs(machineAddresses) do
         local multiblockStatus = getMultiblockStatus(address, name)
-        shouldBroadcastStatuses =
-            statuses.multiblocks[address].state ~= multiblockStatus.state and not serverData.isMain
+        if statuses.multiblocks[address].state ~= multiblockStatus.state then
+            shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
+            updatedMultiblocks[address] = multiblockStatus
+        end
         statuses.multiblocks[address] = multiblockStatus
     end
     if shouldBroadcastStatuses then
-        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(statuses.multiblocks))
+        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(updatedMultiblocks))
     end
 
     if powerAddress then
