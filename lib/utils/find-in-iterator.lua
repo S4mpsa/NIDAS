@@ -1,7 +1,7 @@
-local function findIn(table, value)
+local function findInIterator(iterator, value)
     local key = nil
 
-    for k, v in pairs(table) do
+    for k, v in iterator do
         if v == value then
             key = k
             break
@@ -11,4 +11,4 @@ local function findIn(table, value)
     return key
 end
 
-return findIn
+return findInIterator

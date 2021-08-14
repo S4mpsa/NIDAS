@@ -3,7 +3,7 @@ local component = require("component")
 local filesystem = require("filesystem")
 local new = require("lib.utils.new")
 
-local findIn = require("lib.utils.find-in")
+local findInIterator = require("lib.utils.find-in-iterator")
 local mock = require("server.entities.mocks.mock-machine")
 local machineEntity = require("server.entities.machine")
 
@@ -17,8 +17,8 @@ local function exec(partialAdress, name)
 
         local machineComponent =
             (address and component.proxy(address)) or -- Exists
-            (findIn(component.list(), "ocemu") and mock:new(partialAdress, name)) or -- Is running on emulator
-            nil
+            (findInIterator(component.list(), "ocemu") and mock:new(partialAdress)) or -- Is running on emulator
+            {}
 
         knownMachines[partialAdress] = new(machineEntity, machineComponent, {name = name})
     end
