@@ -1,4 +1,4 @@
 *.tar
 .vscode
+settings/*
 available_version.lua
-settings
