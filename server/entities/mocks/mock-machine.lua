@@ -32,7 +32,8 @@ function mockMachine:getMock(address, name)
             workProgress = 0,
             workMaxProgress = 0,
             isBroken = false,
-            address = address
+            address = address,
+            type = "gt_machine"
         }
     end
     return self.mocks[address]
