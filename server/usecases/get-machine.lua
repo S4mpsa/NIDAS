@@ -1,17 +1,16 @@
 -- Import section
 local component = require("component")
-local filesystem = require("filesystem")
 local new = require("lib.utils.new")
 
 local findInIterator = require("lib.utils.find-in-iterator")
-local mock = require("server.entities.mocks.mock-machine")
 local machineEntity = require("server.entities.machine")
 
 --
 
 local knownMachines = {}
 
-local function exec(partialAdress, name)
+local function exec(partialAdress, name, mock)
+    mock = mock or require("server.entities.mocks.mock-machine")
     if not knownMachines[partialAdress] then
         local address = component.get(partialAdress)
 
