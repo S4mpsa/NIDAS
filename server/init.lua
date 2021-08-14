@@ -128,7 +128,7 @@ local savingCounter = savingInterval
 function server.update()
     local shouldBroadcastStatuses = false
     local updatedStatuses = {}
-    for address, name in pairs(machineAddresses) do
+    for address, name in pairs(machineAddresses or {}) do
         local multiblockStatus = getMultiblockStatus(address, name)
         if statuses.multiblocks[address] == nil then statuses.multiblocks[address] = {} end
         if multiblockStatus ~= nil then
