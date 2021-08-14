@@ -24,23 +24,18 @@ local statuses = {multiblocks = {}, power = {}}
 local function save()
     serverData.statuses = statuses
     local file = io.open("/home/NIDAS/settings/serverData", "w")
-    obs = serverData
     file:write(serialization.serialize(serverData))
     file:close()
 end
+
 local function load()
     local file = io.open("/home/NIDAS/settings/serverData", "r")
-    if file ~= nil then
-        serverData = serialization.unserialize(file:read("*a"))
-        if serverData ~= nil then
-            if serverData.statuses ~= nil then statuses = serverData.statuses end
-        else
-            serverData = {statuses = statuses}
-        end
+    if file then
+        serverData = serialization.unserialize(file:read("*a")) or {statuses = statuses}
+        statuses = serverData.statuses
         file:close()
     end
 end
-
 load()
 
 local function updateMachineList(_, address, _)
@@ -95,7 +90,7 @@ if not serverData.isMain then
     event.listen("modem_message", sendStatuses)
 end
 
-local function updateMachineStatuses(_, _, _ , port, _, ...)
+local function updateMachineStatuses(_, _, _, port, _, ...)
     local args = {...}
     if port == portNumber and args[1] == "local_multiblock_statuses" then
         for address, status in pairs(serialization.unserialize(args[2])) do
@@ -107,7 +102,7 @@ if serverData.isMain then
     event.listen("modem_message", updateMachineStatuses)
 end
 
-local function updatePowerStatus(_evName, _localAddress, sender, port, _distance, ...)
+local function updatePowerStatus(_, _, _, port, _, ...)
     local args = {...}
     if port == portNumber and args[1] == "local_power_status" then
         statuses.powerStatus = serialization.unserialize(args[2])
@@ -128,16 +123,17 @@ local savingCounter = savingInterval
 function server.update()
     local shouldBroadcastStatuses = false
     local updatedStatuses = {}
+
     for address, name in pairs(machineAddresses or {}) do
         local multiblockStatus = getMultiblockStatus(address, name)
-        if statuses.multiblocks[address] == nil then statuses.multiblocks[address] = {} end
-        if multiblockStatus ~= nil then
-            if statuses.multiblocks[address].state ~= multiblockStatus.state then
-                shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
-                updatedStatuses[address] = {state = multiblockStatus.state, problems = multiblockStatus.problems}
-            end
-            statuses.multiblocks[address] = multiblockStatus
+        statuses.multiblocks[address] = statuses.multiblocks[address] or {}
+
+        if multiblockStatus.state ~= statuses.multiblocks[address].state then
+            shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
+            updatedStatuses[address] = {state = multiblockStatus.state, problems = multiblockStatus.problems}
         end
+
+        statuses.multiblocks[address] = multiblockStatus
     end
 
     if shouldBroadcastStatuses then

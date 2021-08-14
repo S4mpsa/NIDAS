@@ -11,7 +11,7 @@ local getNumberOfProblems = require("server.usecases.get-number-of-problems")
 local function exec(address, name)
     local lsc = getMachine(address, name, require("server.entities.mocks.mock-lsc"))
     if not lsc.address then
-        return lsc
+        return {state = states.MISSING}
     end
 
     local sensorInformation = lsc:getSensorInformation()
@@ -37,7 +37,7 @@ local function exec(address, name)
         storedEU = parser.getInteger(sensorInformation[2]),
         EUCapacity = parser.getInteger(sensorInformation[3]),
         problems = problems,
-        passiveLoss = parser.getInteger(sensorInformation[4]) or 0,
+        passiveLoss = parser.getInteger(sensorInformation[4]),
         state = state
     }
     return status
