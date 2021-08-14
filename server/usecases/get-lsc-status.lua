@@ -9,7 +9,7 @@ local getNumberOfProblems = require("server.usecases.get-number-of-problems")
 --
 
 local function exec(address, name)
-    local lsc = getMachine(address, name)
+    local lsc = getMachine(address, name, require("server.entities.mocks.mock-lsc"))
     if string.len(lsc.address) == 0 then return lsc end
 
     local sensorInformation = lsc:getSensorInformation()
