@@ -47,7 +47,8 @@ local successful = pcall(function()
     shell.execute("cp -r lib /home/lib")
     filesystem.copy(workDir .. ".shrc", "/home/.shrc")
     filesystem.copy(workDir .. "setup.lua", "/home/setup.lua")
-
+    filesystem.makeDirectory(workDir.."settings")
+    
     if filesystem.exists("/home/temp") then
         shell.execute("cp -r /home/temp/settings " .. workDir)
         filesystem.remove("/home/temp/")
