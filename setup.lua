@@ -58,6 +58,7 @@ local successful =
                 shell.execute("cp -r " .. workDir .. thing .. " /home/temp/" .. thing)
             end
         end
+
         filesystem.remove(workDir)
         filesystem.makeDirectory(workDir)
         shell.setWorkingDirectory(workDir)
@@ -71,12 +72,12 @@ local successful =
         filesystem.copy(workDir .. "setup.lua", "/home/setup.lua")
         filesystem.makeDirectory(workDir .. "settings")
 
-        if filesystem.exists("/home/temp") then
-            for _, thing in ipairs(persistent) do
+        for _, thing in ipairs(persistent) do
+            if filesystem.exists("/home/temp/" .. thing) then
                 shell.execute("cp -r /home/temp/" .. thing .. " " .. workDir)
             end
-            filesystem.remove("/home/temp/")
         end
+        filesystem.remove("/home/temp/")
 
         gpu.set(width / 2 - 7, height / 2, "                ")
         gpu.set(width / 2 - 7, height / 2, "Update complete.  ")
