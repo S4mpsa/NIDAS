@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
-        run: tar -cvf NIDAS.tar --exclude-from=tar-exclude.txt *
+        run: tar -cvf NIDAS.tar .shrc --exclude-from=tar-exclude.txt *
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
