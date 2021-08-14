@@ -1,5 +1,4 @@
 tar-exclude.txt
-NIDAS.tar
 .gitignore
 .github
 README.md
