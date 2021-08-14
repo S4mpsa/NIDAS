@@ -14,7 +14,7 @@ local function exec(partialAdress, name, mock)
     local address = component.get(partialAdress)
     local machine =
         (address and component.proxy(address)) or -- Exists
-        (findInIterator(component.list(), "ocemu") and mock:new(partialAdress)) or -- Is running on emulator
+        (findInIterator(component.list(), "ocemu") and mock:getMock(partialAdress)) or -- Is running on emulator
         {} -- Is missing
 
     machine.name = name
