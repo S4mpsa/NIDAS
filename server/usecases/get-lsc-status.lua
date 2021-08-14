@@ -10,12 +10,14 @@ local getNumberOfProblems = require("server.usecases.get-number-of-problems")
 
 local function exec(address, name)
     local lsc = getMachine(address, name, require("server.entities.mocks.mock-lsc"))
-    if string.len(lsc.address) == 0 then return lsc end
+    if string.len(lsc.address) == 0 then
+        return lsc
+    end
 
     local sensorInformation = lsc:getSensorInformation()
 
     local problems = getNumberOfProblems(sensorInformation[9])
-    
+
     local state = nil
     if lsc:isWorkAllowed() then
         if lsc:hasWork() then
@@ -27,7 +29,9 @@ local function exec(address, name)
         state = states.OFF
     end
 
-    if problems > 0 then state = states.BROKEN end
+    if problems > 0 then
+        state = states.BROKEN
+    end
 
     local status = {
         storedEU = parser.getInteger(sensorInformation[2]),

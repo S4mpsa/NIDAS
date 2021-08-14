@@ -3,7 +3,6 @@ local component = require("component")
 local new = require("lib.utils.new")
 
 local findInIterator = require("lib.utils.find-in-iterator")
-local machineEntity = require("server.entities.machine")
 
 --
 
@@ -17,9 +16,9 @@ local function exec(partialAdress, name, mock)
         local machineComponent =
             (address and component.proxy(address)) or -- Exists
             (findInIterator(component.list(), "ocemu") and mock:new(partialAdress)) or -- Is running on emulator
-            {}
+            {address = partialAdress}
 
-        knownMachines[partialAdress] = new(machineEntity, machineComponent, {name = name})
+        knownMachines[partialAdress] = new(machineComponent, {name = name})
     end
 
     return knownMachines[partialAdress]
