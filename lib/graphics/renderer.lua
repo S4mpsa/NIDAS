@@ -20,6 +20,11 @@ local testObject = {
 
 local objects = {}
 
+function renderer.clear()
+    graphics.context().gpu.setActiveBuffer(0)
+    objects = {}
+end
+
 local focused = false
 --To disable click detection
 function renderer.setFocus()
@@ -61,6 +66,7 @@ end
 --An object is created by calling renderer.createObject(x, y, width, height)
 --This returns a page number which can be used to manipulate the object.
 function renderer.createObject(x, y, width, height, alwaysVisible)
+    obs = graphics.context()
     if width < 0 or height < 0 then error("Dimensions must be positive") end
     alwaysVisible = alwaysVisible or false
     local gpu = graphics.context().gpu
@@ -206,7 +212,6 @@ local function checkClick(_, _, X, Y)
                             if type(o.clickFunction) == "function" then
                                 o.clickFunction(table.unpack(o.args))
                             elseif type(o.clickFunction) == "table" then
-                                print("Starting multiple function calls")
                                 for f = 1, #o.clickFunction do
                                     o.clickFunction[f](table.unpack(o.args))
                                 end

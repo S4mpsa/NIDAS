@@ -10,6 +10,12 @@ local borderColor = colors.darkGray
 local primaryColor = colors.electricBlue
 local accentColor = colors.magenta
 
+function gui.setColors(primary, accent, border)
+    primaryColor = primary or colors.electricBlue
+    accentColor = accent or colors.magenta
+    borderColor = border or colors.darkGray
+end
+
 --Creates a bounded 3-tall button.
 --  text = Text to display on button
 --  onClick = Function to call when button is pressed
@@ -208,7 +214,7 @@ end
 --The start value of the number box is passed in startValue. Defaults to 0.
 --The number can either expand right or left, depending on startLeft. True = Number grows to the right, False = Number grows to the left. Defaults to false.
 --Returns the value inserted when pressing ENTER, or nil if focus is lost (touch signal not in box).
-function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
+function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim, minValue, maxValue)
     x = x or 1
     y = y or 1
     maxWidth = maxWidth or 15
@@ -278,6 +284,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim)
         if value == 9 then
             event.push("touch", _, x, y+1)
         end
+        if minValue and number < minValue then return minValue end
         return number
     else
         padded = parser.splitNumber(tonumber(startValue),delim)
@@ -366,14 +373,14 @@ local function setTextAttribute(x, y, tableToModify, tableValue, attribute)
         end
     end
 end
-local function setNumberAttribute(x, y, tableToModify, tableValue, attribute)
+local function setNumberAttribute(x, y, tableToModify, tableValue, attribute, minValue)
     local startValue = 0
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or 0
     else
         startValue = tableToModify[attribute] or 0
     end
-    local value = gui.numberInput(x, y, 50, startValue, true, "")
+    local value = gui.numberInput(x, y, 50, startValue, true, "", minValue)
     if value ~= nil then
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
@@ -394,13 +401,36 @@ local function setColorAttribute(x, y, tableToModify, tableValue, attribute)
             tableToModify[attribute] = value
         end
     end
+    renderer.update()
 end
 
-local function setBooleanAttribute(x, y, tableToModify, tableValue, attribute)
+local function setBooleanAttribute(x, y, tableToModify, tableValue, attribute, defaultValue)
+    local startValue = false
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or false
     else
         startValue = tableToModify[attribute] or false
+    end
+    local value = not startValue
+    local color = borderColor
+    local displayName = ""
+    if value then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
+    graphics.text(x, y*2-1, displayName.." ", color)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+
+local function setComponentAttribute(x, y, tableToModify, tableValue, attribute, defaultValue)
+    local startValue = ""
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or "None"
+    else
+        startValue = tableToModify[attribute] or "None"
     end
     local value = not startValue
     local color = borderColor
@@ -435,14 +465,14 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
         if type == "string" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
         elseif type == "number" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or"None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or"None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue}))
         elseif type == "color" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or "Custom", setColorAttribute,
             {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
         elseif type == "boolean" then
             local color = borderColor
             if displayName then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName, setBooleanAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, color))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName, setBooleanAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].defaultValue}, _, color))
         elseif type == "header" then --Do nothing
         end
     end
