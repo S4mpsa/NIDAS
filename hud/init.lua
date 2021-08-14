@@ -6,7 +6,7 @@ local powerDisplay = require("hud.powerdisplay")
 local toolbar = require("hud.toolbar")
 local component = require("component")
 local serialization = require("serialization")
-local colors = require "lib.graphics.colors"
+local colors = require("lib.graphics.colors")
 --
 
 local glassData = {}
