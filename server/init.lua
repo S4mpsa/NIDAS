@@ -61,7 +61,11 @@ end
 local function sendStatuses(_evName, _localAddress, sender, port, _distance, ...)
     local args = {...}
     if port == portNumber and args[1] == "get_status" then
-        modem.send(sender, portNumber, "local_multiblock_statuses", serialization.serialize(statuses.multiblocks))
+        local updatedStatuses = {}
+        for address, status in statuses.multiblocks do
+            updatedStatuses[address] = {state = status.state, problems = status.problems}
+        end
+        modem.send(sender, portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
     end
 end
 if not serverData.isMain then
@@ -98,17 +102,17 @@ end
 -- TODO: Persist to file
 function server.update()
     local shouldBroadcastStatuses = false
-    local updatedMultiblocks = {}
+    local updatedStatuses = {}
     for address, name in pairs(machineAddresses) do
         local multiblockStatus = getMultiblockStatus(address, name)
         if statuses.multiblocks[address].state ~= multiblockStatus.state then
             shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
-            updatedMultiblocks[address] = multiblockStatus
+            updatedStatuses[address] = {state = multiblockStatus.state, problems = multiblockStatus.problems}
         end
         statuses.multiblocks[address] = multiblockStatus
     end
     if shouldBroadcastStatuses then
-        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(updatedMultiblocks))
+        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
     end
 
     if powerAddress then
