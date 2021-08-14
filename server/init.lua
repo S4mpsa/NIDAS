@@ -2,7 +2,7 @@
 local event = require("event")
 local component = require("component")
 local modem = component.modem
-local serialization = require("serialize")
+local serialization = require("serialization")
 
 local addressesConfigFile = "settings.machine-addresses"
 local machineAddresses = require(addressesConfigFile)
@@ -11,15 +11,37 @@ local addMachine = require("server.usecases.add-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
 
-local serverData = require("settings.serverData") or {}
 local constants = require("configuration.constants")
 local portNumber = constants.machineStatusPort
 local serverResponseTime = constants.networkResponseTime
 
---
-
+local serverData = {}
 local server = {}
 local statuses = {multiblocks = {}, power = {}}
+
+--
+
+local function save()
+    serverData.statuses = statuses
+    local file = io.open("/home/NIDAS/settings/serverData", "w")
+    obs = serverData
+    file:write(serialization.serialize(serverData))
+    file:close()
+end
+local function load()
+    local file = io.open("/home/NIDAS/settings/serverData", "r")
+    if file ~= nil then
+        serverData = serialization.unserialize(file:read("*a"))
+        if serverData ~= nil then
+            if serverData.statuses ~= nil then statuses = serverData.statuses end
+        else
+            serverData = {statuses = statuses}
+        end
+        file:close()
+    end
+end
+
+load()
 
 local function updateMachineList(_, address, _)
     local comp = component.proxy(address)
@@ -52,6 +74,7 @@ if serverData.isMain == nil then
         end
         event.listen("modem_message", identifyAsMainServer)
     end
+    save()
 end
 
 if serverData.isMain then
@@ -72,7 +95,7 @@ if not serverData.isMain then
     event.listen("modem_message", sendStatuses)
 end
 
-local function updateMachineStatuses(_evName, _localAddress, sender, port, _distance, ...)
+local function updateMachineStatuses(_, _, _ , port, _, ...)
     local args = {...}
     if port == portNumber and args[1] == "local_multiblock_statuses" then
         for address, status in pairs(serialization.unserialize(args[2])) do
@@ -100,17 +123,23 @@ function server.configure(x, y)
 end
 
 -- TODO: Persist to file
+local savingInterval = 500
+local savingCounter = savingInterval
 function server.update()
     local shouldBroadcastStatuses = false
     local updatedStatuses = {}
     for address, name in pairs(machineAddresses) do
         local multiblockStatus = getMultiblockStatus(address, name)
-        if statuses.multiblocks[address].state ~= multiblockStatus.state then
-            shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
-            updatedStatuses[address] = {state = multiblockStatus.state, problems = multiblockStatus.problems}
+        if statuses.multiblocks[address] == nil then statuses.multiblocks[address] = {} end
+        if multiblockStatus ~= nil then
+            if statuses.multiblocks[address].state ~= multiblockStatus.state then
+                shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
+                updatedStatuses[address] = {state = multiblockStatus.state, problems = multiblockStatus.problems}
+            end
+            statuses.multiblocks[address] = multiblockStatus
         end
-        statuses.multiblocks[address] = multiblockStatus
     end
+
     if shouldBroadcastStatuses then
         modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
     end
@@ -120,8 +149,13 @@ function server.update()
         if statuses.powerStatus ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
+        statuses.powerStatus = powerStatus
     end
-
+    if savingCounter == savingInterval then
+        save()
+        savingCounter = 1
+    end
+    savingCounter = savingCounter + 1
     return statuses
 end
 

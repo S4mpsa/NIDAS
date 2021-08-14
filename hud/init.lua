@@ -100,7 +100,7 @@ function hud.configure(x, y, gui, graphics, renderer, page)
 end
 refresh = hud.configure
 function hud.update(serverInfo)
-    powerDisplay.widget(powerDisplayUsers, serverInfo.power)
+    powerDisplay.widget(powerDisplayUsers, serverInfo.powerStatus)
     toolbar.widget(toolbarUsers)
 end
 load()

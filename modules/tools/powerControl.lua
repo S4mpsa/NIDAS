@@ -29,7 +29,7 @@ end
 
 function powerControl.update(data, redstoneAddress)
     redstoneAddress = redstoneAddress or "NONE"
-    local level = getPercentage(data.power)
+    local level = getPercentage(data.powerStatus)
     if redstone == nil then
         setRedstone(redstoneAddress)
         if level < 0.85 then engaged = false else engaged = true end
