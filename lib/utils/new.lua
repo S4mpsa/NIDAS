@@ -1,7 +1,9 @@
 local function new(class, ...)
     local newObject = {}
 
-    for key, value in pairs(class) do newObject[key] = value end
+    for key, value in pairs(class) do
+        newObject[key] = value
+    end
 
     local parents = {...}
     if parents then
