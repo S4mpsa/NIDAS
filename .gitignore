@@ -1,5 +1,4 @@
 *.tar
 .vscode
-enabledModules
-hudConfig
+settings/*
 available_version.lua
