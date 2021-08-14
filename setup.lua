@@ -4,7 +4,19 @@
 local shell = require("shell")
 local filesystem = require("filesystem")
 local computer = require("computer")
+local component = require("component")
+local gpu = component.gpu
+local width, height = gpu.getResolution()
 
+local colorA = 0x00A6FF
+local colorB = 0xFF00FF
+
+gpu.fill(1, 1, width, height, " ")
+gpu.setForeground(0x181818)
+gpu.fill(width/2-11, height/2-3, 23, 6, "▄")
+gpu.fill(width/2-10, height/2-2, 21, 4, " ")
+gpu.setForeground(colorA)
+gpu.set(width/2-7, height/2-2, "Updating NIDAS")
 local tarMan =
     "https://raw.githubusercontent.com/mpmxyz/ocprograms/master/usr/man/tar.man"
 local tarBin =
@@ -36,15 +48,13 @@ local successful = pcall(function()
     local workDir = "/home/NIDAS/"
     filesystem.remove(workDir)
     filesystem.makeDirectory(workDir)
-
     shell.setWorkingDirectory(workDir)
-    print("Downloading NIDAS-" .. release)
+    gpu.set(width/2-8, height/2-1, "Downloading . . .")
     shell.execute("wget -fq " .. NIDAS)
-    print("Extracting")
+    gpu.set(width/2-8, height/2-1, "                 ")
+    gpu.set(width/2-7, height/2, "Extracting . . .")
     shell.execute("tar -xf NIDAS.tar")
     filesystem.remove(workDir .. "NIDAS.tar")
-    filesystem.remove("/home/lib")
-    shell.execute("cp -r lib /home/lib")
     filesystem.copy(workDir .. ".shrc", "/home/.shrc")
     filesystem.copy(workDir .. "setup.lua", "/home/setup.lua")
     filesystem.makeDirectory(workDir.."settings")
@@ -54,13 +64,14 @@ local successful = pcall(function()
         filesystem.remove("/home/temp/")
     end
 
-    local rebootTime = 3
-    print("Success!")
-    print("Rebooting in 3s\n")
-    for i = 1, rebootTime do
-        io.write(".")
-        os.sleep(1)
-    end
+    gpu.set(width/2-7, height/2, "                ")
+    gpu.set(width/2-7, height/2, "Update complete.  ")
+    gpu.setForeground(colorB)
+    gpu.set(width/2-5, height/2+1, "Rebooting  ")
+    os.sleep(1)
     computer.shutdown(true)
 end)
-if (not successful) then print("Update failed") end
+if (successful) then
+    gpu.setForeground(0xFF0000)
+    gpu.set(width/2-7, height/2, "Update failed!  ")    
+end
