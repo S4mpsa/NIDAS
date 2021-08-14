@@ -1,3 +1,3 @@
-local address = require("component").gt_machine.address
+local address = "eafcc4cd"
 
 return address
