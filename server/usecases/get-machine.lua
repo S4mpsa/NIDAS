@@ -17,8 +17,8 @@ local function exec(partialAdress, name)
 
         local machineComponent =
             (address and component.proxy(address)) or -- Exists
-            (findIn(component.list(), "ocemu") and mock:new(partialAdress, name)) or -- Is running on emulator
-            nil
+            (findIn(component.list(), "ocemu") and mock:new(partialAdress)) or -- Is running on emulator
+            {}
 
         knownMachines[partialAdress] = new(machineEntity, machineComponent, {name = name})
     end

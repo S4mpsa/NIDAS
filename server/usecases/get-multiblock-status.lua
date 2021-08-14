@@ -12,7 +12,7 @@ local getEfficiencyPercentage = require("server.usecases.get-efficiency-percenta
 local function exec(address, name)
     local multiblock = getMachine(address, name)
     if string.len(multiblock.address) == 0 then
-        return {}
+        return multiblock
     end
 
     local sensorInformation = multiblock:getSensorInformation()

@@ -141,8 +141,8 @@ function mockMachine:getEUMaxStored()
     return self:getEUCapacity()
 end
 
-function mockMachine:new(address, name)
-    return new(self, {address = address, name = name})
+function mockMachine:new(address)
+    return new(self, {address = address})
 end
 
 function mockMachine:getEfficiencyPercentage()

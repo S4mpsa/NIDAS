@@ -1,7 +1,14 @@
-local function findIn(table, value)
+local function findIn(list, value)
     local key = nil
+    local iterator
 
-    for k, v in pairs(table) do
+    if type(list) == "function" then
+        iterator = list
+    else
+        iterator = pairs(list)
+    end
+
+    for k, v in iterator do
         if v == value then
             key = k
             break
