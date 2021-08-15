@@ -465,9 +465,10 @@ local function setColorAttribute(x, y, tableToModify, tableValue, attribute)
             graphics.text(x, 2*y-1, name, value)
         else
             tableToModify[attribute] = value
+            for i = 1, longest-#name do name = name .. " " end
+            graphics.text(x, 2*y-1, name, value)
         end
     end
-    renderer.update()
 end
 
 local function setBooleanAttribute(x, y, tableToModify, tableValue, attribute)
@@ -509,12 +510,14 @@ local function setComponentAttribute(x, y, tableToModify, tableValue, attribute,
         end
     end
 
-    local value = gui.selectionBox(x, y, components)
+    local value = gui.selectionBox(x+2, y, components)
     if value ~= nil then
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
+            graphics.text(x, y*2-1, value, primaryColor)
         else
             tableToModify[attribute] = value
+            graphics.text(x, y*2-1, value, primaryColor)
         end
     end
 end

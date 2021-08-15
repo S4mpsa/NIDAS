@@ -55,7 +55,7 @@ function event.onError(message)
     graphics.text(1, graphics.context().heigth, message)
 end
 
-function renderer.multicast(interrupted)
+function renderer.multicast()
     if multicasting then
         local screens = 0
         for address, t in component.list() do
@@ -63,7 +63,7 @@ function renderer.multicast(interrupted)
         end
         if screens > 1 then
             local gpu = graphics.context().gpu
-            local width, height = gpu.getResolution()
+            local width, height = graphics.context().width, graphics.context().height
             local screenBuffer = gpu.allocateBuffer(width, height)
             gpu.bitblt(screenBuffer, 1, 1, width, height, 0, 1, 1)
             for address, t in component.list() do
@@ -168,6 +168,8 @@ local whitelist = {}
 
 function renderer.update(pages)
     local gpu = graphics.context().gpu
+    gpu.bind(primaryScreen, false)
+    gpu.setResolution(graphics.context().width, graphics.context().height)
     local renderOnTop = {}
     for i = 1, #objects do
         local o = objects[i]
