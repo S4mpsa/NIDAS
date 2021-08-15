@@ -547,7 +547,7 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
         if type == "string" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
         elseif type == "number" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or"None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue}))
         elseif type == "color" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or "Custom", setColorAttribute,
             {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
