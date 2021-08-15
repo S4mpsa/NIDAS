@@ -191,7 +191,7 @@ function gui.wrappedTextBox(x, y, width, height, text, title)
             line = line .. " " .. words[i]
         else
             table.insert(lines, line)
-            line = ""
+            line = " "..words[i]
         end
     end
     if #line > 0 then
@@ -493,7 +493,7 @@ local function setBooleanAttribute(x, y, tableToModify, tableValue, attribute)
     end
 end
 
-local function setComponentAttribute(x, y, tableToModify, tableValue, attribute, componentType)
+local function setComponentAttribute(x, y, tableToModify, tableValue, attribute, componentType, nameTable)
     local startValue = ""
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or "None"
@@ -503,8 +503,14 @@ local function setComponentAttribute(x, y, tableToModify, tableValue, attribute,
     local components = {}
     for address, component in require("component").list() do
         if component == componentType then
+            local displayName = address
+            if nameTable ~= nil then
+                if nameTable[address] ~= nil then
+                    displayName = nameTable[address].name or displayName
+                end
+            end
             table.insert(components,
-            {displayName = address,
+            {displayName = displayName,
             value = address,
             args = nil})
         end
@@ -551,7 +557,7 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName, setBooleanAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].defaultValue}, _, color))
         elseif type == "header" then --Do nothing
         elseif type == "component" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setComponentAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].componentType}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setComponentAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].componentType, attributeData[i].nameTable}))
         end
     end
     return pageTable
