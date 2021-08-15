@@ -83,12 +83,15 @@ local function load()
                 activate(configurationData.processes[i].module, configurationData.processes[i].name, configurationData.processes[i].desc, true)
             end
             local primaryScreen = configurationData.primaryScreen or require("component").screen.address
-            require("component").gpu.bind(primaryScreen, false)
+            gui.setColors(configurationData.primaryColor, configurationData.accentColor, configurationData.borderColor)
+            graphics.setContext({gpu = require("component").gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
+            maxWidth = graphics.context().width
+            maxheight = graphics.context().height
             renderer.setPrimaryScreen(primaryScreen)
             renderer.setDebug(configurationData.debug or false)
-            renderer.setMulticasting(configurationData.multicasting or true)
+            renderer.setMulticasting(configurationData.multicasting and true)
         else
-            configurationData = {multicasting = true}
+            configurationData = {}
         end
         file:close()
     end
@@ -155,7 +158,7 @@ local function saveSettings()
     component.gpu.bind(primaryScreen, false)
     renderer.setPrimaryScreen(primaryScreen)
     renderer.setDebug(configurationData.debug or false)
-    renderer.setMulticasting(configurationData.multicasting or true)
+    renderer.setMulticasting(configurationData.multicasting and true)
     menuVariable()
     graphics.context().gpu.fill(1, 1, 160, 50, " ")
     configScreen(location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, "NIDAS Settings", menu)
@@ -242,15 +245,8 @@ end
 
 local function update()
     load()
-    gui.setColors(configurationData.primaryColor, configurationData.accentColor, configurationData.borderColor)
-    require("component").gpu.setResolution(configurationData.xRes or 125, configurationData.yRes or 35)
-    graphics.setContext({gpu = require("component").gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
-    maxWidth = graphics.context().width
-    maxheight = graphics.context().height
     generateMenu()
-    graphics.context().gpu.fill(1, 1, 160, 50, " ")
     renderer.update()
-    renderer.multicast()
     while not interrupted do
         main()
     end
