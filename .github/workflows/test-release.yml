@@ -1,14 +1,15 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI-test
+
+name: CI-master
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push events for every branch
-  push:
+  # Triggers the workflow on push events on the develop branch
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -31,8 +32,8 @@ jobs:
       - uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.RELEASE_SECRET }}
-          tag: v-1
-          prerelease: true
+          tag: ${{ steps.get_tag_name.outputs.VERSION }}
+          prerelease: false
           gzip: false
           files: NIDAS.tar
           allow_override: true
