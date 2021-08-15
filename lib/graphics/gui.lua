@@ -357,185 +357,6 @@ function gui.colorSelection(x, y, colorList)
     end
 end
 
-local function setTextAttribute(x, y, tableToModify, tableValue, attribute)
-    local startValue = ""
-    if tableValue ~= nil then
-        startValue = tableToModify[tableValue][attribute] or "None"
-    else
-        startValue = tableToModify[attribute] or "None"
-    end
-    local value = gui.textInput(x, y, 50, startValue)
-    if value ~= nil then
-        if tableValue ~= nil then
-            tableToModify[tableValue][attribute] = value
-        else
-            tableToModify[attribute] = value
-        end
-    end
-end
-local function setNumberAttribute(x, y, tableToModify, tableValue, attribute, minValue)
-    local startValue = 0
-    if tableValue ~= nil then
-        startValue = tableToModify[tableValue][attribute] or 0
-    else
-        startValue = tableToModify[attribute] or 0
-    end
-    local value = gui.numberInput(x, y, 50, startValue, true, "", minValue)
-    if value ~= nil then
-        if tableValue ~= nil then
-            tableToModify[tableValue][attribute] = value
-        else
-            tableToModify[attribute] = value
-        end
-    end
-end
-
-local function setColorAttribute(x, y, tableToModify, tableValue, attribute)
-    local value, name, longest = gui.colorSelection(x, y, colors)
-    if value ~= nil then
-        if tableValue ~= nil then
-            tableToModify[tableValue][attribute] = value
-            for i = 1, longest-#name do name = name .. " " end
-            graphics.text(x, 2*y-1, name, value)
-        else
-            tableToModify[attribute] = value
-        end
-    end
-    renderer.update()
-end
-
-local function setBooleanAttribute(x, y, tableToModify, tableValue, attribute, defaultValue)
-    local startValue = false
-    if tableValue ~= nil then
-        startValue = tableToModify[tableValue][attribute] or false
-    else
-        startValue = tableToModify[attribute] or false
-    end
-    local value = not startValue
-    local color = borderColor
-    local displayName = ""
-    if value then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
-    graphics.text(x, y*2-1, displayName.." ", color)
-    if value ~= nil then
-        if tableValue ~= nil then
-            tableToModify[tableValue][attribute] = value
-        else
-            tableToModify[attribute] = value
-        end
-    end
-end
-
-local function setComponentAttribute(x, y, tableToModify, tableValue, attribute, defaultValue)
-    local startValue = ""
-    if tableValue ~= nil then
-        startValue = tableToModify[tableValue][attribute] or "None"
-    else
-        startValue = tableToModify[attribute] or "None"
-    end
-    local value = not startValue
-    local color = borderColor
-    local displayName = ""
-    if value then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
-    graphics.text(x, y*2-1, displayName.." ", color)
-    if value ~= nil then
-        if tableValue ~= nil then
-            tableToModify[tableValue][attribute] = value
-        else
-            tableToModify[attribute] = value
-        end
-    end
-end
-
---Creates a named list of attributes to change, given in attributeData in the format {name="Name", attribute="attr", type="string|number"}
---The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
---If dataValue is nil, then the main dataTable.attribute is modified instead.
-function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue)
-    local longestAttribute = 0
-    for i = 1, #attributeData do
-        if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end
-    end
-    for i = 1, #attributeData do
-        local attribute = attributeData[i].attribute
-        local name = attributeData[i].name
-        local type = attributeData[i].type
-        local displayName = ""
-        if dataValue ~= nil then displayName = dataTable[dataValue][attribute] else displayName = dataTable[attribute] end
-        graphics.context().gpu.setActiveBuffer(page)
-        graphics.text(3, 2*y+2*i-1, name)
-        if type == "string" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
-        elseif type == "number" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or"None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue}))
-        elseif type == "color" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or "Custom", setColorAttribute,
-            {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
-        elseif type == "boolean" then
-            local color = borderColor
-            if displayName then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName, setBooleanAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].defaultValue}, _, color))
-        elseif type == "header" then --Do nothing
-        end
-    end
-    return pageTable
-end
-
-function gui.logo(x, y, version)
-    local logo1 = {
-        "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
-        "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
-        "█ ◥◣█  █  █   █ █   █ █    ",
-        "█  ◥█  █  █   █ █▃▃▃█ ◥███◣",
-        "█   █  █  █   █ █   █     █",
-        "█   █  █  █  ◢◤ █   █     █",
-        "█   █  ◤  ███◤  █   █ ◢███◤"
-    }
-    local logo2 ={
-        " ◢█◣ ",
-        "◢◤ ◥◣",
-        "█   █",
-        "█▃▃▃█",
-        "█   █",
-        "█   █",
-        "█   █"
-    }
-    local page = renderer.createObject(x, y, 29, 8)
-    local gpu = graphics.context().gpu
-    gpu.setActiveBuffer(page)
-    graphics.text(1, 3, "◢", borderColor)
-    graphics.rectangle(1, 5, 1, 12, borderColor)
-    graphics.rectangle(2, 16, 27, 1, borderColor)
-    graphics.outline(3, 1, logo1, primaryColor)
-    graphics.outline(19, 1, logo2, accentColor)
-    graphics.text(27, 3, "Ver", accentColor)
-    graphics.text(27, 5, version, accentColor)
-    gpu.setActiveBuffer(0)
-end
-
-function gui.smallLogo(x, y, version)
-    local logo1 = {
-        "▙ ▌▐ ▛▚▗▀▖▞▀",
-        "▌▚▌▐ ▌▐▐▄▌▘▗",
-        "▌ ▌▐ ▙▞▐ ▌▄▞"
-    }
-    local logo2 ={
-        "▗▀▖",
-        "▐▄▌",
-        "▐ ▌",
-    }
-    local page = renderer.createObject(x, y, 20, 4)
-    local gpu = graphics.context().gpu
-    gpu.setActiveBuffer(page)
-    graphics.text(1, 3, "◢", borderColor)
-    graphics.rectangle(1, 5, 1, 4, borderColor)
-    graphics.rectangle(2, 8, 18, 1, borderColor)
-    graphics.outline(3, 1, logo1, primaryColor)
-    graphics.outline(10, 1, logo2, accentColor)
-    graphics.text(16, 5, version, accentColor)
-    graphics.text(20, 5, "◢", borderColor)
-    graphics.text(20, 7, "◤", borderColor)
-    gpu.setActiveBuffer(0)
-end
-
 --There are two drop-down menus: Color selection and arbitrary list
 --These have prioritized click capture and are rendered without the need to call renderer.update(), and are removed as soon as the screen is clicked.
 
@@ -600,6 +421,194 @@ function gui.selectionBox(x, y, choices)
     else
         return nil
     end
+end
+
+local function setTextAttribute(x, y, tableToModify, tableValue, attribute)
+    local startValue = ""
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or "None"
+    else
+        startValue = tableToModify[attribute] or "None"
+    end
+    local value = gui.textInput(x, y, 50, startValue)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+local function setNumberAttribute(x, y, tableToModify, tableValue, attribute, minValue)
+    local startValue = 0
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or 0
+    else
+        startValue = tableToModify[attribute] or 0
+    end
+    local value = gui.numberInput(x, y, 50, startValue, true, "", minValue)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+
+local function setColorAttribute(x, y, tableToModify, tableValue, attribute)
+    local value, name, longest = gui.colorSelection(x, y, colors)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+            for i = 1, longest-#name do name = name .. " " end
+            graphics.text(x, 2*y-1, name, value)
+        else
+            tableToModify[attribute] = value
+        end
+    end
+    renderer.update()
+end
+
+local function setBooleanAttribute(x, y, tableToModify, tableValue, attribute)
+    local startValue = false
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or false
+    else
+        startValue = tableToModify[attribute] or false
+    end
+    local value = not startValue
+    local color = borderColor
+    local displayName = ""
+    if value then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
+    graphics.text(x, y*2-1, displayName.." ", color)
+    renderer.multicast()
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+
+local function setComponentAttribute(x, y, tableToModify, tableValue, attribute, componentType)
+    local startValue = ""
+    if tableValue ~= nil then
+        startValue = tableToModify[tableValue][attribute] or "None"
+    else
+        startValue = tableToModify[attribute] or "None"
+    end
+    local components = {}
+    for address, component in require("component").list() do
+        if component == componentType then
+            table.insert(components,
+            {displayName = address,
+            value = address,
+            args = nil})
+        end
+    end
+
+    local value = gui.selectionBox(x, y, components)
+    if value ~= nil then
+        if tableValue ~= nil then
+            tableToModify[tableValue][attribute] = value
+        else
+            tableToModify[attribute] = value
+        end
+    end
+end
+
+--Creates a named list of attributes to change, given in attributeData in the format {name="Name", attribute="attr", type="string|number"}
+--The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
+--If dataValue is nil, then the main dataTable.attribute is modified instead.
+function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue)
+    local longestAttribute = 0
+    for i = 1, #attributeData do
+        if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end
+    end
+    for i = 1, #attributeData do
+        local attribute = attributeData[i].attribute
+        local name = attributeData[i].name
+        local type = attributeData[i].type
+        local displayName = ""
+        if dataValue ~= nil then displayName = dataTable[dataValue][attribute] else displayName = dataTable[attribute] end
+        graphics.context().gpu.setActiveBuffer(page)
+        graphics.text(3, 2*y+2*i-1, name)
+        if type == "string" then
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
+        elseif type == "number" then
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or"None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue}))
+        elseif type == "color" then
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or "Custom", setColorAttribute,
+            {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
+        elseif type == "boolean" then
+            local color = borderColor
+            if displayName then displayName = "Enabled"; color = primaryColor else displayName = "Disabled" end
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName, setBooleanAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].defaultValue}, _, color))
+        elseif type == "header" then --Do nothing
+        elseif type == "component" then
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setComponentAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].componentType}))
+        end
+    end
+    return pageTable
+end
+
+function gui.logo(x, y, version)
+    local logo1 = {
+        "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
+        "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
+        "█ ◥◣█  █  █   █ █   █ █    ",
+        "█  ◥█  █  █   █ █▃▃▃█ ◥███◣",
+        "█   █  █  █   █ █   █     █",
+        "█   █  █  █  ◢◤ █   █     █",
+        "█   █  ◤  ███◤  █   █ ◢███◤"
+    }
+    local logo2 ={
+        " ◢█◣ ",
+        "◢◤ ◥◣",
+        "█   █",
+        "█▃▃▃█",
+        "█   █",
+        "█   █",
+        "█   █"
+    }
+    local page = renderer.createObject(x, y, 29, 8)
+    local gpu = graphics.context().gpu
+    gpu.setActiveBuffer(page)
+    graphics.text(1, 3, "◢", borderColor)
+    graphics.rectangle(1, 5, 1, 12, borderColor)
+    graphics.rectangle(2, 16, 27, 1, borderColor)
+    graphics.outline(3, 1, logo1, primaryColor)
+    graphics.outline(19, 1, logo2, accentColor)
+    graphics.text(27, 3, "Ver", accentColor)
+    graphics.text(27, 5, version, accentColor)
+    gpu.setActiveBuffer(0)
+end
+
+function gui.smallLogo(x, y, version)
+    local logo1 = {
+        "▙ ▌▐ ▛▚▗▀▖▞▀",
+        "▌▚▌▐ ▌▐▐▄▌▘▗",
+        "▌ ▌▐ ▙▞▐ ▌▄▞"
+    }
+    local logo2 ={
+        "▗▀▖",
+        "▐▄▌",
+        "▐ ▌",
+    }
+    local page = renderer.createObject(x, y, 20, 4)
+    local gpu = graphics.context().gpu
+    gpu.setActiveBuffer(page)
+    graphics.text(1, 3, "◢", borderColor)
+    graphics.rectangle(1, 5, 1, 4, borderColor)
+    graphics.rectangle(2, 8, 18, 1, borderColor)
+    graphics.outline(3, 1, logo1, primaryColor)
+    graphics.outline(10, 1, logo2, accentColor)
+    graphics.text(16, 5, version, accentColor)
+    graphics.text(20, 5, "◢", borderColor)
+    graphics.text(20, 7, "◤", borderColor)
+    gpu.setActiveBuffer(0)
 end
 
 return gui

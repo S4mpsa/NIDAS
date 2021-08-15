@@ -82,6 +82,11 @@ local function load()
             for i = 1, #configurationData.processes do
                 activate(configurationData.processes[i].module, configurationData.processes[i].name, configurationData.processes[i].desc, true)
             end
+            local primaryScreen = configurationData.primaryScreen or require("component").screen.address
+            require("component").gpu.bind(primaryScreen, false)
+            renderer.setPrimaryScreen(primaryScreen)
+            renderer.setDebug(configurationData.debug or false)
+            renderer.setMulticasting(configurationData.multicasting or true)
         else
             configurationData = {multicasting = true}
         end
@@ -138,17 +143,23 @@ local menuVariable = nil
 
 local menu = {}
 local function saveSettings()
+    local component = require("component")
     save()
     gui.setColors(configurationData.primaryColor, configurationData.accentColor, configurationData.borderColor)
     renderer.clear()
-    require("component").gpu.setResolution(configurationData.xRes or 125, configurationData.yRes or 35)
+    component.gpu.setResolution(configurationData.xRes or 125, configurationData.yRes or 35)
     graphics.setContext({gpu = require("component").gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
     maxWidth = graphics.context().width
     maxheight = graphics.context().height
+    local primaryScreen = configurationData.primaryScreen or require("component").screen.address
+    component.gpu.bind(primaryScreen, false)
+    renderer.setPrimaryScreen(primaryScreen)
+    renderer.setDebug(configurationData.debug or false)
+    renderer.setMulticasting(configurationData.multicasting or true)
     menuVariable()
     graphics.context().gpu.fill(1, 1, 160, 50, " ")
-    renderer.update()
     configScreen(location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, "NIDAS Settings", menu)
+    renderer.update()
 end
 
 function menu.configure(x, y, _, _, _, page)
@@ -156,14 +167,15 @@ function menu.configure(x, y, _, _, _, page)
     graphics.context().gpu.setActiveBuffer(page)
     local currentConfigWindow = {}
     local attributeChangeList = {
-        {name = "Primary Screen",   attribute = "primaryScreen",    type = "string",    defaultValue = require("component").screen.address},
+        {name = "Primary Screen",   attribute = "primaryScreen",    type = "component", defaultValue = require("component").screen.address, componentType = "screen"},
         {name = "Resolution (X)",   attribute = "xRes",             type = "number",    defaultValue = 125, minValue = 80},
         {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 35, minValue = 20},
         {name = "Primary Color",    attribute = "primaryColor",     type = "color",     defaultValue = colors.electricBlue},
         {name = "Accent Color",     attribute = "accentColor",      type = "color",     defaultValue = colors.magenta},
         {name = "Border Color",     attribute = "borderColor",      type = "color",     defaultValue = colors.darkGray},
         {name = "",                 attribute = nil,                type = "header",    defaultValue = nil},
-        {name = "Multicasting",     attribute = "multicasting",     type = "boolean",   defaultValue = nil},
+        {name = "Multicasting",     attribute = "multicasting",     type = "boolean",   defaultValue = true},
+        {name = "Developer Mode",   attribute = "debug",            type = "boolean",   defaultValue = false},
 
     }
     gui.multiAttributeList(x+3, y+3, page, currentConfigWindow, attributeChangeList, configurationData)
@@ -200,6 +212,8 @@ local function updateAvailable()
 end
 
 local function reboot()
+    graphics.context().gpu.fill(1, 1, 160, 50, " ")
+    renderer.multicast()
     require("computer").shutdown(true)
 end
 
@@ -236,6 +250,7 @@ local function update()
     generateMenu()
     graphics.context().gpu.fill(1, 1, 160, 50, " ")
     renderer.update()
+    renderer.multicast()
     while not interrupted do
         main()
     end

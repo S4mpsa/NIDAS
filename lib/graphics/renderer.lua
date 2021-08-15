@@ -19,9 +19,24 @@ local testObject = {
 
 
 local objects = {}
+local primaryScreen = component.screen.address
+local debug = false
+local multicasting = true
+
+function renderer.setMulticasting(value)
+    multicasting = value
+end
+function renderer.setDebug(value)
+    debug = value
+end
+
+function renderer.setPrimaryScreen(address)
+    primaryScreen = address
+end
 
 function renderer.clear()
     graphics.context().gpu.setActiveBuffer(0)
+    graphics.context().gpu.freeAllBuffers()
     objects = {}
 end
 
@@ -40,33 +55,33 @@ function event.onError(message)
     graphics.text(1, graphics.context().heigth, message)
 end
 
-function renderer.multicast()
-    local screens = 0
-    for address, t in component.list() do
-        if t == "screen" then screens = screens + 1 end
-    end
-    if screens > 1 then
-        local gpu = graphics.context().gpu
-        local primary = component.screen
-        local width, height = gpu.getResolution()
-        local screenBuffer = gpu.allocateBuffer(width, height)
-        gpu.bitblt(screenBuffer, 1, 1, width, height, 0, 1, 1)
+function renderer.multicast(interrupted)
+    if multicasting then
+        local screens = 0
         for address, t in component.list() do
-            if t == "screen" and address ~= primary.address then
-                gpu.bind(address, false)
-                gpu.setResolution(width, height)
-                gpu.bitblt(0, 1, 1, width, width, screenBuffer, 1, 1)
-            end
+            if t == "screen" then screens = screens + 1 end
         end
-        gpu.bind(primary.address, false)
-        gpu.freeBuffer(screenBuffer)
+        if screens > 1 then
+            local gpu = graphics.context().gpu
+            local width, height = gpu.getResolution()
+            local screenBuffer = gpu.allocateBuffer(width, height)
+            gpu.bitblt(screenBuffer, 1, 1, width, height, 0, 1, 1)
+            for address, t in component.list() do
+                if t == "screen" and address ~= primaryScreen then
+                    gpu.bind(address, false)
+                    gpu.setResolution(width, height)
+                    gpu.bitblt(0, 1, 1, width, width, screenBuffer, 1, 1)
+                end
+            end
+            gpu.bind(primaryScreen, false)
+            gpu.freeBuffer(screenBuffer)
+        end
     end
 end
 
 --An object is created by calling renderer.createObject(x, y, width, height)
 --This returns a page number which can be used to manipulate the object.
 function renderer.createObject(x, y, width, height, alwaysVisible)
-    obs = graphics.context()
     if width < 0 or height < 0 then error("Dimensions must be positive") end
     alwaysVisible = alwaysVisible or false
     local gpu = graphics.context().gpu
@@ -150,7 +165,7 @@ end
 --This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
 --Passing a list of pages only updates those pages.
 local whitelist = {}
-local debug = false
+
 function renderer.update(pages)
     local gpu = graphics.context().gpu
     local renderOnTop = {}
@@ -192,6 +207,7 @@ function renderer.update(pages)
         --graphics.text(1, y*2-5, str)
         graphics.text(1, y*2-3, "Memory free: "..gpu.freeMemory().."      ")
         graphics.text(1, y*2-1, "Memory used by buffers: "..bufferSum.."    ")
+        renderer.multicast()
     end
 end
 
