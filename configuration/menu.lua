@@ -202,12 +202,12 @@ end
 
 local function update()
     require("shell").execute("cd /home")
-    require("shell").execute("setup dev")
+    require("shell").execute("setup")
 end
 
 local function updateAvailable()
     local version = require("nidas_version")
-    require("shell").execute("wget https://raw.githubusercontent.com/S4mpsa/NIDAS/develop/nidas_version.lua /home/NIDAS/available_version.lua -f -q")
+    require("shell").execute("wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/nidas_version.lua /home/NIDAS/available_version.lua -f -q")
     local availableVersion = require("available_version")
     if tonumber(version) < tonumber(availableVersion) then
         return true
