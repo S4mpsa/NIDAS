@@ -1,0 +1,54 @@
+Basic graphics loop:
+
+
+
+Context of rendering is defined with graphics.setContext(object) (This is temporary for now), which sets the GPU that is used and the width and heigth of the screen.
+
+Creating new objects:
+    An object is created by calling renderer.createObject(x, y, width, height)
+    This returns a page number which can be used to manipulate the object.
+    To modify the object, first call graphics.getContext().gpu.setActiveBuffer(page) to switch into the new object space.
+    Now you can create new graphical elements with the graphics library, in the width x heigth area.
+    After all graphical changes are done, set active buffer to 0 (The screen)
+
+Rendering objects:
+    All changes are buffered in video memory and only rendered on calling renderer.update()
+    This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
+
+Removing objects:
+    Objects can be removed by calling renderer.removeObject(pages)
+    They can be removed one-by-one, or as a bulk operation by passing a table of numbers.
+
+Clickable objects:
+    All objects (or parts of the objects) can be made to react to clicks. This is done by calling renderer.setClickable(page, function, arguments, v1, v2)
+    page is the identifier given by createObject() to select which object you want to make clickable.
+    Function is the function that is called with function(arguments) on click of the area.
+    Arguments is a table {arg1, arg2, arg3, ...} which is passed to the function given.
+    v1 and v2 are the top left and bottom right bounds of the clickable area, given as a pair {x1, y1} and {x2, y2}
+
+Drop-down menus:
+    There are two drop-down menus: Color selection and arbitrary list
+    These have prioritized click capture and are rendered without the need to call renderer.update(), and are removed as soon as the screen is clicked.
+    Color selection return the color value that was selected, or nil if click was not in the box.
+    Arbitrary list returns the value of the object that was clicked, or calls the function assigned with predeteremined arguments.
+
+    To use the arbitrary list, you need to provide it with objects in the following format:
+    dropDownChoices = {
+        {
+            displayName = "Name on the dropdown menu"),
+            value = theFunctionToCall or "Value to return"
+            args = {arg1, arg2, arg3, ...} or nil
+        },
+        {
+            displayName = "Name on the dropdown menu"),
+            value = theFunctionToCall or "Value to return"
+            args = {arg1, arg2, arg3, ...} or nil
+        }
+    }
+    The drop-down menu is then created as follows:
+    gui.selectionMenu(x, y, dropDownChoices)
+    Color menu:
+    gui.colorSelection(x, y, colorList)
+
+    Drop-down menus can be chained together into buttons to create clickable objects that create the drop-down menu by passing the selectionMenu as the onClick function, with the x, y, dropDownChoices as arguments:
+    gui.smallButton(x2, y2, "Text of button", gui.selectionMenu, {x1, y1, dropDownChoices})

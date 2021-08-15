@@ -1,9 +1,5 @@
-package.path = package.path..";/NIDAS/lib/graphics/?.lua"..";/NIDAS/lib/utils/?.lua"
-local component = require("component")
-local computer = require("computer")
-local event = require("event")
-local util = require("utility")
-local colors = require("colors")
+local screen = require("lib.utils.screen")
+local colors = require("lib.graphics.colors")
 
 local arGraphics = {}
 
@@ -56,6 +52,7 @@ end
 
 function arGraphics.text(glasses, string, v1, color, scale)
     scale = scale or 1
+    color = color or 0xFFFFFF
     local text = glasses.addTextLabel()
     text.setText(string)
     text.setPosition(v1[1], v1[2])
@@ -84,18 +81,30 @@ end
 
 function arGraphics.testGrid(glasses, resolution, scale)
     scale = scale or 3
-    local glassResolution = util.screensize(resolution, scale)
+    local glassResolution = screen.size(resolution, scale)
     arGraphics.rectangle(glasses, {glassResolution[1]/2, 0}, 1, glassResolution[2], colors.electricBlue)
     arGraphics.rectangle(glasses, {0, glassResolution[2]/2}, glassResolution[1], 1, colors.electricBlue)
 end
 
 function arGraphics.borders(glasses, resolution, scale)
     scale = scale or 3
-    local glassResolution = util.screensize(resolution, scale)
+    local glassResolution = screen.size(resolution, scale)
     arGraphics.rectangle(glasses, {0, 0}, glassResolution[1], 1, colors.electricBlue)
     arGraphics.rectangle(glasses, {0, 0}, 1, glassResolution[2], colors.electricBlue)
     arGraphics.rectangle(glasses, {0, glassResolution[2]-1}, glassResolution[1], 1, colors.electricBlue)
     arGraphics.rectangle(glasses, {glassResolution[1]-1, 0}, 1, glassResolution[2], colors.electricBlue)
+end
+
+function arGraphics.testHud(glasses)
+    local component = require("component")
+    local glasses = component.proxy(component.get(glasses))
+    arGraphics.text(glasses, "HUD Test", {1, 1})
+    local c = glasses.addFloatingText()
+    c.setText("Machine Disabled")
+    c.set3DPos(0.5, 1.5, 0.5)
+    c.setScale(0.1)
+    c.setAlpha(1)
+    c.setColor(RGB(0xFF0000))
 end
 
 return arGraphics

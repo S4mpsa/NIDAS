@@ -1,14 +1,14 @@
 -- Import section
 
-Machine = require("entities.machine")
-Inherits = require("utils.inherits")
-New = require("utils.new")
+local machine = require("server.entities.machine")
+local inherits = require("lib.utils.inherits")
+local new = require("lib.utils.new")
 
 --
 
 local mockMachine =
-    Inherits(
-    Machine,
+    inherits(
+    machine,
     {
         mocks = {}
     }
@@ -32,7 +32,8 @@ function mockMachine:getMock(address, name)
             workProgress = 0,
             workMaxProgress = 0,
             isBroken = false,
-            address = address
+            address = address,
+            type = "gt_machine"
         }
     end
     return self.mocks[address]
@@ -139,10 +140,6 @@ end
 
 function mockMachine:getEUMaxStored()
     return self:getEUCapacity()
-end
-
-function mockMachine:new(address, name)
-    return New(self, {address = address, name = name})
 end
 
 function mockMachine:getEfficiencyPercentage()

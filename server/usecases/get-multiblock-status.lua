@@ -1,21 +1,22 @@
 -- Import section
+local parser = require "lib.utils.parser"
 
-local states = require("entities.states")
+local states = require("server.entities.states")
 
-local getMachine = require("usecases.get-machine")
-local getNumberOfProblems = require("usecases.get-number-of-problems")
-local getEnergyUsage = require("usecases.get-energy-usage")
-local getEfficiencyPercentage = require("usecases.get-efficiency-percentage")
+local getMachine = require("server.usecases.get-machine")
+local getNumberOfProblems = require("server.usecases.get-number-of-problems")
+local getEfficiencyPercentage = require("server.usecases.get-efficiency-percentage")
 
 --
 
 local function exec(address, name)
     local multiblock = getMachine(address, name)
-    if string.len(multiblock.address) == 0 then
-        return multiblock
+    if not multiblock.address then
+        return {state = states.MISSING}
     end
+    local sensorInformation = multiblock:getSensorInformation()
 
-    local problems = getNumberOfProblems(multiblock)
+    local problems = getNumberOfProblems(sensorInformation[5])
 
     local state = {}
     if multiblock:isWorkAllowed() then
@@ -28,7 +29,7 @@ local function exec(address, name)
         state = states.OFF
     end
 
-    if (problems or 0) > 0 then
+    if problems > 0 then
         state = states.BROKEN
     end
 
@@ -36,8 +37,8 @@ local function exec(address, name)
         progress = multiblock.getWorkProgress(),
         maxProgress = multiblock.getWorkMaxProgress(),
         problems = problems,
-        probablyUses = getEnergyUsage(multiblock),
-        efficiencyPercentage = getEfficiencyPercentage(multiblock),
+        probablyUses = multiblock.getWorkMaxProgress() and parser.getInteger(sensorInformation[3]) or 0,
+        efficiencyPercentage = getEfficiencyPercentage(sensorInformation[5]),
         state = state
     }
     return status

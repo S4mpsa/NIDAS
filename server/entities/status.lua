@@ -1,6 +1,6 @@
 -- Import section
 
-Colors = require("graphics.colors")
+Colors = require("lib.graphics.colors")
 
 --
 

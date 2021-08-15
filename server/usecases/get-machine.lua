@@ -1,32 +1,26 @@
 -- Import section
 
-Component = require("component")
-Filesystem = require("filesystem")
+local component = require("component")
 
-local findIn = require("utils.find-in")
-local mock = require("entities.mocks.mock-machine")
-local machineEntity = require("entities.machine")
+local findInIterator = require("lib.utils.find-in-iterator")
 
 --
 
-local function exec(partialAdress, name)
-    local machine = nil
+local knownMachines = {}
 
-    local successful =
-        pcall(
-        function()
-            machine = New(machineEntity, Component.proxy(Component.get(partialAdress)), {name = name})
-        end
-    )
-    if not successful then
-        if findIn(Component.list(), "ocemu") then -- Is running on emulator
-            machine = New(machineEntity, mock:new(partialAdress, name))
-        else
-            machine = New(machineEntity)
-        end
-    end
+local function exec(partialAdress, name, mock)
+    mock = mock or require("server.entities.mocks.mock-machine")
 
-    return machine
+    local address = component.get(partialAdress)
+    local machine =
+        (address and component.proxy(address)) or -- Exists
+        (findInIterator(component.list(), "ocemu") and mock:getMock(partialAdress)) or -- Is running on emulator
+        {} -- Is missing
+
+    machine.name = name
+    knownMachines[partialAdress] = machine
+
+    return knownMachines[partialAdress]
 end
 
 return exec

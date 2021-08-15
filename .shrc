@@ -1,7 +1,9 @@
 # TODO: Configure first time setup
-ln /home/NIDAS/configuration /home/NIDAS/server/configuration
+ln /home/NIDAS/settings /home/NIDAS/server/settings
 ln /home/NIDAS/configuration /home/NIDAS/tablet/configuration
-cd /home/NIDAS/server
+#ln /home/NIDAS/configuration /home/NIDAS/glasses/configuration
+#ln /home/NIDAS/configuration /home/NIDAS/screen/configuration
+cd /home/NIDAS
 clear
 init
 cd
