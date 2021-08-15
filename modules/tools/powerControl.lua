@@ -83,7 +83,7 @@ refresh = powerControl.configure
 
 load()
 
-function powerControl.update(data, redstoneAddress)
+function powerControl.update(data)
     if data ~= nil then
         local level = getPercentage(data.powerStatus)
         if engaged == nil then
