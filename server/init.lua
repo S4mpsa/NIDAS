@@ -5,7 +5,7 @@ local modem = component.modem
 local serialization = require("serialization")
 
 local addressesConfigFile = "settings.machine-addresses"
-local machineAddresses = require(addressesConfigFile)
+local machineAddresses = {}
 local addMachine = require("server.usecases.add-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
@@ -21,9 +21,11 @@ local statuses = {multiblocks = {}, power = {}}
 --
 
 local function save()
-    serverData.statuses = statuses
     local file = io.open("/home/NIDAS/settings/serverData", "w")
     file:write(serialization.serialize(serverData))
+    file:close()
+    file = io.open("/home/NIDAS/settings/machineData", "w")
+    file:write(serialization.serialize(statuses))
     file:close()
 end
 
@@ -32,7 +34,11 @@ local function load()
     if file then
         serverData = serialization.unserialize(file:read("*a")) or {statuses = statuses}
         statuses = serverData.statuses
-        powerAddress = serverData.powerAddress
+        file:close()
+    end
+    file = io.open("/home/NIDAS/settings/machineData", "r")
+    if file then
+        statuses = serialization.unserialize(file:read("*a")) or {}
         file:close()
     end
 end

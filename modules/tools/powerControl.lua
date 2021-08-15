@@ -84,14 +84,16 @@ refresh = powerControl.configure
 load()
 
 function powerControl.update(data, redstoneAddress)
-    local level = getPercentage(data.powerStatus)
-    if engaged == nil then
-        engaged = level < enableLevel
-    end
-    if level < enableLevel then
-        if not engaged then engage() end
-    elseif level > disableLevel then
-        if engaged then disengage() end
+    if data ~= nil then
+        local level = getPercentage(data.powerStatus)
+        if engaged == nil then
+            engaged = level < enableLevel
+        end
+        if level < enableLevel then
+            if not engaged then engage() end
+        elseif level > disableLevel then
+            if engaged then disengage() end
+        end
     end
 end
 
