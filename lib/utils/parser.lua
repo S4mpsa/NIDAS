@@ -19,6 +19,7 @@ function parser.splitNumber(number, delim)
 end
 
 function parser.metricNumber(number)
+    if math.abs(number) < 1000 then return tostring(math.floor(number)) end
     local suffixes = {"K", "M", "G", "T", "P", "E", "Z"}
     local power = 1
     while math.abs((number / 1000 ^ power)) > 1000 do power = power + 1 end

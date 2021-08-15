@@ -3,6 +3,7 @@ local graphics = require("lib.graphics.graphics")
 local renderer = require("lib.graphics.renderer")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
+local descriptions = require("configuration.descriptions")
 
 graphics.setContext()
 local maxWidth = 160
@@ -13,9 +14,9 @@ local configurationData = {}
 
 
 local modules = {
-    {name = "HUD",              module = "hud", desc = "Overlays a HUD on your screen."},
-    {name = "Primary Server",   module = "server", desc = "Updates all data and handles communication between other servers."},
-    {name = "Power Control",    module = "modules.tools.powerControl", desc = "Emits redstone when power levels are below a certain amount."}
+    {name = "HUD",              module = "hud", desc = descriptions.hud},
+    {name = "Primary Server",   module = "server", desc = descriptions.server},
+    {name = "Power Control",    module = "modules.tools.powerControl", desc = descriptions.powerControl}
 }
 local processes = {}
 

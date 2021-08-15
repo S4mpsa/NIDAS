@@ -6,7 +6,6 @@ local serialization = require("serialization")
 
 local addressesConfigFile = "settings.machine-addresses"
 local machineAddresses = require(addressesConfigFile)
-local powerAddress = require("settings.power-address")
 local addMachine = require("server.usecases.add-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
@@ -33,6 +32,7 @@ local function load()
     if file then
         serverData = serialization.unserialize(file:read("*a")) or {statuses = statuses}
         statuses = serverData.statuses
+        powerAddress = serverData.powerAddress
         file:close()
     end
 end
@@ -110,12 +110,52 @@ local function updatePowerStatus(_, _, _, port, _, ...)
 end
 event.listen("modem_message", updatePowerStatus)
 
-function server.configure(x, y)
-    -- TODO: Code for GUI configuration of server:
-    ---- Machine renaming
-    ---- Machine widgets layout?
-    ---- Selecting server type: main or local
+local refresh = nil
+local selectedMachine = "None"
+local currentConfigWindow = {}
+local function changeMachine(machineAddress, data)
+    selectedMachine = machineAddress
+    local x, y, gui, graphics, renderer, page = table.unpack(data)
+    renderer.removeObject(currentConfigWindow)
+    refresh(x, y, gui, graphics, renderer, page)
 end
+
+function server.configure(x, y, gui, graphics, renderer, page)
+    local renderingData = {x, y, gui, graphics, renderer, page}
+    graphics.context().gpu.setActiveBuffer(page)
+    graphics.text(3, 11, "Machine:")
+    local onActivation = {}
+    for address, componentType in component.list() do
+        if componentType == "gt_machine" then
+            if statuses.multiblocks[address] == nil then
+                statuses.multiblocks[address] = {}
+            end
+            local displayName = statuses.multiblocks[address].name or address
+            table.insert(onActivation, {displayName = displayName, value = changeMachine, args = {address, renderingData}})
+        end
+    end
+    local _, ySize = graphics.context().gpu.getBufferSize(page)
+    table.insert(currentConfigWindow, gui.smallButton(x+10, y+5, selectedMachine, gui.selectionBox, {x+15, y+5, onActivation}))
+    table.insert(currentConfigWindow, gui.bigButton(x+2, y+tonumber(ySize)-4, "Save Configuration", save))
+    local attributeChangeList = {
+        {name = "Main Server",      attribute = "isMain",            type = "boolean",    defaultValue = false},
+        {name = "Power Capacitor",      attribute = "powerAddress",            type = "component",    defaultValue = "None", componentType = "gt_machine", nameTable = statuses.multiblocks}
+    }
+    gui.multiAttributeList(x+3, y+1, page, currentConfigWindow, attributeChangeList, serverData)
+
+    if selectedMachine ~= "None" then
+        local attributeChangeList = {
+            {name = "Machine Name",      attribute = "name",            type = "string",    defaultValue = nil}
+        }
+        gui.multiAttributeList(x+3, y+7, page, currentConfigWindow, attributeChangeList, statuses.multiblocks, selectedMachine)
+    end
+    renderer.update()
+    return currentConfigWindow
+
+    -- TODO: Code for GUI configuration of server:
+    ---- Machine widgets layout?
+end
+refresh = server.configure
 
 -- TODO: Persist to file
 local savingInterval = 500
@@ -140,8 +180,8 @@ function server.update()
         modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
     end
 
-    if powerAddress then
-        local powerStatus = getPowerStatus(powerAddress, "Lapotronic Supercapacitor")
+    if serverData.powerAddress then
+        local powerStatus = getPowerStatus(serverData.powerAddress, "Lapotronic Supercapacitor")
         if statuses.powerStatus ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
