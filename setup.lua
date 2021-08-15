@@ -1,5 +1,5 @@
 -- Paste this into OpenComputer terminal to download and set up NIDAS
--- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/develop/setup.lua -f
+-- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/setup.lua -f
 
 local shell = require("shell")
 local filesystem = require("filesystem")
