@@ -178,6 +178,7 @@ function menu.configure(x, y, _, _, _, page)
         {name = "Accent Color",     attribute = "accentColor",      type = "color",     defaultValue = colors.magenta},
         {name = "Border Color",     attribute = "borderColor",      type = "color",     defaultValue = colors.darkGray},
         {name = "",                 attribute = nil,                type = "header",    defaultValue = nil},
+        {name = "Autorun",          attribute = "autorun",          type = "boolean",   defaultValue = false},
         {name = "Multicasting",     attribute = "multicasting",     type = "boolean",   defaultValue = true},
         {name = "Developer Mode",   attribute = "debug",            type = "boolean",   defaultValue = false},
 
@@ -248,6 +249,7 @@ local function update()
     load()
     generateMenu()
     renderer.update()
+    if configurationData.autorun then switch() end
     while not interrupted do
         main()
     end
