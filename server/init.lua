@@ -44,14 +44,6 @@ local function load()
 end
 load()
 
-local function updateMachineList(_, address, _)
-    local comp = component.proxy(address)
-    if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
-        addMachine(address, addressesConfigFile)
-    end
-end
-event.listen("component_added", updateMachineList)
-
 local function identifyAsMainServer(_, _, sender, port, _, messageName)
     if port == portNumber and messageName == "are_you_the_main_server" then
         modem.send(sender, portNumber, "I_am_the_main_server")
@@ -86,6 +78,14 @@ if serverData.isMain == nil then
 else
     event.listen("modem_message", identifyAsMainServer)
 end
+
+local function updateMachineList(_, address, _)
+    local comp = component.proxy(address)
+    if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
+        addMachine(address, addressesConfigFile)
+    end
+end
+event.listen("component_added", updateMachineList)
 
 if serverData.isMain then
     modem.broadcast(portNumber, "get_status")
