@@ -49,6 +49,7 @@ end
 --Only the glass proxy is required, rest have default values.
 function powerDisplay.widget(glasses, data)
     if data ~= nil then
+    if data.state ~= states.MISSING then
     local currentEU = math.floor(data.storedEU)
     local maxEU = math.floor(data.EUCapacity)
     if maxEU < 0 then
@@ -186,6 +187,7 @@ function powerDisplay.widget(glasses, data)
             end
         end
         hudObjects[i].dynamic.filltime.setText(fillTimeString)
+    end
     end
     end
 end

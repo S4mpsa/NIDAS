@@ -192,6 +192,8 @@ function server.update()
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
         statuses.powerStatus = powerStatus
+    else
+        statuses.powerStatus = nil
     end
     if savingCounter == savingInterval then
         save()
