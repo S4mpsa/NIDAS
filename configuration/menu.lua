@@ -172,8 +172,8 @@ function menu.configure(x, y, _, _, _, page)
     local currentConfigWindow = {}
     local attributeChangeList = {
         {name = "Primary Screen",   attribute = "primaryScreen",    type = "component", defaultValue = require("component").screen.address, componentType = "screen"},
-        {name = "Resolution (X)",   attribute = "xRes",             type = "number",    defaultValue = 125, minValue = 80},
-        {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 35, minValue = 20},
+        {name = "Resolution (X)",   attribute = "xRes",             type = "number",    defaultValue = 125, minValue = 80, maxValue = 160},
+        {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 35, minValue = 20, maxValue = 50},
         {name = "Primary Color",    attribute = "primaryColor",     type = "color",     defaultValue = colors.electricBlue},
         {name = "Accent Color",     attribute = "accentColor",      type = "color",     defaultValue = colors.magenta},
         {name = "Border Color",     attribute = "borderColor",      type = "color",     defaultValue = colors.darkGray},
