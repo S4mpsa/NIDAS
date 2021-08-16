@@ -87,43 +87,7 @@ local successful =
         computer.shutdown(true)
     end
 )
-if (successful) then
+if (not successful) then
     gpu.setForeground(0xFF0000)
     gpu.set(width / 2 - 7, height / 2, "Update failed!  ")
-
 end
-
-local successful = pcall(function()
-    if filesystem.exists("/home/NIDAS/settings") then
-        shell.execute("cp -r /home/NIDAS/settings /home/temp/settings")
-    end
-    local workDir = "/home/NIDAS/"
-    filesystem.remove(workDir)
-    filesystem.makeDirectory(workDir)
-
-    shell.setWorkingDirectory(workDir)
-    print("Downloading NIDAS-" .. release)
-    shell.execute("wget -fq " .. NIDAS)
-    print("Extracting")
-    shell.execute("tar -xf NIDAS.tar")
-    filesystem.remove(workDir .. "NIDAS.tar")
-    filesystem.remove("/home/lib")
-    shell.execute("cp -r lib /home/lib")
-    filesystem.copy(workDir .. ".shrc", "/home/.shrc")
-    filesystem.copy(workDir .. "setup.lua", "/home/setup.lua")
-
-    if filesystem.exists("/home/temp") then
-        shell.execute("cp -r /home/temp/settings " .. workDir)
-        filesystem.remove("/home/temp/")
-    end
-
-    local rebootTime = 3
-    print("Success!")
-    print("Rebooting in 3s\n")
-    for i = 1, rebootTime do
-        io.write(".")
-        os.sleep(1)
-    end
-    computer.shutdown(true)
-end)
-if (not successful) then print("Update failed") end
