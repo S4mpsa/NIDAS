@@ -56,6 +56,7 @@ local function notification(data, string, timeout, color)
         if timeout then event.timer(timeout, retract) else return retract end
     else
         table.insert(data.queue, {string, timeout, color})
+        return false
     end
 end
 
@@ -64,11 +65,23 @@ function notifications.addNotification(text, timeout, color)
     for i = 1, #hudObjects do
         local hudObject = hudObjects[i]
         local retractFunc = notification(hudObject, text, timeout, color)
-        if retractFunc then table.insert(retracts, retractFunc) end
+        if not timeout then table.insert(retracts, retractFunc) end
     end
     local function retractAll()
+        --Remove notifications from queue if they were never shown
         for i = 1, #retracts do
-            retracts[i]()
+            if retracts[i] == false then
+                for j = 1, #hudObjects do
+                    for k = 1, #hudObjects[j].queue do
+                        if hudObjects[j].queue[k][1] == text then
+                            table.remove(hudObjects[j].queue, k)
+                            break
+                        end
+                    end
+                end
+            else
+                retracts[i]()
+            end
         end
     end
     if not timeout then return retractAll end
