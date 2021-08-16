@@ -4,6 +4,7 @@ local ar = require("lib.graphics.ar")
 package.loaded.powerdisplay = nil
 local powerDisplay = require("hud.powerdisplay")
 local toolbar = require("hud.toolbar")
+local notifications = require("hud.notifications")
 local component = require("component")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
@@ -12,6 +13,7 @@ local colors = require("lib.graphics.colors")
 local glassData = {}
 local powerDisplayUsers = {}
 local toolbarUsers = {}
+local notificationsUsers = {}
 local function load()
     local file = io.open("/home/NIDAS/settings/hudConfig", "r")
     if file ~= nil then
@@ -23,7 +25,9 @@ local function load()
         ar.clear(component.proxy(address))
         if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
         if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+        if data.notifications then table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
     end
+    
 end
 local function save()
     local file = io.open("/home/NIDAS/settings/hudConfig", "w")
@@ -39,6 +43,10 @@ local function save()
         if data.toolbar then
             table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
             toolbar.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+        end
+        if data.notifications then
+            table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+            notifications.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
         end
     end
     package.loaded.powerdisplay = nil
@@ -91,6 +99,7 @@ function hud.configure(x, y, gui, graphics, renderer, page)
             {name = "Active Modules",   attribute = nil,                type = "header",    defaultValue = nil},
             {name = "  Energy Display", attribute = "energyDisplay",    type = "boolean",   defaultValue = true},
             {name = "  Toolbar Overlay",attribute = "toolbar",          type = "boolean",   defaultValue = true},
+            {name = "  Notifications",  attribute = "notifications",          type = "boolean",   defaultValue = true},
         }
         gui.multiAttributeList(x+3, y+3, page, currentConfigWindow, attributeChangeList, glassData, selectedGlasses)
     end
@@ -103,6 +112,7 @@ function hud.update(serverInfo)
     if serverInfo then
         powerDisplay.widget(powerDisplayUsers, serverInfo.powerStatus)
         toolbar.widget(toolbarUsers)
+        notifications.widget(notificationsUsers)
     end
 end
 load()
