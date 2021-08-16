@@ -44,6 +44,14 @@ local function load()
 end
 load()
 
+local function updateMachineList(_, address, _)
+    local comp = component.proxy(address)
+    if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
+        addMachine(address, addressesConfigFile)
+    end
+end
+event.listen("component_added", updateMachineList)
+
 modem.open(portNumber)
 
 local function isMain()
