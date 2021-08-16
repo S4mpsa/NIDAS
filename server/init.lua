@@ -44,6 +44,8 @@ local function load()
 end
 load()
 
+modem.open(portNumber)
+
 local function isMain()
     -- Identifies as main
     local function identifyAsMainServer(_, _, sender, port, _, messageName)
@@ -85,7 +87,7 @@ elseif serverData.isMain == nil then
     event.timer(
         serverResponseTime,
         function()
-            event.ignore(detectMainServer)
+            event.ignore("modem_message", detectMainServer)
             if serverData.isMain then
                 isMain()
             end
