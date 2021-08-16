@@ -158,8 +158,8 @@ local function exec(address, packageName)
         return
     end
 
-    local comp = component.proxy(address)
-    componentAddresses[comp.type] = address
+    local proxy = component.proxy(address)
+    componentAddresses[proxy.type] = address
 
     local machineAddress = componentAddresses["gt_machine"] or componentAddresses["gt_batterybuffer"]
     if machineAddress and componentAddresses["waypoint"] then

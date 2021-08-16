@@ -52,66 +52,74 @@ local function updateMachineList(_, address, _)
 end
 event.listen("component_added", updateMachineList)
 
-if serverData.isMain == nil then
-    -- Server not configured yet
-    local function filter(eventName, ...)
-        local signalParams = {...}
-        local port = signalParams[4]
-        local args = signalParams[6]
-        return eventName == "modem_message" and port == portNumber and args and args[1] == "I_am_the_main_server"
+modem.open(portNumber)
+
+local function isMain()
+    -- Identifies as main
+    local function identifyAsMainServer(_, _, sender, port, _, messageName)
+        if port == portNumber and messageName == "are_you_the_main_server" then
+            modem.send(sender, portNumber, "I_am_the_main_server")
+        end
     end
+    event.listen("modem_message", identifyAsMainServer)
 
-    modem.broadcast(portNumber, "are_you_the_main_server")
-
-    local response = event.pullFiltered(serverResponseTime, filter)
-    if response == nil then
-        -- There's no other main server
-        serverData.isMain = true
-        local function identifyAsMainServer(_evName, _localAddress, sender, port, _distance, ...)
-            local args = {...}
-            if port == portNumber and args[1] == "are_you_the_main_server" then
-                modem.send(sender, portNumber, "I_am_the_main_server")
+    -- Gets other server statuses
+    local function updateMachineStatuses(_, _, _, port, _, messageName, arg)
+        if port == portNumber and messageName == "local_multiblock_statuses" then
+            for address, status in pairs(serialization.unserialize(arg)) do
+                statuses.multiblocks[address] = status
             end
         end
-        event.listen("modem_message", identifyAsMainServer)
     end
-    save()
-end
-
-if serverData.isMain then
+    event.listen("modem_message", updateMachineStatuses)
     modem.broadcast(portNumber, "get_status")
 end
 
-local function sendStatuses(_evName, _localAddress, sender, port, _distance, ...)
-    local args = {...}
-    if port == portNumber and args[1] == "get_status" then
-        local updatedStatuses = {}
-        for address, status in statuses.multiblocks do
-            updatedStatuses[address] = {state = status.state, problems = status.problems}
+if serverData.isMain then
+    isMain()
+elseif serverData.isMain == nil then
+    -- Server not configured yet
+    -- In case there's no response, server is main
+    serverData.isMain = true
+
+    local function detectMainServer(_, _, _, port, _, messageName)
+        if port == portNumber and messageName == "I_am_the_main_server" then
+            serverData.isMain = false
         end
-        modem.send(sender, portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
     end
-end
-if not serverData.isMain then
+
+    event.listen("modem_message", detectMainServer)
+    modem.broadcast(portNumber, "are_you_the_main_server")
+
+    -- Ignores response after timeout
+    event.timer(
+        serverResponseTime,
+        function()
+            event.ignore("modem_message", detectMainServer)
+            if serverData.isMain then
+                isMain()
+            end
+            save()
+        end
+    )
+else
+    -- Server is local
+    -- Sends it's statuses
+    local function sendStatuses(_, _, sender, port, _, messageName)
+        if port == portNumber and messageName == "get_status" then
+            local updatedStatuses = {}
+            for address, status in statuses.multiblocks do
+                updatedStatuses[address] = {state = status.state, problems = status.problems}
+            end
+            modem.send(sender, portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
+        end
+    end
     event.listen("modem_message", sendStatuses)
 end
 
-local function updateMachineStatuses(_, _, _, port, _, ...)
-    local args = {...}
-    if port == portNumber and args[1] == "local_multiblock_statuses" then
-        for address, status in pairs(serialization.unserialize(args[2])) do
-            statuses.multiblocks[address] = status
-        end
-    end
-end
-if serverData.isMain then
-    event.listen("modem_message", updateMachineStatuses)
-end
-
-local function updatePowerStatus(_, _, _, port, _, ...)
-    local args = {...}
-    if port == portNumber and args[1] == "local_power_status" then
-        statuses.powerStatus = serialization.unserialize(args[2])
+local function updatePowerStatus(_, _, _, port, _, messageName, arg)
+    if port == portNumber and messageName == "local_power_status" then
+        statuses.powerStatus = serialization.unserialize(arg)
     end
 end
 event.listen("modem_message", updatePowerStatus)
@@ -137,23 +145,44 @@ function server.configure(x, y, gui, graphics, renderer, page)
                 statuses.multiblocks[address] = {}
             end
             local displayName = statuses.multiblocks[address].name or address
-            table.insert(onActivation, {displayName = displayName, value = changeMachine, args = {address, renderingData}})
+            table.insert(
+                onActivation,
+                {displayName = displayName, value = changeMachine, args = {address, renderingData}}
+            )
         end
     end
     local _, ySize = graphics.context().gpu.getBufferSize(page)
-    table.insert(currentConfigWindow, gui.smallButton(x+10, y+5, selectedMachine, gui.selectionBox, {x+15, y+5, onActivation}))
-    table.insert(currentConfigWindow, gui.bigButton(x+2, y+tonumber(ySize)-4, "Save Configuration", save))
+    table.insert(
+        currentConfigWindow,
+        gui.smallButton(x + 10, y + 5, selectedMachine, gui.selectionBox, {x + 15, y + 5, onActivation})
+    )
+    table.insert(currentConfigWindow, gui.bigButton(x + 2, y + tonumber(ySize) - 4, "Save Configuration", save))
     local attributeChangeList = {
-        {name = "Main Server",      attribute = "isMain",            type = "boolean",    defaultValue = false},
-        {name = "Power Capacitor",      attribute = "powerAddress",            type = "component",    defaultValue = "None", componentType = "gt_machine", nameTable = statuses.multiblocks}
+        {name = "Main Server", attribute = "isMain", type = "boolean", defaultValue = false},
+        {
+            name = "Power Capacitor",
+            attribute = "powerAddress",
+            type = "component",
+            defaultValue = "None",
+            componentType = "gt_machine",
+            nameTable = statuses.multiblocks
+        }
     }
-    gui.multiAttributeList(x+3, y+1, page, currentConfigWindow, attributeChangeList, serverData)
+    gui.multiAttributeList(x + 3, y + 1, page, currentConfigWindow, attributeChangeList, serverData)
 
     if selectedMachine ~= "None" then
         local attributeChangeList = {
-            {name = "Machine Name",      attribute = "name",            type = "string",    defaultValue = nil}
+            {name = "Machine Name", attribute = "name", type = "string", defaultValue = nil}
         }
-        gui.multiAttributeList(x+3, y+7, page, currentConfigWindow, attributeChangeList, statuses.multiblocks, selectedMachine)
+        gui.multiAttributeList(
+            x + 3,
+            y + 7,
+            page,
+            currentConfigWindow,
+            attributeChangeList,
+            statuses.multiblocks,
+            selectedMachine
+        )
     end
     renderer.update()
     return currentConfigWindow
@@ -163,7 +192,6 @@ function server.configure(x, y, gui, graphics, renderer, page)
 end
 refresh = server.configure
 
--- TODO: Persist to file
 local savingInterval = 500
 local savingCounter = savingInterval
 function server.update()
