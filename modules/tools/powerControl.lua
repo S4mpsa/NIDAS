@@ -38,11 +38,11 @@ end
 
 local engaged = nil
 local function disengage()
-    redstone.setOutput({0, 0, 0, 0, 0, 0})
+    if engaged then redstone.setOutput({0, 0, 0, 0, 0, 0}) end
     engaged = false
 end
 local function engage()
-    redstone.setOutput({15, 15, 15, 15, 15, 15})
+    if not engaged then redstone.setOutput({15, 15, 15, 15, 15, 15}) end
     engaged = true
 end
 
@@ -82,17 +82,14 @@ end
 refresh = powerControl.configure
 
 load()
-
+engaged = redstone.getOutput(0) > 0
 function powerControl.update(data)
     if data ~= nil then
         local level = getPercentage(data.powerStatus)
-        if engaged == nil then
-            engaged = level < enableLevel
-        end
         if level < enableLevel then
-            if not engaged then engage() end
+            engage()
         elseif level > disableLevel then
-            if engaged then disengage() end
+            disengage()
         end
     end
 end
