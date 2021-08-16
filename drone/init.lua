@@ -68,16 +68,17 @@ local function getWaypointData(label)
         if wp.redstone > 0 then
             chancesToBeIt = 2
             -- Waypoint with a redstone signal and a label
-            if waypoint.label then
+            if #waypoint.label > 0 then
                 chancesToBeIt = 3
                 -- Waypoint with a redstone signal and the correct label
                 if wp.label == label then
                     chancesToBeIt = 4
                 end
             end
-        elseif wp.label then
+        elseif #wp.label > 0 then
             -- Waypoint with a label but no redstone signal
             chancesToBeIt = 1
+            -- Waypoint with the correct label but no redstone signal
             if wp.label == label then
                 chancesToBeIt = 3
             end
