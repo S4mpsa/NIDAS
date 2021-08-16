@@ -5,6 +5,8 @@ local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
 local descriptions = require("configuration.descriptions")
 
+local component = require("component")
+
 graphics.setContext()
 local maxWidth = 160
 local maxheight = 50
@@ -83,9 +85,9 @@ local function load()
             for i = 1, #configurationData.processes do
                 activate(configurationData.processes[i].module, configurationData.processes[i].name, configurationData.processes[i].desc, true)
             end
-            local primaryScreen = configurationData.primaryScreen or require("component").screen.address
+            local primaryScreen = configurationData.primaryScreen or component.screen.address
             gui.setColors(configurationData.primaryColor, configurationData.accentColor, configurationData.borderColor)
-            graphics.setContext({gpu = require("component").gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
+            graphics.setContext({gpu = component.gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
             maxWidth = graphics.context().width
             maxheight = graphics.context().height
             renderer.setPrimaryScreen(primaryScreen)
@@ -147,15 +149,14 @@ local menuVariable = nil
 
 local menu = {}
 local function saveSettings()
-    local component = require("component")
     save()
     gui.setColors(configurationData.primaryColor, configurationData.accentColor, configurationData.borderColor)
     renderer.clear()
     component.gpu.setResolution(configurationData.xRes or 125, configurationData.yRes or 35)
-    graphics.setContext({gpu = require("component").gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
+    graphics.setContext({gpu = component.gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
     maxWidth = graphics.context().width
     maxheight = graphics.context().height
-    local primaryScreen = configurationData.primaryScreen or require("component").screen.address
+    local primaryScreen = configurationData.primaryScreen or component.screen.address
     component.gpu.bind(primaryScreen, false)
     renderer.setPrimaryScreen(primaryScreen)
     renderer.setDebug(configurationData.debug or false)
@@ -171,7 +172,7 @@ function menu.configure(x, y, _, _, _, page)
     graphics.context().gpu.setActiveBuffer(page)
     local currentConfigWindow = {}
     local attributeChangeList = {
-        {name = "Primary Screen",   attribute = "primaryScreen",    type = "component", defaultValue = require("component").screen.address, componentType = "screen"},
+        {name = "Primary Screen",   attribute = "primaryScreen",    type = "component", defaultValue = component.screen.address, componentType = "screen"},
         {name = "Resolution (X)",   attribute = "xRes",             type = "number",    defaultValue = 125, minValue = 80, maxValue = 160},
         {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 35, minValue = 20, maxValue = 50},
         {name = "Primary Color",    attribute = "primaryColor",     type = "color",     defaultValue = colors.electricBlue},
@@ -192,7 +193,7 @@ end
 local running = false
 local serverData = nil
 local interrupted = false
-local function switch()
+local function switchRunStatus()
     running = not running
 end
 
@@ -225,7 +226,7 @@ end
 local function generateMenu()
     selector = activator(location.x, location.y, selectionBoxWidth, maxheight-5, "Activate", activate, modules, "Available", selector)
     deselector = activator(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5, "Disable", deactivate, processes, "Active", deselector)
-    gui.bigButton(location.x, location.y+maxheight-5, "Run", switch)
+    gui.bigButton(location.x, location.y+maxheight-5, "Run", switchRunStatus)
     gui.bigButton(location.x+5, location.y+maxheight-5, "Save", save)
     gui.bigButton(location.x+11, location.y+maxheight-5, "Reboot", reboot)
     gui.bigButton(location.x+19, location.y+maxheight-5, "Shell", interrupt)
@@ -249,7 +250,7 @@ local function update()
     load()
     generateMenu()
     renderer.update()
-    if configurationData.autorun then switch() end
+    if configurationData.autorun then switchRunStatus() end
     while not interrupted do
         main()
     end
