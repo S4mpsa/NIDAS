@@ -8,7 +8,7 @@ local findInIterator = require("lib.utils.find-in-iterator")
 
 local knownMachines = {}
 
-local function exec(partialAdress, name, mock)
+local function exec(partialAdress, name, location, mock)
     mock = mock or require("server.entities.mocks.mock-machine")
 
     local address = component.get(partialAdress)
@@ -18,6 +18,7 @@ local function exec(partialAdress, name, mock)
         {} -- Is missing
 
     machine.name = name
+    machine.location = location
     knownMachines[partialAdress] = machine
 
     return knownMachines[partialAdress]

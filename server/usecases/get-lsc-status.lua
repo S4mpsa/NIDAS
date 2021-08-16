@@ -8,8 +8,8 @@ local getNumberOfProblems = require("server.usecases.get-number-of-problems")
 
 --
 
-local function exec(address, name)
-    local lsc = getMachine(address, name, require("server.entities.mocks.mock-lsc"))
+local function exec(address, name, location)
+    local lsc = getMachine(address, name, location, require("server.entities.mocks.mock-lsc"))
     if not lsc.address then
         return {state = states.MISSING}
     end
