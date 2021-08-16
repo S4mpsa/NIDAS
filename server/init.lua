@@ -44,14 +44,31 @@ local function load()
 end
 load()
 
-local function identifyAsMainServer(_, _, sender, port, _, messageName)
-    if port == portNumber and messageName == "are_you_the_main_server" then
-        modem.send(sender, portNumber, "I_am_the_main_server")
+local function isMain()
+    -- Identifies as main
+    local function identifyAsMainServer(_, _, sender, port, _, messageName)
+        if port == portNumber and messageName == "are_you_the_main_server" then
+            modem.send(sender, portNumber, "I_am_the_main_server")
+        end
     end
-end
-if serverData.isMain == nil then
-    -- Server not configured yet
+    event.listen("modem_message", identifyAsMainServer)
 
+    -- Gets other server statuses
+    local function updateMachineStatuses(_, _, _, port, _, messageName, arg)
+        if port == portNumber and messageName == "local_multiblock_statuses" then
+            for address, status in pairs(serialization.unserialize(arg)) do
+                statuses.multiblocks[address] = status
+            end
+        end
+    end
+    event.listen("modem_message", updateMachineStatuses)
+    modem.broadcast(portNumber, "get_status")
+end
+
+if serverData.isMain then
+    isMain()
+elseif serverData.isMain == nil then
+    -- Server not configured yet
     -- In case there's no response, server is main
     serverData.isMain = true
 
@@ -61,8 +78,8 @@ if serverData.isMain == nil then
         end
     end
 
-    modem.broadcast(portNumber, "are_you_the_main_server")
     event.listen("modem_message", detectMainServer)
+    modem.broadcast(portNumber, "are_you_the_main_server")
 
     -- Ignores response after timeout
     event.timer(
@@ -70,49 +87,24 @@ if serverData.isMain == nil then
         function()
             event.ignore(detectMainServer)
             if serverData.isMain then
-                event.listen("modem_message", identifyAsMainServer)
+                isMain()
             end
             save()
         end
     )
 else
-    event.listen("modem_message", identifyAsMainServer)
-end
-
-local function updateMachineList(_, address, _)
-    local comp = component.proxy(address)
-    if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
-        addMachine(address, addressesConfigFile)
-    end
-end
-event.listen("component_added", updateMachineList)
-
-if serverData.isMain then
-    modem.broadcast(portNumber, "get_status")
-end
-
-local function sendStatuses(_, _, sender, port, _, messageName)
-    if port == portNumber and messageName == "get_status" then
-        local updatedStatuses = {}
-        for address, status in statuses.multiblocks do
-            updatedStatuses[address] = {state = status.state, problems = status.problems}
+    -- Server is local
+    -- Sends it's statuses
+    local function sendStatuses(_, _, sender, port, _, messageName)
+        if port == portNumber and messageName == "get_status" then
+            local updatedStatuses = {}
+            for address, status in statuses.multiblocks do
+                updatedStatuses[address] = {state = status.state, problems = status.problems}
+            end
+            modem.send(sender, portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
         end
-        modem.send(sender, portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
     end
-end
-if not serverData.isMain then
     event.listen("modem_message", sendStatuses)
-end
-
-local function updateMachineStatuses(_, _, _, port, _, messageName, arg)
-    if port == portNumber and messageName == "local_multiblock_statuses" then
-        for address, status in pairs(serialization.unserialize(arg)) do
-            statuses.multiblocks[address] = status
-        end
-    end
-end
-if serverData.isMain then
-    event.listen("modem_message", updateMachineStatuses)
 end
 
 local function updatePowerStatus(_, _, _, port, _, messageName, arg)
