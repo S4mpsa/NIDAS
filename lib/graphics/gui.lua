@@ -568,7 +568,10 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
     return pageTable
 end
 
-function gui.logo(x, y, version)
+function gui.logo(x, y, version, border, primary, accent)
+    local bColor = border or borderColor
+    local pColor = primary or primaryColor
+    local aColor = accent or accentColor
     local logo1 = {
         "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
         "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
@@ -587,17 +590,18 @@ function gui.logo(x, y, version)
         "█   █",
         "█   █"
     }
-    local page = renderer.createObject(x, y, 29, 8)
-    local gpu = graphics.context().gpu
-    gpu.setActiveBuffer(page)
-    graphics.text(1, 3, "◢", borderColor)
-    graphics.rectangle(1, 5, 1, 12, borderColor)
-    graphics.rectangle(2, 16, 27, 1, borderColor)
-    graphics.outline(3, 1, logo1, primaryColor)
-    graphics.outline(19, 1, logo2, accentColor)
-    graphics.text(27, 3, "Ver", accentColor)
-    graphics.text(27, 5, version, accentColor)
-    gpu.setActiveBuffer(0)
+    --local page = renderer.createObject(x, y, 29, 8)
+    --local gpu = graphics.context().gpu
+    --gpu.setActiveBuffer(page)
+    graphics.text(x+1, y+3, "◢", bColor)
+    graphics.text(x+1, y+14, "◥", bColor)
+    graphics.rectangle(x+1, y+5, 1, 12, bColor)
+    graphics.rectangle(x+2, y+14, 27, 1, bColor)
+    graphics.outline(x+3, y+1, logo1, pColor)
+    graphics.outline(x+19, y+1, logo2, aColor)
+    graphics.text(x+27, y+3, "Ver", aColor)
+    graphics.text(x+27, y+5, version, aColor)
+    --gpu.setActiveBuffer(0)
 end
 
 function gui.smallLogo(x, y, version)
