@@ -515,13 +515,18 @@ local function setComponentAttribute(x, y, tableToModify, tableValue, attribute,
             args = nil})
         end
     end
-
+    table.insert(components,
+    {displayName = "None",
+    value = "None",
+    args = nil})
     local value = gui.selectionBox(x+2, y, components)
     if value ~= nil then
         if tableValue ~= nil then
+            if value == "None" then tableToModify[tableValue][attribute] = nil end
             tableToModify[tableValue][attribute] = value
             graphics.text(x, y*2-1, value, primaryColor)
         else
+            if value == "None" then tableToModify[attribute] = nil end
             tableToModify[attribute] = value
             graphics.text(x, y*2-1, value, primaryColor)
         end
