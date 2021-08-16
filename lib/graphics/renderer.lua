@@ -3,21 +3,6 @@ local component = require("component")
 local event = require("event")
 local renderer = {}
 
-local testObject = {
-    gpu = component.gpu,
-    page = 0,
-    x = 0,
-    y = 0,
-    width = 160,
-    height = 50,
-    state = 0,
-    clickable = false,
-    clickArea = {{0, 0}, {0, 0}},
-    clickFunction = nil,
-    boundScreens = 0
-}
-
-
 local objects = {}
 local primaryScreen = component.screen.address
 local debug = false

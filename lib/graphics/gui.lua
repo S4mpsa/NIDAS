@@ -463,12 +463,11 @@ local function setColorAttribute(x, y, tableToModify, tableValue, attribute)
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
             for i = 1, longest-#name do name = name .. " " end
-            graphics.text(x, 2*y-1, name, value)
         else
             tableToModify[attribute] = value
             for i = 1, longest-#name do name = name .. " " end
-            graphics.text(x, 2*y-1, name, value)
         end
+        graphics.text(x, 2*y-1, name, value)
     end
 end
 

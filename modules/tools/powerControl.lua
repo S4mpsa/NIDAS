@@ -80,8 +80,8 @@ function powerControl.configure(x, y, gui, graphics, renderer, page)
     table.insert(currentConfigWindow, gui.smallButton(x+15, y+2, powerControlData.address or "None", gui.selectionBox, {x+16, y+2, onActivation}))
     table.insert(currentConfigWindow, gui.bigButton(x+2, y+tonumber(ySize)-4, "Save Configuration", save))
     local attributeChangeList = {
-        {name = "Active Level",      attribute = "enableLevel",            type = "string",    defaultValue = "Not Set"},
-        {name = "Disable Level",     attribute = "disableLevel",            type = "string",    defaultValue = "Not Set"},
+        {name = "Active Level",     attribute = "enableLevel",  type = "string",    defaultValue = "Not Set"},
+        {name = "Disable Level",    attribute = "disableLevel", type = "string",    defaultValue = "Not Set"},
     }
     gui.multiAttributeList(x+3, y+3, page, currentConfigWindow, attributeChangeList, powerControlData)
 
