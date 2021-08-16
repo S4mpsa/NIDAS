@@ -4,6 +4,7 @@ local renderer = require("lib.graphics.renderer")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
 local descriptions = require("configuration.descriptions")
+local screen = require("lib.utils.screen")
 
 local component = require("component")
 
@@ -248,7 +249,17 @@ end
 
 local function update()
     load()
+    renderer.update({0})
+    component.gpu.setActiveBuffer(0)
+    local x, y = component.gpu.getResolution()
+    component.gpu.fill(1, 1, x, y, " ")
+    local steps = 10
+    for i = 1, steps do
+        gui.logo(x/2-15, y/2+7, require("nidas_version"), screen.divideHex(colors.darkGray, (i/steps)), screen.divideHex(colors.electricBlue, (i/steps)), screen.divideHex(colors.magenta, (i/steps)))
+        os.sleep(0.05*i^0.5)
+    end
     generateMenu()
+    component.gpu.fill(1, 1, x, y, " ")
     renderer.update()
     if configurationData.autorun then switchRunStatus() end
     while not interrupted do
