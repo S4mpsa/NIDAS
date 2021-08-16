@@ -252,6 +252,7 @@ local function update()
     renderer.update({0})
     component.gpu.setActiveBuffer(0)
     local x, y = component.gpu.getResolution()
+    if y % 2 == 0 then y = y + 1 end
     component.gpu.fill(1, 1, x, y, " ")
     local steps = 10
     for i = 1, steps do
