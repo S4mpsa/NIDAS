@@ -285,6 +285,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim, minValue,
             event.push("touch", _, x, y+1)
         end
         if minValue and number < minValue then return minValue end
+        if maxValue and number > maxValue then return maxValue end
         return number
     else
         padded = parser.splitNumber(tonumber(startValue),delim)
@@ -439,14 +440,14 @@ local function setTextAttribute(x, y, tableToModify, tableValue, attribute)
         end
     end
 end
-local function setNumberAttribute(x, y, tableToModify, tableValue, attribute, minValue)
+local function setNumberAttribute(x, y, tableToModify, tableValue, attribute, minValue, maxValue)
     local startValue = 0
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or 0
     else
         startValue = tableToModify[attribute] or 0
     end
-    local value = gui.numberInput(x, y, 50, startValue, true, "", minValue)
+    local value = gui.numberInput(x, y, 50, startValue, true, "", minValue, maxValue)
     if value ~= nil then
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
@@ -552,7 +553,7 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
         if type == "string" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
         elseif type == "number" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue, attributeData[i].maxValue}))
         elseif type == "color" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or "Custom", setColorAttribute,
             {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
