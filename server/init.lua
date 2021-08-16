@@ -52,26 +52,39 @@ local function updateMachineList(_, address, _)
 end
 event.listen("component_added", updateMachineList)
 
+local function identifyAsMainServer(_, _, sender, port, _, messageName)
+    if port == portNumber and messageName == "are_you_the_main_server" then
+        modem.send(sender, portNumber, "I_am_the_main_server")
+    end
+end
 if serverData.isMain == nil then
     -- Server not configured yet
-    local function filter(eventName, _, _, _, port, _, messageName)
-        return eventName == "modem_message" and port == portNumber and messageName == "I_am_the_main_server"
+
+    -- In case there's no response, server is main
+    serverData.isMain = true
+
+    local function detectMainServer(_, _, _, port, _, messageName)
+        if port == portNumber and messageName == "I_am_the_main_server" then
+            serverData.isMain = false
+        end
     end
 
     modem.broadcast(portNumber, "are_you_the_main_server")
+    event.listen("modem_message", detectMainServer)
 
-    local response = event.pullFiltered(serverResponseTime, filter)
-    if response == nil then
-        -- There's no other main server
-        serverData.isMain = true
-        local function identifyAsMainServer(_, _, sender, port, _, messageName)
-            if port == portNumber and messageName == "are_you_the_main_server" then
-                modem.send(sender, portNumber, "I_am_the_main_server")
+    -- Ignores response after timeout
+    event.timer(
+        serverResponseTime,
+        function()
+            event.ignore(detectMainServer)
+            if serverData.isMain then
+                event.listen("modem_message", identifyAsMainServer)
             end
+            save()
         end
-        event.listen("modem_message", identifyAsMainServer)
-    end
-    save()
+    )
+else
+    event.listen("modem_message", identifyAsMainServer)
 end
 
 if serverData.isMain then
