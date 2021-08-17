@@ -86,8 +86,6 @@ local successful =
             local fileContent = string.gsub(profile:read("*a"), '\ndofile%("/etc/motd"%)\n', "")
             io.close(profile)
 
-            print("read successful")
-
             profile = io.open(profilePath, "w")
             profile:write(fileContent)
             io.close(profile)
