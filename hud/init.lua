@@ -35,6 +35,7 @@ local function save()
     file:close()
     powerDisplayUsers = {}
     toolbarUsers = {}
+    notificationsUsers = {}
     for address, data in pairs(glassData) do
         if data.energyDisplay then
             table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})

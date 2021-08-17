@@ -121,20 +121,12 @@ function notifications.widget(glasses)
                 notifications   = notificationTable,
                 queue           = {}
             })
-            local flashed = {}
+            local flashed = 1
             local function flashNotification()
-                table.insert(flashed, notification(hudObjects[i], tostring(#flashed), _, hudObjects[i].borderColor))
-            end
-            local function retractFlashed()
-                local n = 1
-                local function retract()
-                    flashed[n]()
-                    n  = n + 1
-                end
-                event.timer(0.05, retract, #flashed + 1)
+                notification(hudObjects[i], tostring(flashed), 0.1*#notificationTable+1, hudObjects[i].borderColor)
+                flashed = flashed + 1
             end
             event.timer(0.05, flashNotification, #notificationTable)
-            event.timer(0.1*#notificationTable+1, retractFlashed)
         end
     end
     for i = 1, #hudObjects do
