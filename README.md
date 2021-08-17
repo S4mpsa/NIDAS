@@ -1,41 +1,39 @@
 # **NIDAS** - Networked Information Display &amp; Automation Software
-    This is a program to run on OpenComputers computers that run the OpenOS OS.
+    NIDAS runs as a program over the OpenOS shell.
 
-    This program has it's use on the GTNH modpack, but might be useful for other modpacks as well.
+    The program is mostly developed for use with the GregTech: New Horizons modpack.
+    It requires OpenGlasses 1, which is only available for 1.7.10.
 
 # **Features**
 ## **AR HUD (OpenGlasses)**
 ### **Power monitor**
-* Displays current power status: How much power does the buffer support, how much power it has right now, the rate of change, 
-and how long will it take until it's full or empty considering the current rate of change.
+* Displays current power status: Total capacity, current capacity, input/output rate, and time to full/empty based on the rate.
     
-    (Only works for the LSC, but other kinds of buffers will be added later)
+    (Only works for the Lapotronic Supercapacitor)
 
 ### **Toolbar decoration**
-* Provides a nice overlay for your toolbar that indicates ingame time as well as real world time.
+* Provides an overlay for the toolbar, displaying both the ingame time and real world time.
 
 ### **Notifications**
-* Notifies the player of important events such as machines needing maintenance. 
+* Displays a HUD notification of important events, such as machines needing maintenance. 
 
-    It's a work in progress right now and isn't on the official, "stable" release.
+    ! Not implemented in stable !
 
-### **Machine overlay**
-    Displays an overlay on the controller of a machine that needs maintenance for easier locating it
+### **Gregtech machine maintenance overlay**
+    Notifies of maintenance need on the HUD and displays an in-world location helper. 
 
 ## **Machine monitoring**
-    As of now, the server keeps machine names, locations, progress, efficiency, power usage, and number of problems.
+    As of now, the server tracks machine names, locations, recipe progress, efficiency, power usage, and number of problems.
 
-    It recognizes newly added machines to the network, but doesn't read machines that are added while the computer is off.
+    Each machine has to be individually configured for location support.
 
-    However, we don't display those yet. There will soon be a nice pretty screen that has all or most of that information on local servers.
+    Local servers can display the data on a connected screen, while the main server provides HUD notifications of maintenace from all local servers.
 
-    The main server will only show the maintenance statuses of machines.
-
-## **Configuration screen**
+## **Configuration options**
 There are many things that can be configured.
 
 ### **System configuration**
-* Color scheme with support for custom colors. Each of the three colors on the interface are configurable to your liking.
+* Color scheme with support for custom colors. Each of the three colors are configurable.
 * Screen resolution.
 * Primary screen: Choose which one of the screens connected to the computer is the primary screen.
 * Autorun: Choose whether the program should run as soon as the computer boots. There is a `run` button for running it manually.
@@ -48,17 +46,18 @@ There are many things that can be configured.
 
 ### **HUD configuration**
 * Name the owner of the glasses.
-* Chose the resolution Minecraft is running at
-* Chose GUI scale on the video options of the game: 1 for small, 2 for medium, ,3 for large and 4 for auto.
+* Change the rendering resolution.
+* Chose GUI scale on the video options of the game: 1 for Small, 2 for Medium, ,3 for Large and 4 for Auto.
 * Choose your timezone offset so the real world clock displays your time correctly. 
-    (If the offset is negative, you must type the number first and then press minus, blame @S4mpsa for that)
+    (If the offset is negative, you must type the number first and then press -, blame @S4mpsa for that)
 
 ### **Power configuration**
-* Set the redstone component which controls the power
-* Configure the thresholds at which the power generators whould be turned on or off
+* Set the redstone component which controls the power.
+* Configure the thresholds at which the power generators whould be turned on or off.
 
 # **Requirements**
-    To run this on your OC computer, you must have a tier 3 server to accomodate all the components we use.
+    Due to the AR glasses requiring tier 3 components, support is only provided for tier 3 components. You can try running it with worse hardware, just don't complain!
+    Both the local servers and the main server can run on in a T3 computer case, but server racks are suggested for extra component capacity.
 
 ## **Components**
 * Internet card
@@ -67,18 +66,17 @@ There are many things that can be configured.
 * Tier 2 wireless network card
     * Is used for communication between different servers on the system.
 * Memory sticks
-    * The more the merrier.
+    * At least one Tier 3.5 or equivalent.
     * We haven't calculated how much we need, but if you can build an OC, you can probably craft planty of those.
-    * Aim for the highest tier available.
 * Component busses
-    * The more the merrier
-    * If you can build an OC, you can probably craft planty of those.
-    * They're needed to connect machines components. The more machines you have on your network, the more of these you'll need.
+    * Main server does not necessarily need any.
+    * Local servers will most likely want these to connect more than a few machines.
+    * Each T3 Component bus gives the server 16 more components, with a maximum of around 50 free slots after the required hardware.
     * Aim for the highest tier available.
-* Disk
-    * We only use one tier 3 disk and evverything works fine so far.
-* Tier 3 graphics card
-    * For displaying nice colors and getting touch events.
+* HardDisk
+    * NIDAS itself uses around 300Kb, so even a T1 Disk should work. We suggest using a T3 disk, however.
+* Tier 3 graphics card and screen
+    * The configuration menu is very cramped and looks washed out with a T2 screen and GPU.
 
 # **Installation**
     Glad you got this far.
@@ -106,30 +104,28 @@ There are many things that can be configured.
 * Server
     * Place the main server first.
         (It could be later, but then you gotta change the setting that says it's the main server on it and on the local server you placed first).
-    * Chose the component that is the power buffer.
-        (See new machines below).
-    * Place the local server second.
+    * Place local servers after the main server has ran atleast once.
 * Drone
-    * The drone is used to get the machine locations so that we can put an overlay on the machine controller in case there's a maintenance issue.
+    * The drone is used to get the machine locations for displaying machine maintenance locations.
     * Place it by a charger so it doesn't run out of battery.
-    * Place your drone with the following components in it:
+    * Createa your drone in the electronics assembelr with the following components:
         * Internet card for setting up and updating.
         * Tier 2 network card for communicating with the server.
-        * Location upgrade to get the location of the waypoints.
         * Some RAM.
-        * A disk.
+        * A disk installed with OpenOS
         * A keyboard (Important, don't forget this).
         * A graphics card.
         * A CPU.
-        * Some screen.
+        * A Screen
         * Card holder upgrade.
-    * Install the program just like you did for the server.
-    * Whenever you place your drone in a new location, it'll prompt you for that location. Use its terminal to give it that information.
+        * Navigation Upgrade in the card holder upgrade. (Craft the navigation card with a vanilla map that was created on top of the drone to ensure it being in range)
+    * Install the program just like you did for the server. You can also install NIDAS to the hard drive before creating the drone.
+    * Whenever you place your drone in a new location, it'll prompt you for that location. Use the terminal to give the X, Y and Z coordinates.
 * New machines
-    * Place down a waypoint 4 blocks below the machine controller.
+    * Place down a waypoint so the particle effects are inside the machine controller location.
     * (Optional): Name the waypoint. This will be the name of the machine in the system.
     * (Optional): Give it a redstone signal.
-    * Place the adapter on the machine controller (You can use an MFU for that, so you don't need the adpter to be adjacent to the controller).
+    * Place the adapter on the machine controller (You can use an MFU for that, so you don't need the adapter to be adjacent to the controller).
     * Remove the waypoint after 10 seconds.
 * Glasses
     * Place down a glasses terminal.
