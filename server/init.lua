@@ -5,8 +5,7 @@ local modem = component.modem
 local serialization = require("serialization")
 
 local addressesConfigFile = "settings.machine-addresses"
-local machineAddresses = {}
-local addMachine = require("server.usecases.add-machine")
+local addDroneMachine = require("server.usecases.add-drone-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
 
@@ -47,7 +46,8 @@ load()
 local function updateMachineList(_, address, _)
     local comp = component.proxy(address)
     if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
-        addMachine(address, addressesConfigFile)
+        addDroneMachine(address, addressesConfigFile)
+        serverData.knownMachines = require(addressesConfigFile)
     end
 end
 event.listen("component_added", updateMachineList)
@@ -198,13 +198,18 @@ function server.update()
     local shouldBroadcastStatuses = false
     local updatedStatuses = {}
 
-    for address, name in pairs(machineAddresses or {}) do
-        local multiblockStatus = getMultiblockStatus(address, name)
+    for address, machine in pairs(serverData.knownMachines or {}) do
+        local multiblockStatus = getMultiblockStatus(address, machine.name, machine.location)
         statuses.multiblocks[address] = statuses.multiblocks[address] or {}
 
         if multiblockStatus.state ~= statuses.multiblocks[address].state then
             shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
-            updatedStatuses[address] = {state = multiblockStatus.state, problems = multiblockStatus.problems}
+            updatedStatuses[address] = {
+                state = multiblockStatus.state,
+                problems = multiblockStatus.problems,
+                name = machine.name,
+                location = machine.location
+            }
         end
 
         statuses.multiblocks[address] = multiblockStatus

@@ -9,8 +9,8 @@ local getEfficiencyPercentage = require("server.usecases.get-efficiency-percenta
 
 --
 
-local function exec(address, name)
-    local multiblock = getMachine(address, name)
+local function exec(address, name, location)
+    local multiblock = getMachine(address, name, location)
     if not multiblock.address then
         return {state = states.MISSING}
     end
