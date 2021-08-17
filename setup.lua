@@ -79,6 +79,23 @@ local successful =
         end
         filesystem.remove("/home/temp/")
 
+        local function removeMotd()
+            local profilePath = "/etc/profile.lua"
+            local profile = io.open(profilePath, "r")
+            local fileContent = {}
+            for line in profile:lines() do
+                table.insert(fileContent, line:gsub('%f[^\n%z]dofile("/etc/motd")[^\n]*', ""))
+            end
+            io.close(profile)
+            
+            profile = io.open(profilePath, "w")
+            for _, value in ipairs(fileContent) do
+                profile:write(value .. "\n")
+            end
+            io.close(profile)
+        end
+        removeMotd()
+
         gpu.set(width / 2 - 7, height / 2, "                ")
         gpu.set(width / 2 - 7, height / 2, "Update complete.  ")
         gpu.setForeground(colorB)
