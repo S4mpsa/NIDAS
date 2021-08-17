@@ -83,7 +83,7 @@ local successful =
             local profilePath = "/etc/profile.lua"
 
             local profile = io.open(profilePath, "r")
-            local fileContent = profile:read("*a"):gsub('%f[^\n%z]dofile("/etc/motd")[^\n]*', "")
+            local fileContent = string.gsub(profile:read("*a"), '\ndofile%("/etc/motd"%)\n', "")
             io.close(profile)
 
             print("read successful")
