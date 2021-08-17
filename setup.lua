@@ -81,17 +81,15 @@ local successful =
 
         local function removeMotd()
             local profilePath = "/etc/profile.lua"
+
             local profile = io.open(profilePath, "r")
-            local fileContent = {}
-            for line in profile:lines() do
-                table.insert(fileContent, line:gsub('%f[^\n%z]dofile("/etc/motd")[^\n]*', ""))
-            end
+            local fileContent = profile:read("*a"):gsub('%f[^\n%z]dofile("/etc/motd")[^\n]*', "")
             io.close(profile)
-            
+
+            print("read successful")
+
             profile = io.open(profilePath, "w")
-            for _, value in ipairs(fileContent) do
-                profile:write(value .. "\n")
-            end
+            profile:write(fileContent)
             io.close(profile)
         end
         removeMotd()
