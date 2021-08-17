@@ -131,7 +131,7 @@ function notifications.widget(glasses)
                     flashed[n]()
                     n  = n + 1
                 end
-                event.timer(0.05, retract, #flashed)
+                event.timer(0.05, retract, #flashed + 1)
             end
             event.timer(0.05, flashNotification, #notificationTable)
             event.timer(0.1*#notificationTable+1, retractFlashed)
