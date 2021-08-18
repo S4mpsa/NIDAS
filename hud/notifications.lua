@@ -167,6 +167,7 @@ function notifications.widget(glasses)
             local function doStartup()
                 startup(hudObjects[i], 1, #notificationTable)
             end
+            --The next line is to prevent the HUD animations firing off before rest of the HUD is drawn.
             event.timer(3, doStartup, 1)
         end
     end
