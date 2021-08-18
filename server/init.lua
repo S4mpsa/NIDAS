@@ -27,7 +27,7 @@ local function save()
     file:write(serialization.serialize(statuses))
     file:close()
     file = io.open("/home/NIDAS/settings/known-machines", "w")
-    file:write(serialization.serialize(statuses))
+    file:write(serialization.serialize(knownMachines))
     file:close()
 end
 
