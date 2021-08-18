@@ -1,8 +1,12 @@
 -- Import section
+
 local event = require("event")
 local component = require("component")
 local modem = component.modem
 local serialization = require("serialization")
+local gui = require("lib.graphics.gui")
+local renderer = require("lib.graphics.renderer")
+local graphics = require("lib.graphics.graphics")
 
 local addDroneMachine = require("server.usecases.add-drone-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
@@ -34,8 +38,7 @@ end
 local function load()
     local file = io.open("/home/NIDAS/settings/serverData", "r")
     if file then
-        serverData = serialization.unserialize(file:read("*a")) or {statuses = statuses}
-        statuses = serverData.statuses
+        serverData = serialization.unserialize(file:read("*a")) or {}
         file:close()
     end
     file = io.open("/home/NIDAS/settings/machineData", "r")
@@ -131,42 +134,33 @@ end
 
 local function updatePowerStatus(_, _, _, port, _, messageName, arg)
     if port == portNumber and messageName == "local_power_status" then
-        statuses.powerStatus = serialization.unserialize(arg)
+        statuses.power = serialization.unserialize(arg)
     end
 end
 event.listen("modem_message", updatePowerStatus)
 
 local refresh = nil
-local selectedMachine = "None"
+local selectedMachineAddress = "None"
 local currentConfigWindow = {}
-local function changeMachine(machineAddress, data)
-    selectedMachine = machineAddress
-    local x, y, gui, graphics, renderer, page = table.unpack(data)
+local function changeMachine(machineAddress, x, y, page)
+    selectedMachineAddress = machineAddress
     renderer.removeObject(currentConfigWindow)
-    refresh(x, y, gui, graphics, renderer, page)
+    refresh(x, y, nil, nil, nil, page)
 end
 
-function server.configure(x, y, gui, graphics, renderer, page)
-    local renderingData = {x, y, gui, graphics, renderer, page}
+function server.configure(x, y, _, _, _, page)
     graphics.context().gpu.setActiveBuffer(page)
     graphics.text(3, 11, "Machine:")
     local onActivation = {}
-    for address, componentType in component.list() do
-        if componentType == "gt_machine" then
-            if statuses.multiblocks[address] == nil then
-                statuses.multiblocks[address] = {}
-            end
-            local displayName = statuses.multiblocks[address].name or address
-            table.insert(
-                onActivation,
-                {displayName = displayName, value = changeMachine, args = {address, renderingData}}
-            )
-        end
+    for address, machine in pairs(knownMachines or {}) do
+        statuses.multiblocks[address] = statuses.multiblocks[address] or {}
+        local displayName = machine.name or statuses.multiblocks[address].name or address
+        table.insert(onActivation, {displayName = displayName, value = changeMachine, args = {address, x, y, page}})
     end
     local _, ySize = graphics.context().gpu.getBufferSize(page)
     table.insert(
         currentConfigWindow,
-        gui.smallButton(x + 10, y + 5, selectedMachine, gui.selectionBox, {x + 15, y + 5, onActivation})
+        gui.smallButton(x + 10, y + 5, selectedMachineAddress, gui.selectionBox, {x + 15, y + 5, onActivation})
     )
     table.insert(currentConfigWindow, gui.bigButton(x + 2, y + tonumber(ySize) - 4, "Save Configuration", save))
     local attributeChangeList = {
@@ -182,8 +176,8 @@ function server.configure(x, y, gui, graphics, renderer, page)
     }
     gui.multiAttributeList(x + 3, y + 1, page, currentConfigWindow, attributeChangeList, serverData)
 
-    if selectedMachine ~= "None" then
-        local attributeChangeList = {
+    if selectedMachineAddress ~= "None" then
+        attributeChangeList = {
             {name = "Machine Name", attribute = "name", type = "string", defaultValue = nil}
         }
         gui.multiAttributeList(
@@ -192,8 +186,8 @@ function server.configure(x, y, gui, graphics, renderer, page)
             page,
             currentConfigWindow,
             attributeChangeList,
-            statuses.multiblocks,
-            selectedMachine
+            knownMachines,
+            selectedMachineAddress
         )
     end
     renderer.update()
@@ -208,15 +202,15 @@ local savingInterval = 500
 local savingCounter = savingInterval
 function server.update()
     local shouldBroadcastStatuses = false
-    local updatedStatuses = {}
+    local statusesToBroadcast = {}
 
     for address, machine in pairs(knownMachines or {}) do
         local multiblockStatus = getMultiblockStatus(address, machine.name, machine.location)
         statuses.multiblocks[address] = statuses.multiblocks[address] or {}
 
-        if multiblockStatus.state ~= statuses.multiblocks[address].state then
-            shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
-            updatedStatuses[address] = {
+        if not serverData.isMain and multiblockStatus.state ~= statuses.multiblocks[address].state then
+            shouldBroadcastStatuses = true
+            statusesToBroadcast[address] = {
                 state = multiblockStatus.state,
                 problems = multiblockStatus.problems,
                 name = machine.name,
@@ -228,17 +222,17 @@ function server.update()
     end
 
     if shouldBroadcastStatuses then
-        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
+        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(statusesToBroadcast))
     end
 
     if serverData.powerAddress then
         local powerStatus = getPowerStatus(serverData.powerAddress, "Lapotronic Supercapacitor")
-        if statuses.powerStatus ~= powerStatus then
+        if statuses.power ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
-        statuses.powerStatus = powerStatus
+        statuses.power = powerStatus
     else
-        statuses.powerStatus = nil
+        statuses.power = nil
     end
     if savingCounter == savingInterval then
         save()

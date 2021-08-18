@@ -111,7 +111,7 @@ end
 refresh = hud.configure
 function hud.update(serverInfo)
     if serverInfo then
-        powerDisplay.widget(powerDisplayUsers, serverInfo.powerStatus)
+        powerDisplay.widget(powerDisplayUsers, serverInfo.power)
         toolbar.widget(toolbarUsers)
         notifications.widget(notificationsUsers)
     end

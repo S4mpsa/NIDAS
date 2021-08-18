@@ -40,9 +40,9 @@ local function registerWaypointDataListener(machineAddress)
         if port == portNumber and messageName == "waypoint_data" then
             local waypointData = serialization.unserialize(arg)
             knownMachines[machineAddress] = {
-                location = {waypointData[1], waypointData[2], waypointData[3]},
-                label = waypointData[4],
-                redstone = waypointData[5]
+                name = waypointData[1],
+                redstone = waypointData[2],
+                location = {waypointData[3], waypointData[4], waypointData[5]}
             }
         end
     end

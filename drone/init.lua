@@ -88,11 +88,11 @@ local function getWaypointData(label)
 
     if waypoint then
         local waypointData = {
+            waypoint.label,
+            waypoint.redstone,
             droneData.coordinates.x + waypoint.position[1],
             droneData.coordinates.y + waypoint.position[2],
-            droneData.coordinates.z + waypoint.position[3],
-            waypoint.label,
-            waypoint.redstone
+            droneData.coordinates.z + waypoint.position[3]
         }
         return waypointData
     else
