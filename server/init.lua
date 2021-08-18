@@ -26,7 +26,7 @@ local function save()
     file = io.open("/home/NIDAS/settings/machineData", "w")
     file:write(serialization.serialize(statuses))
     file:close()
-    file = io.open("/home/NIDAS/settings/knownMachines", "w")
+    file = io.open("/home/NIDAS/settings/known-machines", "w")
     file:write(serialization.serialize(statuses))
     file:close()
 end
@@ -43,9 +43,9 @@ local function load()
         statuses = serialization.unserialize(file:read("*a")) or {}
         file:close()
     end
-    file = io.open("/home/NIDAS/settings/machine-addresses", "r")
+    file = io.open("/home/NIDAS/settings/known-machines", "r")
     if file then
-        serverData.knownMachines = serialization.unserialize(file:read("*a")) or {}
+        knownMachines = serialization.unserialize(file:read("*a")) or {}
         file:close()
     end
 end
@@ -55,9 +55,9 @@ local function updateMachineList(_, address, _)
     local comp = component.proxy(address)
     if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
         addDroneMachine(address)
-        local file = io.open("/home/NIDAS/settings/machine-addresses", "r")
+        local file = io.open("/home/NIDAS/settings/known-machines", "r")
         if file then
-            serverData.knownMachines = serialization.unserialize(file:read("*a")) or {}
+            knownMachines = serialization.unserialize(file:read("*a")) or {}
             file:close()
         end
     end
@@ -210,7 +210,7 @@ function server.update()
     local shouldBroadcastStatuses = false
     local updatedStatuses = {}
 
-    for address, machine in pairs(serverData.knownMachines or {}) do
+    for address, machine in pairs(knownMachines or {}) do
         local multiblockStatus = getMultiblockStatus(address, machine.name, machine.location)
         statuses.multiblocks[address] = statuses.multiblocks[address] or {}
 

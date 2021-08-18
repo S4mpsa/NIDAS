@@ -20,13 +20,13 @@ local portNumber = constants.machineAddPort
 modem.open(portNumber)
 
 local function save()
-    local file = io.open("/home/NIDAS/settings/machine-addresses", "w")
+    local file = io.open("/home/NIDAS/settings/known-machines", "w")
     file:write(serialization.serialize(knownMachines))
     file:close()
 end
 
 local function load()
-    local file = io.open("/home/NIDAS/settings/machine-addresses", "r")
+    local file = io.open("/home/NIDAS/settings/known-machines", "r")
     if file then
         knownMachines = serialization.unserialize(file:read("*a")) or {}
         file:close()
