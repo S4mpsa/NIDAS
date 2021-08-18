@@ -208,15 +208,15 @@ local savingInterval = 500
 local savingCounter = savingInterval
 function server.update()
     local shouldBroadcastStatuses = false
-    local updatedStatuses = {}
+    local statusesToBroadcast = {}
 
     for address, machine in pairs(knownMachines or {}) do
         local multiblockStatus = getMultiblockStatus(address, machine.name, machine.location)
         statuses.multiblocks[address] = statuses.multiblocks[address] or {}
 
-        if multiblockStatus.state ~= statuses.multiblocks[address].state then
-            shouldBroadcastStatuses = shouldBroadcastStatuses or not serverData.isMain
-            updatedStatuses[address] = {
+        if not serverData.isMain and multiblockStatus.state ~= statuses.multiblocks[address].state then
+            shouldBroadcastStatuses = true
+            statusesToBroadcast[address] = {
                 state = multiblockStatus.state,
                 problems = multiblockStatus.problems,
                 name = machine.name,
@@ -228,7 +228,7 @@ function server.update()
     end
 
     if shouldBroadcastStatuses then
-        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(updatedStatuses))
+        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(statusesToBroadcast))
     end
 
     if serverData.powerAddress then
