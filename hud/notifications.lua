@@ -9,13 +9,15 @@ local hudObjects = {}
 local startY = 40
 local stepModifier = 3
 
-local function notification(data, string, timeout, color)
-    local yModifier = nil
-    for i = 1, #data.notifications do
-        if not data.notifications[i] then
-            yModifier = i
-            data.notifications[i] = true
-            break
+local function notification(data, string, timeout, color, forceSlot)
+    local yModifier = forceSlot or nil
+    if not forceSlot then
+        for i = 1, #data.notifications do
+            if not data.notifications[i] then
+                yModifier = i
+                data.notifications[i] = true
+                break
+            end
         end
     end
     if yModifier then
@@ -58,6 +60,47 @@ local function notification(data, string, timeout, color)
         table.insert(data.queue, {string, timeout, color})
         return false
     end
+end
+
+local function startup(data, startN, endN)
+        local glasses = data.glasses
+        local width = 40
+        local height = 11 * (endN - startN)
+        local y = startY
+        local x = 0
+        local stepSize = stepModifier * math.ceil(width / 30)
+        local top = ar.quad(glasses, {x, y}, {x, y+1}, {x, y+1}, {x, y}, data.borderColor, 0.8)
+        local bottom = ar.quad(glasses, {x, y+height}, {x, y+height+1}, {x, y+height+1}, {x, y+height}, data.borderColor, 0.8)
+        local background = ar.quad(glasses, {x, y+1}, {x, y+height}, {x, y+height}, {x, y+1}, data.borderColor, 0.4)
+        local text = ar.text(glasses, "          "..tostring(startN), {-width, y+2}, data.primaryColor)
+        local text2 = ar.text(glasses, "          "..tostring(endN), {-width, y+height-10}, data.primaryColor)
+        local stepsTaken = 0
+        local totalSteps = width / stepSize
+        local direction = 1
+        local function advance()
+            stepsTaken = stepsTaken + direction
+            top.setVertex(3, x + stepSize * stepsTaken, y+1)
+            top.setVertex(4, x + stepSize * stepsTaken - 1, y)
+            bottom.setVertex(3, x + stepSize * stepsTaken - 1, y+height+1)
+            bottom.setVertex(4, x + stepSize * stepsTaken, y+height)
+            background.setVertex(3, x + stepSize * stepsTaken, y+height)
+            background.setVertex(4, x + stepSize * stepsTaken, y+1)
+            text.setPosition(math.min(x+1, x + -width + stepSize * stepsTaken - 1), y+2)
+            text2.setPosition(math.min(x+1, x + -width + stepSize * stepsTaken - 1), y+height-10)
+            if direction == -1 and stepsTaken == 0 then
+                glasses.removeObject(top.getID())
+                glasses.removeObject(bottom.getID())
+                glasses.removeObject(background.getID())
+                glasses.removeObject(text.getID())
+                glasses.removeObject(text2.getID())
+            end
+        end
+        local function retract()
+            direction = -1
+            event.timer(0.05, advance, totalSteps)
+        end
+        event.timer(0.05, advance, totalSteps)
+        event.timer(3, retract)
 end
 
 function notifications.addNotification(text, timeout, color)
@@ -121,12 +164,11 @@ function notifications.widget(glasses)
                 notifications   = notificationTable,
                 queue           = {}
             })
-            local flashed = 1
-            local function flashNotification()
-                notification(hudObjects[i], tostring(flashed), 0.1*#notificationTable+1, hudObjects[i].borderColor)
-                flashed = flashed + 1
+            local function doStartup()
+                startup(hudObjects[i], 1, #notificationTable)
             end
-            event.timer(0.05, flashNotification, #notificationTable)
+            --The next line is to prevent the HUD animations firing off before rest of the HUD is drawn.
+            event.timer(3, doStartup, 1)
         end
     end
     for i = 1, #hudObjects do
@@ -136,13 +178,5 @@ function notifications.widget(glasses)
         end
     end
 end
-
-
-
-
-
-
-
-
 
 return notifications
