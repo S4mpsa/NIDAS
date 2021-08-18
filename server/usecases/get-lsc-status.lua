@@ -11,7 +11,7 @@ local getNumberOfProblems = require("server.usecases.get-number-of-problems")
 local function exec(address, name, location)
     local lsc = getMachine(address, name, location, require("server.entities.mocks.mock-lsc"))
     if not lsc.address then
-        return {state = states.MISSING}
+        return {state = states.MISSING, name = name, location = location}
     end
 
     local sensorInformation = lsc:getSensorInformation()
