@@ -232,7 +232,7 @@ function server.update()
         end
         statuses.power = powerStatus
     else
-        statuses.power = {}
+        statuses.power = nil
     end
     if savingCounter == savingInterval then
         save()
