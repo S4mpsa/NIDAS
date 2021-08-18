@@ -234,6 +234,8 @@ local function generateMenu()
     gui.bigButton(location.x+26, location.y+maxheight-5, "Settings", configScreen, {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, "NIDAS Settings", menu})
     if updateAvailable() then gui.smallButton(maxWidth-21, maxheight, "Update available!", update) end
     gui.smallLogo(maxWidth-20, maxheight-4, require("nidas_version"))
+    component.gpu.fill(1, 1, 160, 50, " ")
+    renderer.update()
 end
 menuVariable = generateMenu
 local function main()
@@ -249,19 +251,7 @@ end
 
 local function update()
     load()
-    renderer.update({0})
-    component.gpu.setActiveBuffer(0)
-    local x, y = component.gpu.getResolution()
-    if y % 2 == 0 then y = y + 1 end
-    component.gpu.fill(1, 1, x, y, " ")
-    local steps = 10
-    for i = 1, steps do
-        gui.logo(x/2-15, y/2+7, require("nidas_version"), screen.divideHex(colors.darkGray, (i/steps)), screen.divideHex(colors.electricBlue, (i/steps)), screen.divideHex(colors.magenta, (i/steps)))
-        os.sleep(0.05*i^0.5)
-    end
     generateMenu()
-    component.gpu.fill(1, 1, x, y, " ")
-    renderer.update()
     if configurationData.autorun then switchRunStatus() end
     while not interrupted do
         main()

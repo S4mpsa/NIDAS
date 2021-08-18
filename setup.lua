@@ -79,18 +79,11 @@ local successful =
         end
         filesystem.remove("/home/temp/")
 
-        local function removeMotd()
-            local profilePath = "/etc/profile.lua"
+        filesystem.remove("/lib/core/boot.lua")
+        filesystem.copy(workDir .. "nidas_boot.lua", "/lib/core/boot.lua")
 
-            local profile = io.open(profilePath, "r")
-            local fileContent = string.gsub(profile:read("*a"), '\ndofile%("/etc/motd"%)\n', "")
-            io.close(profile)
-
-            profile = io.open(profilePath, "w")
-            profile:write(fileContent)
-            io.close(profile)
-        end
-        removeMotd()
+        filesystem.remove("/etc/profile.lua")
+        filesystem.copy(workDir .. "nidas_profile.lua", "/etc/profile.lua")
 
         gpu.set(width / 2 - 7, height / 2, "                ")
         gpu.set(width / 2 - 7, height / 2, "Update complete.  ")

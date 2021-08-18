@@ -4,6 +4,5 @@ ln /home/NIDAS/configuration /home/NIDAS/tablet/configuration
 #ln /home/NIDAS/configuration /home/NIDAS/glasses/configuration
 #ln /home/NIDAS/configuration /home/NIDAS/screen/configuration
 cd /home/NIDAS
-clear
 init
 cd
