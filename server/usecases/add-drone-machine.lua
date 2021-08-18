@@ -1,17 +1,17 @@
 -- Import section
 
-local filesystem = require("filesystem")
 local event = require("event")
+local serialization = require("serialization")
+
 local component = require("component")
 local modem = component.modem
+
 local constants = require("configuration.constants")
-local serialization = require("serialization")
 
 --
 
 local componentAddresses = {}
 
-local addressesConfigFile = ""
 local knownMachines = {}
 
 local responseTime = constants.networkResponseTime
@@ -19,36 +19,20 @@ local responseTime = constants.networkResponseTime
 local portNumber = constants.machineAddPort
 modem.open(portNumber)
 
-local function reloadAddressesConfigFile()
-    -- Unloads the config file from memory
-    pcall(
-        function()
-            package.loaded[addressesConfigFile] = nil
-        end
-    )
-    -- Reloads the config file
-    pcall(
-        function()
-            knownMachines = require(addressesConfigFile)
-        end
-    )
+local function save()
+    local file = io.open("/home/NIDAS/settings/known-machines", "w")
+    file:write(serialization.serialize(knownMachines))
+    file:close()
 end
 
--- Rewrites the address configuration file, based on the knownMachines
-local function rewriteAddressFile()
-    local filePath = package.searchpath(addressesConfigFile, package.path)
-    filesystem.remove(filePath)
-    local configFile = io.open(filePath, "w")
-    configFile:write("local addresses =\n")
-
-    configFile:write(serialization.serialize(knownMachines, true))
-
-    configFile:write("\n\n")
-    configFile:write("return addresses\n")
-    configFile:close()
-
-    reloadAddressesConfigFile()
+local function load()
+    local file = io.open("/home/NIDAS/settings/known-machines", "r")
+    if file then
+        knownMachines = serialization.unserialize(file:read("*a")) or {}
+        file:close()
+    end
 end
+load()
 
 local function registerWaypointDataListener(machineAddress)
     knownMachines[machineAddress].name = "Unknown"
@@ -69,14 +53,14 @@ local function registerWaypointDataListener(machineAddress)
         responseTime,
         function()
             event.ignore("modem_message", waypointDataListener)
-            rewriteAddressFile()
+            save()
+            load()
         end
     )
 end
 
-local function exec(address, packageName, label)
-    addressesConfigFile = packageName
-    reloadAddressesConfigFile()
+local function exec(address)
+    load()
     -- Skips machine setup if it's already in the configuration file
     if knownMachines[address] then
         return
