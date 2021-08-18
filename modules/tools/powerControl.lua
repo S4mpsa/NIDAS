@@ -92,9 +92,9 @@ local checkingInterval = 1500
 local counter = checkingInterval
 function powerControl.update(data)
     if counter == checkingInterval then
-        if data.powerStatus ~= nil and redstone ~= nil then
-            if data.powerStatus.state ~= states.MISSING then
-                local level = getPercentage(data.powerStatus)
+        if data.power ~= nil and redstone ~= nil then
+            if data.power.state ~= states.MISSING then
+                local level = getPercentage(data.power)
                 if level < enableLevel then
                     engage()
                 elseif level > disableLevel then
