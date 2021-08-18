@@ -1,4 +1,5 @@
 -- Import section
+
 local event = require("event")
 local component = require("component")
 local modem = component.modem
@@ -139,10 +140,10 @@ end
 event.listen("modem_message", updatePowerStatus)
 
 local refresh = nil
-local selectedMachine = "None"
+local selectedMachineAddress = "None"
 local currentConfigWindow = {}
 local function changeMachine(machineAddress, x, y, page)
-    selectedMachine = machineAddress
+    selectedMachineAddress = machineAddress
     renderer.removeObject(currentConfigWindow)
     refresh(x, y, nil, nil, nil, page)
 end
@@ -151,20 +152,15 @@ function server.configure(x, y, _, _, _, page)
     graphics.context().gpu.setActiveBuffer(page)
     graphics.text(3, 11, "Machine:")
     local onActivation = {}
-    for address, componentType in component.list() do
-        if componentType == "gt_machine" then
-            statuses.multiblocks[address] = statuses.multiblocks[address] or {}
-            local displayName = statuses.multiblocks[address].name or address
-            table.insert(
-                onActivation,
-                {displayName = displayName, value = changeMachine, args = {address, x, y, page}}
-            )
-        end
+    for address, machine in pairs(knownMachines or {}) do
+        statuses.multiblocks[address] = statuses.multiblocks[address] or {}
+        local displayName = machine.name or statuses.multiblocks[address].name or address
+        table.insert(onActivation, {displayName = displayName, value = changeMachine, args = {address, x, y, page}})
     end
     local _, ySize = graphics.context().gpu.getBufferSize(page)
     table.insert(
         currentConfigWindow,
-        gui.smallButton(x + 10, y + 5, selectedMachine, gui.selectionBox, {x + 15, y + 5, onActivation})
+        gui.smallButton(x + 10, y + 5, selectedMachineAddress, gui.selectionBox, {x + 15, y + 5, onActivation})
     )
     table.insert(currentConfigWindow, gui.bigButton(x + 2, y + tonumber(ySize) - 4, "Save Configuration", save))
     local attributeChangeList = {
@@ -180,8 +176,8 @@ function server.configure(x, y, _, _, _, page)
     }
     gui.multiAttributeList(x + 3, y + 1, page, currentConfigWindow, attributeChangeList, serverData)
 
-    if selectedMachine ~= "None" then
-        local attributeChangeList = {
+    if selectedMachineAddress ~= "None" then
+        attributeChangeList = {
             {name = "Machine Name", attribute = "name", type = "string", defaultValue = nil}
         }
         gui.multiAttributeList(
@@ -190,8 +186,8 @@ function server.configure(x, y, _, _, _, page)
             page,
             currentConfigWindow,
             attributeChangeList,
-            statuses.multiblocks,
-            selectedMachine
+            knownMachines,
+            selectedMachineAddress
         )
     end
     renderer.update()
