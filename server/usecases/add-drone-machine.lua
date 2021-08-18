@@ -1,6 +1,5 @@
 -- Import section
 
-local filesystem = require("filesystem")
 local event = require("event")
 local serialization = require("serialization")
 
@@ -13,7 +12,6 @@ local constants = require("configuration.constants")
 
 local componentAddresses = {}
 
-local addressesConfigFile = ""
 local knownMachines = {}
 
 local responseTime = constants.networkResponseTime

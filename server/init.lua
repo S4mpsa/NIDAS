@@ -12,7 +12,8 @@ local constants = require("configuration.constants")
 local portNumber = constants.machineStatusPort
 local serverResponseTime = constants.networkResponseTime
 
-local serverData = {knownMachines = {}}
+local serverData = {}
+local knownMachines = {}
 local server = {}
 local statuses = {multiblocks = {}, power = {}}
 
@@ -23,6 +24,9 @@ local function save()
     file:write(serialization.serialize(serverData))
     file:close()
     file = io.open("/home/NIDAS/settings/machineData", "w")
+    file:write(serialization.serialize(statuses))
+    file:close()
+    file = io.open("/home/NIDAS/settings/knownMachines", "w")
     file:write(serialization.serialize(statuses))
     file:close()
 end
