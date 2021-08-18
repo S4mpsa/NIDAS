@@ -47,7 +47,12 @@ local function updateMachineList(_, address, _)
     local comp = component.proxy(address)
     if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
         addDroneMachine(address, addressesConfigFile)
-        serverData.knownMachines = require(addressesConfigFile)
+        serverData.knownMachines = {}
+        pcall(
+            function()
+                serverData.knownMachines = require(addressesConfigFile)
+            end
+        )
     end
 end
 event.listen("component_added", updateMachineList)

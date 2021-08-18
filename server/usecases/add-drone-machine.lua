@@ -27,7 +27,11 @@ local function reloadAddressesConfigFile()
         end
     )
     -- Reloads the config file
-    knownMachines = require(addressesConfigFile)
+    pcall(
+        function()
+            knownMachines = require(addressesConfigFile)
+        end
+    )
 end
 
 -- Rewrites the address configuration file, based on the knownMachines
