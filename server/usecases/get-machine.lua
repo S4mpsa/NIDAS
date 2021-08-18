@@ -2,8 +2,6 @@
 
 local component = require("component")
 
-local findInIterator = require("lib.utils.find-in-iterator")
-
 --
 
 local knownMachines = {}
@@ -14,8 +12,8 @@ local function exec(partialAdress, name, location, mock)
     local address = component.get(partialAdress)
     local machine =
         (address and component.proxy(address)) or -- Exists
-        (findInIterator(component.list(), "ocemu") and mock:getMock(partialAdress)) or -- Is running on emulator
-        {} -- Is missing
+        (component.list("ocemu", true)() and mock:getMock(partialAdress)) or -- Is running on emulator
+        nil -- Is missing
 
     machine.name = name
     machine.location = location
