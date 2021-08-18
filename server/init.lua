@@ -3,6 +3,9 @@ local event = require("event")
 local component = require("component")
 local modem = component.modem
 local serialization = require("serialization")
+local gui = require("lib.graphics.gui")
+local renderer = require("lib.graphics.renderer")
+local graphics = require("lib.graphics.graphics")
 
 local addDroneMachine = require("server.usecases.add-drone-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
@@ -34,8 +37,7 @@ end
 local function load()
     local file = io.open("/home/NIDAS/settings/serverData", "r")
     if file then
-        serverData = serialization.unserialize(file:read("*a")) or {statuses = statuses}
-        statuses = serverData.statuses
+        serverData = serialization.unserialize(file:read("*a")) or {}
         file:close()
     end
     file = io.open("/home/NIDAS/settings/machineData", "r")
@@ -139,27 +141,23 @@ event.listen("modem_message", updatePowerStatus)
 local refresh = nil
 local selectedMachine = "None"
 local currentConfigWindow = {}
-local function changeMachine(machineAddress, data)
+local function changeMachine(machineAddress, x, y, page)
     selectedMachine = machineAddress
-    local x, y, gui, graphics, renderer, page = table.unpack(data)
     renderer.removeObject(currentConfigWindow)
-    refresh(x, y, gui, graphics, renderer, page)
+    refresh(x, y, nil, nil, nil, page)
 end
 
-function server.configure(x, y, gui, graphics, renderer, page)
-    local renderingData = {x, y, gui, graphics, renderer, page}
+function server.configure(x, y, _, _, _, page)
     graphics.context().gpu.setActiveBuffer(page)
     graphics.text(3, 11, "Machine:")
     local onActivation = {}
     for address, componentType in component.list() do
         if componentType == "gt_machine" then
-            if statuses.multiblocks[address] == nil then
-                statuses.multiblocks[address] = {}
-            end
+            statuses.multiblocks[address] = statuses.multiblocks[address] or {}
             local displayName = statuses.multiblocks[address].name or address
             table.insert(
                 onActivation,
-                {displayName = displayName, value = changeMachine, args = {address, renderingData}}
+                {displayName = displayName, value = changeMachine, args = {address, x, y, page}}
             )
         end
     end

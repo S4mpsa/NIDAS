@@ -41,7 +41,7 @@ local function registerWaypointDataListener(machineAddress)
             local waypointData = serialization.unserialize(arg)
             knownMachines[machineAddress] = {
                 location = {waypointData[1], waypointData[2], waypointData[3]},
-                label = waypointData[4],
+                name = waypointData[4],
                 redstone = waypointData[5]
             }
         end
