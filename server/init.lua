@@ -131,7 +131,7 @@ end
 
 local function updatePowerStatus(_, _, _, port, _, messageName, arg)
     if port == portNumber and messageName == "local_power_status" then
-        statuses.powerStatus = serialization.unserialize(arg)
+        statuses.power = serialization.unserialize(arg)
     end
 end
 event.listen("modem_message", updatePowerStatus)
@@ -233,12 +233,12 @@ function server.update()
 
     if serverData.powerAddress then
         local powerStatus = getPowerStatus(serverData.powerAddress, "Lapotronic Supercapacitor")
-        if statuses.powerStatus ~= powerStatus then
+        if statuses.power ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
-        statuses.powerStatus = powerStatus
+        statuses.power = powerStatus
     else
-        statuses.powerStatus = nil
+        statuses.power = {}
     end
     if savingCounter == savingInterval then
         save()
