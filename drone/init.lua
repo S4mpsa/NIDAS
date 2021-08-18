@@ -64,23 +64,16 @@ local function getWaypointData(label)
     local chancesToBeIt = 0
     local previousChances = 0
     for _, wp in ipairs(waypoints) do
-        -- Waypoint with a redstone signal
         if wp.redstone > 0 then
-            chancesToBeIt = 2
-            -- Waypoint with a redstone signal and a label
-            if #waypoint.label > 0 then
-                chancesToBeIt = 3
-                -- Waypoint with a redstone signal and the correct label
-                if wp.label == label then
-                    chancesToBeIt = 4
-                end
-            end
-        elseif #wp.label > 0 then
-            -- Waypoint with a label but no redstone signal
-            chancesToBeIt = 1
-            -- Waypoint with the correct label but no redstone signal
+            -- Waypoint with a redstone signal
+            chancesToBeIt = chancesToBeIt + 1
+        end
+        if #wp.label > 0 then
+            -- Waypoint with a label
+            chancesToBeIt = chancesToBeIt + 1
             if wp.label == label then
-                chancesToBeIt = 3
+                -- Waypoint with the correct label
+                chancesToBeIt = chancesToBeIt + 2
             end
         end
         if chancesToBeIt > previousChances then
@@ -90,6 +83,7 @@ local function getWaypointData(label)
         if previousChances == 4 then
             break
         end
+        chancesToBeIt = 0
     end
 
     if waypoint then
