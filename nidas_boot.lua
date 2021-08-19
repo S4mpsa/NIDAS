@@ -14,7 +14,9 @@ local unicode = unicode
 -- Runlevel information.
 _G.runlevel = "S"
 local shutdown = computer.shutdown
-computer.runlevel = function() return _G.runlevel end
+computer.runlevel = function()
+  return _G.runlevel
+end
 computer.shutdown = function(reboot)
   _G.runlevel = reboot and 6 or 0
   if os.sleep then
@@ -41,7 +43,6 @@ if gpu then
 end
 
 -- Report boot progress if possible.
-local y = 1
 local uptime = computer.uptime
 -- we actually want to ref the original pullSignal here because /lib/event intercepts it later
 -- because of that, we must re-pushSignal when we use this, else things break badly
@@ -126,69 +127,58 @@ for _, file in ipairs(rom_invoke("list", "boot")) do
   end
 end
 
-if component == nil then
-  component = require("component")
-  computer = require("computer")
-  os = require("os")
-end
-
-local screen = {}
-
-function screen.divideHex(hex, divisor)
+local function screen_divideHex(hex, divisor)
   local r = ((hex >> 16) & 0xFF)
   local g = ((hex >> 8) & 0xFF)
   local b = ((hex) & 0xFF)
-  return ((math.ceil(divisor*r)) << 16) + ((math.ceil(divisor*g)) << 8) + (divisor*b)
+  return ((math.ceil(divisor * r)) << 16) + ((math.ceil(divisor * g)) << 8) + (divisor * b)
 end
 
 local function graphics_text(x, y, text, color)
   color = color or 0xFFFFFF
   if y % 2 == 0 then
-      error("Y must be odd.")
+    error("Y must be odd.")
   else
-      local gpu = component.proxy(component.list("gpu")())
-      local screenY = math.ceil(y/2)
-      gpu.setForeground(color)
-      gpu.set(x, screenY, text)
+    local screenY = math.ceil(y / 2)
+    gpu.setForeground(color)
+    gpu.set(x, screenY, text)
   end
 end
 
 local function pixel(x, y, color)
-  local gpu = component.proxy(component.list("gpu")())
-  local screenY = math.ceil(y/2)
+  local screenY = math.ceil(y / 2)
   gpu.setForeground(color)
   if y % 2 == 1 then --Upper half of pixel
-      gpu.set(x, screenY, "▀");
+    gpu.set(x, screenY, "▀")
   else --Lower half of pixel
-      gpu.set(x, screenY, "▄");
+    gpu.set(x, screenY, "▄")
   end
 end
 
 local function graphics_rectangle(x, y, width, height, color)
-  local gpu = component.proxy(component.list("gpu")())
   local hLeft = height
-      if x > 0 and y > 0 then
-      if y % 2 == 0 then
-          for i = x, x+width-1 do
-              pixel(i, y, color)
-          end
-          hLeft = hLeft - 1
+  if x > 0 and y > 0 then
+    if y % 2 == 0 then
+      for i = x, x + width - 1 do
+        pixel(i, y, color)
       end
-      gpu.setForeground(color)
-      if hLeft % 2 == 1 then
-          gpu.fill(x, math.ceil(y/2)+(height-hLeft), width, (hLeft-1)/2, "█")
-          for j = x, x+width-1 do
-              pixel(j, y+height-1, color)
-          end
-      else
-          gpu.fill(x, math.ceil(y/2)+(height-hLeft), width, hLeft/2, "█")
+      hLeft = hLeft - 1
+    end
+    gpu.setForeground(color)
+    if hLeft % 2 == 1 then
+      gpu.fill(x, math.ceil(y / 2) + (height - hLeft), width, (hLeft - 1) / 2, "█")
+      for j = x, x + width - 1 do
+        pixel(j, y + height - 1, color)
       end
+    else
+      gpu.fill(x, math.ceil(y / 2) + (height - hLeft), width, hLeft / 2, "█")
+    end
   end
 end
 local function graphics_outline(x, y, lines, color)
   color = color or 0xFFFFFF
-  for i = 0, #lines-1 do
-      graphics_text(x, y+i*2, lines[i+1], color)
+  for i = 0, #lines - 1 do
+    graphics_text(x, y + i * 2, lines[i + 1], color)
   end
 end
 local function gui_logo(x, y, version, border, primary, accent)
@@ -196,59 +186,51 @@ local function gui_logo(x, y, version, border, primary, accent)
   local pColor = primary
   local aColor = accent
   local logo1 = {
-      "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
-      "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
-      "█ ◥◣█  █  █   █ █   █ █    ",
-      "█  ◥█  █  █   █ █▃▃▃█ ◥███◣",
-      "█   █  █  █   █ █   █     █",
-      "█   █  █  █  ◢◤ █   █     █",
-      "█   █  ◤  ███◤  █   █ ◢███◤"
+    "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
+    "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
+    "█ ◥◣█  █  █   █ █   █ █    ",
+    "█  ◥█  █  █   █ █▃▃▃█ ◥███◣",
+    "█   █  █  █   █ █   █     █",
+    "█   █  █  █  ◢◤ █   █     █",
+    "█   █  ◤  ███◤  █   █ ◢███◤"
   }
-  local logo2 ={
-      " ◢█◣ ",
-      "◢◤ ◥◣",
-      "█   █",
-      "█▃▃▃█",
-      "█   █",
-      "█   █",
-      "█   █"
+  local logo2 = {
+    " ◢█◣ ",
+    "◢◤ ◥◣",
+    "█   █",
+    "█▃▃▃█",
+    "█   █",
+    "█   █",
+    "█   █"
   }
 
-  graphics_text(x+1, y+3, "◢", bColor)
-  graphics_text(x+1, y+14, "◥", bColor)
-  graphics_rectangle(x+1, y+5, 1, 12, bColor)
-  graphics_rectangle(x+2, y+14, 27, 1, bColor)
-  graphics_outline(x+3, y+1, logo1, pColor)
-  graphics_outline(x+19, y+1, logo2, aColor)
-  graphics_text(x+27, y+3, "Ver", aColor)
-  graphics_text(x+27, y+5, version, aColor)
+  graphics_text(x + 1, y + 3, "◢", bColor)
+  graphics_text(x + 1, y + 14, "◥", bColor)
+  graphics_rectangle(x + 1, y + 5, 1, 12, bColor)
+  graphics_rectangle(x + 2, y + 14, 27, 1, bColor)
+  graphics_outline(x + 3, y + 1, logo1, pColor)
+  graphics_outline(x + 19, y + 1, logo2, aColor)
+  graphics_text(x + 27, y + 3, "Ver", aColor)
+  graphics_text(x + 27, y + 5, version, aColor)
 end
-local uptime = computer.uptime
-local pull = computer.pullSignal
-function sleep(timeout, func, callbacks) 
-local deadline = uptime() + (timeout or 0)
-if func ~= nil then
-  func()
+
+gpu.setResolution(80, 20)
+local x, y = gpu.getResolution()
+if y % 2 == 0 then
+  y = y - 1
 end
-repeat
-  local ev = table.pack(pull(deadline - uptime()))
-  if callbacks ~= nil then
-    local event_name = ev[1]
-    local callback = callbacks[event_name]
-    if callback ~= nil then
-      callback(table.unpack(ev))
-    end
-  end
-until uptime() >= deadline
-end
-component.proxy(component.list("gpu")()).setResolution(80, 20)
-local x, y = component.proxy(component.list("gpu")()).getResolution()
-if y % 2 == 0 then y = y - 1 end
 
 local steps = (#scripts + 1)
 table.sort(scripts)
 for i = 2, (#scripts + 1) do
-  gui_logo(x/2-15, y/2+1, dofile("/home/NIDAS/nidas_version.lua"), screen.divideHex(0x181828, (i/(steps))^2), screen.divideHex(0x00A6FF, (i/(steps + 0))^2), screen.divideHex(0xFF00FF, (i/(steps + 0))^2))
+  gui_logo(
+    x / 2 - 15,
+    y / 2 + 1,
+    dofile("/home/NIDAS/nidas_version.lua"),
+    screen_divideHex(0x181828, (i / (steps)) ^ 2),
+    screen_divideHex(0x00A6FF, (i / (steps + 0)) ^ 2),
+    screen_divideHex(0xFF00FF, (i / (steps + 0)) ^ 2)
+  )
   gpu.setForeground(0xFFFFFF)
   dofile(scripts[i - 1])
 end
