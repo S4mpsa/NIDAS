@@ -76,7 +76,7 @@ local function exec(address)
         registerWaypointDataListener(machineAddress)
         -- TODO: Add a timer for allowing the user to put a label on the waypoint
         -- User should be allowed to name the waypoint even if it has been placed after the machine
-        modem.broadcast(portNumber, "what_is_the_wapoint_data", serialization.serialize(waypointLabel))
+        modem.broadcast(portNumber, "what_is_the_waypoint_data", serialization.serialize(waypointLabel))
 
         -- Forgets the machine and the waypoint after the setup
         componentAddresses = {}

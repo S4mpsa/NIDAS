@@ -102,7 +102,7 @@ local function getWaypointData(label)
 end
 
 local function sendWaypointData(_, _, senderAddress, port, _, messageName, label)
-    if port == portNumber and messageName == "what_is_the_wapoint_data" then
+    if port == portNumber and messageName == "what_is_the_waypoint_data" then
         print("Sending coordinate data for waypoint labeled " .. serialization.unserialize(label))
         modem.send(senderAddress, portNumber, "waypoint_data", serialization.serialize(getWaypointData(label)))
     end
