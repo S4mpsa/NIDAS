@@ -53,6 +53,7 @@ local function registerWaypointDataListener(machineAddress)
         responseTime,
         function()
             event.ignore("modem_message", waypointDataListener)
+            knownMachines[machineAddress] = knownMachines[machineAddress] or {name = machineAddress, location = {}}
             save()
             load()
         end
@@ -72,7 +73,8 @@ local function exec(address)
     local machineAddress = componentAddresses["gt_machine"] or componentAddresses["gt_batterybuffer"]
     if machineAddress then
         local waypointLabel =
-            component.get(componentAddresses["waypoint"] or " ") and component.proxy(componentAddresses["waypoint"]).getLabel()
+            component.get(componentAddresses["waypoint"] or " ") and
+            component.proxy(componentAddresses["waypoint"]).getLabel()
         knownMachines[machineAddress] = {}
         registerWaypointDataListener(machineAddress)
         -- TODO: Add a timer for allowing the user to put a label on the waypoint
