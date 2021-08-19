@@ -105,10 +105,10 @@ There are many things that can be configured.
     * Place the main server first.
         (It could be later, but then you gotta change the setting that says it's the main server on it and on the local server you placed first).
     * Place local servers after the main server has ran atleast once.
-* Drone
-    * The drone is used to get the machine locations for displaying machine maintenance locations.
+* Robot
+    * The robot is used to get the machine locations for displaying machine maintenance locations.
     * Place it by a charger so it doesn't run out of battery.
-    * Createa your drone in the electronics assembelr with the following components:
+    * Create your robot in the electronics assembelr with the following components:
         * Internet card for setting up and updating.
         * Tier 2 network card for communicating with the server.
         * Some RAM.
@@ -118,9 +118,9 @@ There are many things that can be configured.
         * A CPU.
         * A Screen
         * Card holder upgrade.
-        * Navigation Upgrade in the card holder upgrade. (Craft the navigation card with a vanilla map that was created on top of the drone to ensure it being in range)
-    * Install the program just like you did for the server. You can also install NIDAS to the hard drive before creating the drone.
-    * Whenever you place your drone in a new location, it'll prompt you for that location. Use the terminal to give the X, Y and Z coordinates.
+        * Navigation Upgrade in the card holder upgrade. (Craft the navigation card with a vanilla map that was created on top of the robot to ensure it being in range)
+    * Install the program just like you did for the server. You can also install NIDAS to the hard drive before creating the robot.
+    * Whenever you place your robot in a new location, it'll prompt you for that location. Use the terminal to give the X, Y and Z coordinates.
 * New machines
     * Place down a waypoint so the particle effects are inside the machine controller location.
     * (Optional): Name the waypoint. This will be the name of the machine in the system.

@@ -10,37 +10,37 @@ local portNumber = require("configuration.constants").machineAddPort
 
 --
 
-local droneData = {}
+local robotData = {}
 
 local function save()
-    local file = io.open("/home/NIDAS/settings/droneData", "w")
-    file:write(serialization.serialize(droneData))
+    local file = io.open("/home/NIDAS/settings/robotData", "w")
+    file:write(serialization.serialize(robotData))
     file:close()
 end
 
 local function queryLocation()
-    print("Drone location not set.")
+    print("Robot location not set.")
     term.write("Insert X coordinate: ")
     local x = tonumber(term.read(_, true))
     term.write("Insert Y coordinate: ")
     local y = tonumber(term.read(_, true))
     term.write("Insert Z coordinate: ")
     local z = tonumber(term.read(_, true))
-    droneData.coordinates = {x = x, y = y, z = z}
+    robotData.coordinates = {x = x, y = y, z = z}
     save()
 end
 
 local function load()
-    local file = io.open("/home/NIDAS/settings/droneData", "r")
+    local file = io.open("/home/NIDAS/settings/robotData", "r")
     if file then
-        droneData = serialization.unserialize(file:read("*a"))
-        if droneData and droneData.droneLocation then
+        robotData = serialization.unserialize(file:read("*a"))
+        if robotData and robotData.robotLocation then
             local x, y, z = component.navigation.getPosition()
             if x == nil then
-                error("The drone is out of range of the map.")
+                error("The robot is out of range of the map.")
             end
-            if droneData.droneLocation[1] ~= x or droneData.droneLocation[2] ~= y or droneData.droneLocation[3] ~= z then
-                droneData.droneLocation = {x, y, z}
+            if robotData.robotLocation[1] ~= x or robotData.robotLocation[2] ~= y or robotData.robotLocation[3] ~= z then
+                robotData.robotLocation = {x, y, z}
                 queryLocation()
             end
         end
@@ -48,9 +48,9 @@ local function load()
     else
         local x, y, z = component.navigation.getPosition()
         if x == nil then
-            error("The drone is out of range of the map.")
+            error("The robot is out of range of the map.")
         end
-        droneData.droneLocation = {x, y, z}
+        robotData.robotLocation = {x, y, z}
         queryLocation()
     end
 end
@@ -90,9 +90,9 @@ local function getWaypointData(label)
         local waypointData = {
             waypoint.label,
             waypoint.redstone,
-            droneData.coordinates.x + waypoint.position[1],
-            droneData.coordinates.y + waypoint.position[2],
-            droneData.coordinates.z + waypoint.position[3]
+            robotData.coordinates.x + waypoint.position[1],
+            robotData.coordinates.y + waypoint.position[2],
+            robotData.coordinates.z + waypoint.position[3]
         }
         return waypointData
     else
