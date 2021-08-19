@@ -234,7 +234,6 @@ for i = 2, (#scripts + 1) do
   gpu.setForeground(0xFFFFFF)
   dofile(scripts[i - 1])
 end
-gpu.setResolution(gpu.maxResolution())
 
 status("Initializing components...")
 
