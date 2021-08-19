@@ -35,7 +35,6 @@ end
 load()
 
 local function registerWaypointDataListener(machineAddress)
-    knownMachines[machineAddress].name = "Unknown"
     local function waypointDataListener(_, _, _, port, _, messageName, arg)
         if port == portNumber and messageName == "waypoint_data" then
             local waypointData = serialization.unserialize(arg) or {}
@@ -71,20 +70,16 @@ local function exec(address)
     componentAddresses[proxy.type] = address
 
     local machineAddress = componentAddresses["gt_machine"] or componentAddresses["gt_batterybuffer"]
+    local waypointAddress = componentAddresses["waypoint"] or " "
     if machineAddress then
-        local waypointLabel =
-            component.get(componentAddresses["waypoint"] or " ") and
-            component.proxy(componentAddresses["waypoint"]).getLabel()
-        knownMachines[machineAddress] = {}
+        local waypointLabel = component.get(waypointAddress) and component.proxy(waypointAddress).getLabel()
         registerWaypointDataListener(machineAddress)
         -- TODO: Add a timer for allowing the user to put a label on the waypoint
         -- User should be allowed to name the waypoint even if it has been placed after the machine
         modem.broadcast(portNumber, "what_is_the_wapoint_data", serialization.serialize(waypointLabel))
 
         -- Forgets the machine and the waypoint after the setup
-        componentAddresses["waypoint"] = nil
-        componentAddresses["gt_machine"] = nil
-        componentAddresses["gt_batterybuffer"] = nil
+        componentAddresses = {}
     end
 end
 
