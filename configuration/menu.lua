@@ -8,9 +8,6 @@ local screen = require("lib.utils.screen")
 
 local component = require("component")
 
-graphics.setContext()
-local maxWidth = 160
-local maxheight = 50
 local selectionBoxWidth = 20
 local location = {x = 2, y = 1}
 local configurationData = {}
@@ -56,8 +53,8 @@ local function activate(module, displayName, desc, skipRendering)
         end
     end
     if found ~= 0 then table.remove(modules, found) end
-    selector = activatorVar(location.x, location.y, selectionBoxWidth, maxheight-5, "Activate", activate, modules, "Available", selector)
-    deselector = activatorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5, "Disable", deactivateVar, processes, "Active", deselector)
+    selector = activatorVar(location.x, location.y, selectionBoxWidth, graphics.context().height-5, "Activate", activate, modules, "Available", selector)
+    deselector = activatorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, graphics.context().height-5, "Disable", deactivateVar, processes, "Active", deselector)
     if not skipRendering then renderer.update() end
 end
 
@@ -72,8 +69,8 @@ local function deactivate(module)
     if found ~= 0 then
         table.remove(processes, found)
     end
-    selector = activatorVar(location.x, location.y, selectionBoxWidth, maxheight-5, "Activate", activate, modules, "Available", selector)
-    deselector = activatorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5, "Disable", deactivate, processes, "Active", deselector)
+    selector = activatorVar(location.x, location.y, selectionBoxWidth, graphics.context().height-5, "Activate", activate, modules, "Available", selector)
+    deselector = activatorVar(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, graphics.context().height-5, "Disable", deactivate, processes, "Active", deselector)
     renderer.update()
 end
 deactivateVar = deactivate
@@ -89,8 +86,8 @@ local function load()
             local primaryScreen = configurationData.primaryScreen or component.screen.address
             gui.setColors(configurationData.primaryColor, configurationData.accentColor, configurationData.borderColor)
             graphics.setContext({gpu = component.gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
-            maxWidth = graphics.context().width
-            maxheight = graphics.context().height
+            graphics.context().width = graphics.context().width
+            graphics.context().height = graphics.context().height
             renderer.setPrimaryScreen(primaryScreen)
             renderer.setDebug(configurationData.debug or false)
             renderer.setMulticasting(configurationData.multicasting and true)
@@ -98,6 +95,8 @@ local function load()
             configurationData = {}
         end
         file:close()
+    else
+        graphics.setContext({gpu = component.gpu, width = 125, height = 35})
     end
 end
 
@@ -135,10 +134,10 @@ local function activator(x, y, width, height, functionName, mainFunction, dataSo
             args = {dataSource[i].module, dataSource[i].name, dataSource[i].desc}},
             {displayName = "Info",
             value = infoScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, dataSource[i].desc, dataSource[i].name}},
+            args = {location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, dataSource[i].desc, dataSource[i].name}},
             {displayName = "Configure",
             value = configScreen,
-            args = {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, dataSource[i].name, require(dataSource[i].module)}}
+            args = {location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, dataSource[i].name, require(dataSource[i].module)}}
         }
         table.insert(buttons, {name = dataSource[i].name, func = gui.selectionBox, args = {x+width/2, y+i, onActivation}})
     end
@@ -155,8 +154,8 @@ local function saveSettings()
     renderer.clear()
     component.gpu.setResolution(configurationData.xRes or 125, configurationData.yRes or 35)
     graphics.setContext({gpu = component.gpu, width = configurationData.xRes or 125, height = configurationData.yRes or 35})
-    maxWidth = graphics.context().width
-    maxheight = graphics.context().height
+    graphics.context().width = graphics.context().width
+    graphics.context().height = graphics.context().height
     local primaryScreen = configurationData.primaryScreen or component.screen.address
     component.gpu.bind(primaryScreen, false)
     renderer.setPrimaryScreen(primaryScreen)
@@ -164,7 +163,7 @@ local function saveSettings()
     renderer.setMulticasting(configurationData.multicasting and true)
     menuVariable()
     graphics.context().gpu.fill(1, 1, 160, 50, " ")
-    configScreen(location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, "NIDAS Settings", menu)
+    configScreen(location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, "NIDAS Settings", menu)
     renderer.update()
 end
 
@@ -199,7 +198,7 @@ local function switchRunStatus()
 end
 
 local function interrupt()
-    graphics.rectangle(1, 1, maxWidth, 2*(maxheight-5), 0x000000)
+    graphics.rectangle(1, 1, graphics.context().width, 2*(graphics.context().height-5), 0x000000)
     interrupted = true
 end
 
@@ -225,15 +224,15 @@ local function reboot()
 end
 
 local function generateMenu()
-    selector = activator(location.x, location.y, selectionBoxWidth, maxheight-5, "Activate", activate, modules, "Available", selector)
-    deselector = activator(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, maxheight-5, "Disable", deactivate, processes, "Active", deselector)
-    gui.bigButton(location.x, location.y+maxheight-5, "Run", switchRunStatus)
-    gui.bigButton(location.x+5, location.y+maxheight-5, "Save", save)
-    gui.bigButton(location.x+11, location.y+maxheight-5, "Reboot", reboot)
-    gui.bigButton(location.x+19, location.y+maxheight-5, "Shell", interrupt)
-    gui.bigButton(location.x+26, location.y+maxheight-5, "Settings", configScreen, {location.x+2*selectionBoxWidth+2, location.y, maxWidth-(location.x+2*selectionBoxWidth+2), maxheight-5, "NIDAS Settings", menu})
-    if updateAvailable() then gui.smallButton(maxWidth-21, maxheight, "Update available!", update) end
-    gui.smallLogo(maxWidth-20, maxheight-4, require("nidas_version"))
+    selector = activator(location.x, location.y, selectionBoxWidth, graphics.context().height-5, "Activate", activate, modules, "Available", selector)
+    deselector = activator(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, graphics.context().height-5, "Disable", deactivate, processes, "Active", deselector)
+    gui.bigButton(location.x, location.y+graphics.context().height-5, "Run", switchRunStatus)
+    gui.bigButton(location.x+5, location.y+graphics.context().height-5, "Save", save)
+    gui.bigButton(location.x+11, location.y+graphics.context().height-5, "Reboot", reboot)
+    gui.bigButton(location.x+19, location.y+graphics.context().height-5, "Shell", interrupt)
+    gui.bigButton(location.x+26, location.y+graphics.context().height-5, "Settings", configScreen, {location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, "NIDAS Settings", menu})
+    if updateAvailable() then gui.smallButton(graphics.context().width-21, graphics.context().height, "Update available!", update) end
+    gui.smallLogo(graphics.context().width-20, graphics.context().height-4, require("nidas_version"))
     component.gpu.fill(1, 1, 160, 50, " ")
     renderer.update()
 end

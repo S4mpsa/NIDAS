@@ -7,6 +7,8 @@ for _, part in pairs(require("computer").getDeviceInfo()) do
         for _, component in pairs(require("component").list()) do
             if component == "navigation" then
                 navigation = true
+                local gpu = require("component").gpu
+                gpu.setResolution(gpu.maxResolution())
                 require("robot")
                 break
             end
