@@ -13,7 +13,7 @@ for _, part in pairs(require("computer").getDeviceInfo()) do
         end
         if not navigation then
             print("Navigation upgrade not installed!")
-            print("Please reassemble your robot.")
+            print("Please put and upgrade in the slot.")
         end
         break
     end
