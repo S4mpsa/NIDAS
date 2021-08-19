@@ -36,12 +36,13 @@ if gpu then
   end
   _G.boot_screen = gpu.getScreen()
   w, h = gpu.maxResolution()
+  w = 80 < w and 80 or w
+  h = 20 < h and 20 or h
   gpu.setResolution(w, h)
   gpu.setBackground(0x000000)
   gpu.setForeground(0xFFFFFF)
   gpu.fill(1, 1, w, h, " ")
 end
-
 -- Report boot progress if possible.
 local uptime = computer.uptime
 -- we actually want to ref the original pullSignal here because /lib/event intercepts it later
@@ -214,7 +215,6 @@ local function gui_logo(x, y, version, border, primary, accent)
   graphics_text(x + 27, y + 5, version, aColor)
 end
 
-gpu.setResolution(80, 20)
 local x, y = gpu.getResolution()
 if y % 2 == 0 then
   y = y - 1
@@ -234,6 +234,7 @@ for i = 2, (#scripts + 1) do
   gpu.setForeground(0xFFFFFF)
   dofile(scripts[i - 1])
 end
+gpu.setResolution(gpu.maxResolution())
 
 status("Initializing components...")
 
