@@ -15,8 +15,6 @@ local function exec(partialAdress, name, location, mock)
         (component.list("ocemu", true)() and mock:getMock(partialAdress)) or -- Is running on emulator
         nil -- Is missing
 
-    machine.name = name
-    machine.location = location
     knownMachines[partialAdress] = machine
 
     return knownMachines[partialAdress]
