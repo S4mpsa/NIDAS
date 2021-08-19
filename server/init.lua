@@ -8,7 +8,7 @@ local gui = require("lib.graphics.gui")
 local renderer = require("lib.graphics.renderer")
 local graphics = require("lib.graphics.graphics")
 
-local addDroneMachine = require("server.usecases.add-drone-machine")
+local addRobotMachine = require("server.usecases.add-robot-machine")
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
 
@@ -57,7 +57,7 @@ load()
 local function updateMachineList(_, address, _)
     local comp = component.proxy(address)
     if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
-        addDroneMachine(address)
+        addRobotMachine(address)
         local file = io.open("/home/NIDAS/settings/known-machines", "r")
         if file then
             knownMachines = serialization.unserialize(file:read("*a")) or {}
