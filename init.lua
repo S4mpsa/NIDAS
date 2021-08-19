@@ -3,6 +3,8 @@ local drone = false
 for _, name in pairs(require("component").list()) do
     if name == "navigation" then
         drone = true
+        local gpu = require("component").gpu
+        gpu.setResolution(gpu.maxResolution())
         require("drone")
         break
     end
