@@ -77,6 +77,7 @@ deactivateVar = deactivate
 
 local function load()
     local file = io.open("/home/NIDAS/settings/enabledModules", "r")
+    graphics.setContext({gpu = component.gpu, width = 125, height = 35})
     if file ~= nil then
         configurationData = serialization.unserialize(file:read("*a"))
         if configurationData ~= nil then
@@ -95,8 +96,6 @@ local function load()
             configurationData = {}
         end
         file:close()
-    else
-        graphics.setContext({gpu = component.gpu, width = 125, height = 35})
     end
 end
 
