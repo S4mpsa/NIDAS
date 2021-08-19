@@ -26,7 +26,7 @@ computer.shutdown = function(reboot)
   shutdown(reboot)
 end
 
-local w, h
+local w, h  
 local screen = component.list("screen", true)()
 local gpu = screen and component.list("gpu", true)()
 if gpu then

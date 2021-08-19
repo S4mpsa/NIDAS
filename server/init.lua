@@ -152,7 +152,7 @@ function server.configure(x, y, _, _, _, page)
     graphics.context().gpu.setActiveBuffer(page)
 
     graphics.text(3, 11, "Machine:")
-    local function refreshAndOpenSelectionBox(args)
+    local function refreshAndOpenSelectionBox()
         local onActivation = {}
         for address, machine in pairs(knownMachines or {}) do
             table.insert(
@@ -160,11 +160,11 @@ function server.configure(x, y, _, _, _, page)
                 {displayName = machine.name or address, value = changeMachine, args = {address, x, y, page}}
             )
         end
-        gui.selectionBox(args[1], args[2], onActivation)
+        gui.selectionBox(x + 15, y + 5, onActivation)
     end
     table.insert(
         currentConfigWindow,
-        gui.smallButton(x + 10, y + 5, selectedMachineAddress, refreshAndOpenSelectionBox, {x + 15, y + 5})
+        gui.smallButton(x + 10, y + 5, selectedMachineAddress, refreshAndOpenSelectionBox)
     )
 
     local _, ySize = graphics.context().gpu.getBufferSize(page)
