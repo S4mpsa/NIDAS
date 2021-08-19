@@ -9,7 +9,7 @@ for _, part in pairs(require("computer").getDeviceInfo()) do
                 navigation = true
                 local gpu = require("component").gpu
                 gpu.setResolution(gpu.maxResolution())
-                require("robot")
+                require("location-robot")
                 break
             end
         end

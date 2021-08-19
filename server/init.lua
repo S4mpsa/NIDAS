@@ -15,6 +15,7 @@ local getPowerStatus = require("server.usecases.get-lsc-status")
 local constants = require("configuration.constants")
 local portNumber = constants.machineStatusPort
 local serverResponseTime = constants.networkResponseTime
+local robotResponseTime = constants.networkResponseTime
 
 local serverData = {}
 local knownMachines = {}
@@ -58,11 +59,16 @@ local function updateMachineList(_, address, _)
     local comp = component.proxy(address)
     if comp.type == "waypoint" or comp.type == "gt_machine" or comp.type == "gt_batterybuffer" then
         addRobotMachine(address)
-        local file = io.open("/home/NIDAS/settings/known-machines", "r")
-        if file then
-            knownMachines = serialization.unserialize(file:read("*a")) or {}
-            file:close()
-        end
+        event.timer(
+            robotResponseTime + 0.5,
+            function()
+                local file = io.open("/home/NIDAS/settings/known-machines", "r")
+                if file then
+                    knownMachines = serialization.unserialize(file:read("*a")) or {}
+                    file:close()
+                end
+            end
+        )
     end
 end
 event.listen("component_added", updateMachineList)
@@ -150,18 +156,24 @@ end
 
 function server.configure(x, y, _, _, _, page)
     graphics.context().gpu.setActiveBuffer(page)
+
     graphics.text(3, 11, "Machine:")
-    local onActivation = {}
-    for address, machine in pairs(knownMachines or {}) do
-        statuses.multiblocks[address] = statuses.multiblocks[address] or {}
-        local displayName = machine.name or statuses.multiblocks[address].name or address
-        table.insert(onActivation, {displayName = displayName, value = changeMachine, args = {address, x, y, page}})
+    local function refreshAndOpenSelectionBox()
+        local onActivation = {}
+        for address, machine in pairs(knownMachines or {}) do
+            table.insert(
+                onActivation,
+                {displayName = machine.name or address, value = changeMachine, args = {address, x, y, page}}
+            )
+        end
+        gui.selectionBox(x + 15, y + 5, onActivation)
     end
-    local _, ySize = graphics.context().gpu.getBufferSize(page)
     table.insert(
         currentConfigWindow,
-        gui.smallButton(x + 10, y + 5, selectedMachineAddress, gui.selectionBox, {x + 15, y + 5, onActivation})
+        gui.smallButton(x + 10, y + 5, selectedMachineAddress, refreshAndOpenSelectionBox)
     )
+
+    local _, ySize = graphics.context().gpu.getBufferSize(page)
     table.insert(currentConfigWindow, gui.bigButton(x + 2, y + tonumber(ySize) - 4, "Save Configuration", save))
     local attributeChangeList = {
         {name = "Main Server", attribute = "isMain", type = "boolean", defaultValue = false},
@@ -190,6 +202,7 @@ function server.configure(x, y, _, _, _, page)
             selectedMachineAddress
         )
     end
+
     renderer.update()
     return currentConfigWindow
 
