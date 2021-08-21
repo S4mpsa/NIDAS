@@ -117,8 +117,8 @@ There are many things that can be configured.
         * A graphics card.
         * A CPU.
         * A Screen
-        * Card holder upgrade.
-        * Navigation Upgrade in the card holder upgrade. (Craft the navigation card with a vanilla map that was created on top of the robot to ensure it being in range)
+        * Upgrade Container.
+        * Navigation Upgrade in the Upgrade Container. (Craft the Navigation Upgrade with a vanilla map that was created on top of the robot to ensure it being in range)
     * Install the program just like you did for the server. You can also install NIDAS to the hard drive before creating the robot.
     * Whenever you place your robot in a new location, it'll prompt you for that location. Use the terminal to give the X, Y and Z coordinates.
 * New machines
