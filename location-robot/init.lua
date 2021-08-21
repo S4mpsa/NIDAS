@@ -71,10 +71,10 @@ local function getWaypointData(label)
         if #wp.label > 0 then
             -- Waypoint with a label
             chancesToBeIt = chancesToBeIt + 1
-            if wp.label == label then
-                -- Waypoint with the correct label
-                chancesToBeIt = chancesToBeIt + 2
-            end
+        end
+        if wp.label == label then
+            -- Waypoint with the correct label
+            chancesToBeIt = chancesToBeIt + 2
         end
         if chancesToBeIt > previousChances then
             waypoint = wp
