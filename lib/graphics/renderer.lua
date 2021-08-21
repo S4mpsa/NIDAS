@@ -5,14 +5,10 @@ local renderer = {}
 
 local objects = {}
 local primaryScreen = component.screen.address
-local debug = false
 local multicasting = true
 
 function renderer.setMulticasting(value)
     multicasting = value
-end
-function renderer.setDebug(value)
-    debug = value
 end
 
 function renderer.setPrimaryScreen(address)
@@ -178,7 +174,7 @@ function renderer.update(pages)
         gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
     end
     renderer.multicast()
-    if debug then
+    if DEBUG then
         local str = ""
         local bufferSum = 0
         for i = 1, #objects do
@@ -200,7 +196,7 @@ end
 
 local function checkClick(_, _, X, Y)
     if not focused then
-        if debug then
+        if DEBUG then
             local _, y = graphics.context().gpu.getResolution()
             graphics.text(35, y*2-1, "Registered click at: "..X.." "..Y.."      ")
         end
