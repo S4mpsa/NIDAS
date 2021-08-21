@@ -70,7 +70,7 @@ function server.update()
         local multiblockStatus = getMultiblockStatus(address, machine.name, machine.location)
         namespace.statuses.multiblocks[address] = namespace.statuses.multiblocks[address] or {}
 
-        if not namespace.serverData.isMain and multiblockStatus.state ~= namespace.statuses.multiblocks[address].state then
+        if  multiblockStatus.state ~= namespace.statuses.multiblocks[address].state then
             shouldBroadcastStatuses = true
             statusesToBroadcast[address] = {
                 state = multiblockStatus.state,
@@ -82,9 +82,12 @@ function server.update()
 
         namespace.statuses.multiblocks[address] = multiblockStatus
     end
-
     if shouldBroadcastStatuses then
-        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(statusesToBroadcast))
+        if namespace.serverData.isMain then
+            event.push("notification", serialization.serialize(statusesToBroadcast))
+        else
+            modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(statusesToBroadcast))
+        end
     end
 
     if namespace.serverData.powerAddress then

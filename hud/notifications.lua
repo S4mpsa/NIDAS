@@ -4,7 +4,7 @@ local event = require("event")
 local screen = require("lib.utils.screen")
 local serialization = require("serialization")
 local states         = require("server.entities.states")
-local gui = require("gui")
+local gui = require("lib.graphics.gui")
 
 local notifications = {}
 local hudObjects = {}

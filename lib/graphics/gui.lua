@@ -6,22 +6,26 @@ local renderer = require("lib.graphics.renderer")
 local parser = require("lib.utils.parser")
 local gui = {}
 
-local borderColor = colors.darkGray
+local borderColor = colors.gray
 local primaryColor = colors.electricBlue
 local accentColor = colors.magenta
 
 function gui.setColors(primary, accent, border)
     primaryColor = primary or colors.electricBlue
     accentColor = accent or colors.magenta
-    borderColor = border or colors.darkGray
+    borderColor = border or colors.gray
 end
+
+function gui.borderColor() return borderColor end
+function gui.primaryColor() return primaryColor end
+function gui.accentColor() return accentColor end
 
 --Creates a bounded 3-tall button.
 --  text = Text to display on button
 --  onClick = Function to call when button is pressed
 --  args = Arguments to pass to the button
 --  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
-function gui.bigButton(x, y, text, onClick, args, width)
+function gui.bigButton(x, y, text, onClick, args, width, suppressFlash)
     width = width or #text+2
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, 3, true)
@@ -45,7 +49,7 @@ function gui.bigButton(x, y, text, onClick, args, width)
         local function done()
             gpu.bitblt(0, x, y, width, 3, page, 1, 1)
         end
-        event.timer(0.3, done, 1)
+        if not suppressFlash then event.timer(0.3, done, 1) end
     end
     renderer.setClickable(page, {flash, onClick}, args, {x, y}, {x+width, y+3})
     gpu.setActiveBuffer(0)
