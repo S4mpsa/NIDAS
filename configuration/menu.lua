@@ -4,7 +4,6 @@ local renderer = require("lib.graphics.renderer")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
 local descriptions = require("configuration.descriptions")
-local screen = require("lib.utils.screen")
 
 local component = require("component")
 
@@ -90,7 +89,7 @@ local function load()
             graphics.context().width = graphics.context().width
             graphics.context().height = graphics.context().height
             renderer.setPrimaryScreen(primaryScreen)
-            renderer.setDebug(configurationData.debug or false)
+            DEBUG = configurationData.debug or false
             renderer.setMulticasting(configurationData.multicasting and true)
         else
             configurationData = {}
@@ -158,7 +157,7 @@ local function saveSettings()
     local primaryScreen = configurationData.primaryScreen or component.screen.address
     component.gpu.bind(primaryScreen, false)
     renderer.setPrimaryScreen(primaryScreen)
-    renderer.setDebug(configurationData.debug or false)
+    DEBUG = configurationData.debug or false
     renderer.setMulticasting(configurationData.multicasting and true)
     menuVariable()
     graphics.context().gpu.fill(1, 1, 160, 50, " ")
