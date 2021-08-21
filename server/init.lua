@@ -145,26 +145,21 @@ local function updatePowerStatus(_, _, _, port, _, messageName, arg)
 end
 event.listen("modem_message", updatePowerStatus)
 
-local refresh = nil
 local selectedMachineAddress = "None"
 local currentConfigWindow = {}
-local function changeMachine(machineAddress, x, y, page)
-    selectedMachineAddress = machineAddress
-    renderer.removeObject(currentConfigWindow)
-    refresh(x, y, nil, nil, nil, page)
-end
-
-function server.configure(x, y, _, _, _, page)
+local function configure(x, y, page)
     graphics.context().gpu.setActiveBuffer(page)
 
     graphics.text(3, 11, "Machine:")
+    local function changeMachine(machineAddress)
+        selectedMachineAddress = machineAddress
+        renderer.removeObject(currentConfigWindow)
+        configure(x, y, page)
+    end
     local function refreshAndOpenSelectionBox()
         local onActivation = {}
         for address, machine in pairs(knownMachines or {}) do
-            table.insert(
-                onActivation,
-                {displayName = machine.name or address, value = changeMachine, args = {address, x, y, page}}
-            )
+            table.insert(onActivation, {displayName = machine.name or address, value = changeMachine, args = {address}})
         end
         gui.selectionBox(x + 15, y + 5, onActivation)
     end
@@ -205,11 +200,10 @@ function server.configure(x, y, _, _, _, page)
 
     renderer.update()
     return currentConfigWindow
-
-    -- TODO: Code for GUI configuration of server:
-    ---- Machine widgets layout?
 end
-refresh = server.configure
+function server.configure(x, y, _, _, _, page)
+    return configure(x, y, page)
+end
 
 local savingInterval = 500
 local savingCounter = savingInterval
