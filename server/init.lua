@@ -183,7 +183,7 @@ function server.configure(x, y, _, _, _, page)
             type = "component",
             defaultValue = "None",
             componentType = "gt_machine",
-            nameTable = statuses.multiblocks
+            nameTable = knownMachines
         }
     }
     gui.multiAttributeList(x + 3, y + 1, page, currentConfigWindow, attributeChangeList, serverData)
@@ -194,7 +194,7 @@ function server.configure(x, y, _, _, _, page)
         }
         gui.multiAttributeList(
             x + 3,
-            y + 7,
+            y + 5,
             page,
             currentConfigWindow,
             attributeChangeList,
@@ -202,8 +202,16 @@ function server.configure(x, y, _, _, _, page)
             selectedMachineAddress
         )
     end
-
     renderer.update()
+    if selectedMachineAddress ~= "None" then
+        local machine = component.proxy(selectedMachineAddress)
+        local line = 0
+        graphics.text(x+2, y + 16, "Sensor Information:")
+        for i, text in pairs(machine.getSensorInformation()) do
+            graphics.text(x+3, y + 16 + (2*#attributeChangeList) + (2*line), string.gsub(tostring(text), "§.", ""), gui.primaryColor())
+            line = line + 1
+        end
+    end
     return currentConfigWindow
 
     -- TODO: Code for GUI configuration of server:
@@ -221,7 +229,7 @@ function server.update()
         local multiblockStatus = getMultiblockStatus(address, machine.name, machine.location)
         statuses.multiblocks[address] = statuses.multiblocks[address] or {}
 
-        if not serverData.isMain and multiblockStatus.state ~= statuses.multiblocks[address].state then
+        if multiblockStatus.state ~= statuses.multiblocks[address].state then
             shouldBroadcastStatuses = true
             statusesToBroadcast[address] = {
                 state = multiblockStatus.state,
@@ -235,7 +243,11 @@ function server.update()
     end
 
     if shouldBroadcastStatuses then
-        modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(statusesToBroadcast))
+        if not serverData.isMain then
+            modem.broadcast(portNumber, "local_multiblock_statuses", serialization.serialize(statusesToBroadcast))
+        else
+            event.push("notification", serialization.serialize(statusesToBroadcast))
+        end
     end
 
     if serverData.powerAddress then
