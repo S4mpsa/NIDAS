@@ -2,12 +2,19 @@ local colors = require("lib.graphics.colors")
 local ar = require("lib.graphics.ar")
 local event = require("event")
 local screen = require("lib.utils.screen")
+local serialization = require("serialization")
+local states         = require("server.entities.states")
+local gui = require("gui")
 
 local notifications = {}
 local hudObjects = {}
 
 local startY = 40
 local stepModifier = 3
+
+function event.onError(message)
+    error(message)
+end
 
 local function notification(data, string, timeout, color, forceSlot)
     local yModifier = forceSlot or nil
@@ -100,7 +107,7 @@ local function startup(data, startN, endN)
             event.timer(0.05, advance, totalSteps)
         end
         event.timer(0.05, advance, totalSteps)
-        event.timer(3, retract)
+        event.timer(1.5, retract)
 end
 
 function notifications.addNotification(text, timeout, color)
@@ -129,6 +136,7 @@ function notifications.addNotification(text, timeout, color)
     end
     if not timeout then return retractAll end
 end
+
 local function processQueue(hudObject)
     local queue = hudObject.queue[1]
     for i = 1, #hudObject.notifications do
@@ -136,6 +144,29 @@ local function processQueue(hudObject)
             table.remove(hudObject.queue, 1)
             notification(hudObject, queue[1], queue[2], queue[3])
             break
+        end
+    end
+end
+
+
+displayedMachines = {}
+local function displayMaintenance(_, serializedData)
+    local statusData = serialization.unserialize(serializedData)
+    for address, values in pairs(statusData) do
+        if values.state.name == states.OFF.name then
+            local displayString = values.name or address
+            displayedMachines[address] = notifications.addNotification(displayString .. " is disabled", nil, 0xFF0000)
+            --Add location displaying here
+        elseif values.state.name == states.BROKEN.name then
+            local displayString = values.name or address
+            displayedMachines[address] = notifications.addNotification(displayString .. " requires maintenance", nil, gui.accentColor())
+            --Add location displaying here
+        end
+        if displayedMachines[address] then
+            if values.state.name == states.ON.name or values.state.name == states.IDLE.name then
+                displayedMachines[address]()
+                displayedMachines[address] = nil
+            end
         end
     end
 end
@@ -170,6 +201,7 @@ function notifications.widget(glasses)
             --The next line is to prevent the HUD animations firing off before rest of the HUD is drawn.
             event.timer(3, doStartup, 1)
         end
+        event.listen("notification", displayMaintenance)
     end
     for i = 1, #hudObjects do
         local hudObject = hudObjects[i]

@@ -13,9 +13,10 @@ local configurationData = {}
 
 
 local modules = {
-    {name = "HUD",              module = "hud", desc = descriptions.hud},
-    {name = "Primary Server",   module = "server", desc = descriptions.server},
-    {name = "Power Control",    module = "modules.tools.powerControl", desc = descriptions.powerControl}
+    {name = "HUD",              module = "hud",                             desc = descriptions.hud},
+    {name = "Primary Server",   module = "server",                          desc = descriptions.server},
+    {name = "Power Control",    module = "modules.tools.powerControl",      desc = descriptions.powerControl},
+    {name = "Machine Display",  module = "modules.displays.machineDisplay", desc = descriptions.machineDisplay}
 }
 local processes = {}
 
@@ -175,7 +176,7 @@ function menu.configure(x, y, _, _, _, page)
         {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 35, minValue = 20, maxValue = 50},
         {name = "Primary Color",    attribute = "primaryColor",     type = "color",     defaultValue = colors.electricBlue},
         {name = "Accent Color",     attribute = "accentColor",      type = "color",     defaultValue = colors.magenta},
-        {name = "Border Color",     attribute = "borderColor",      type = "color",     defaultValue = colors.darkGray},
+        {name = "Border Color",     attribute = "borderColor",      type = "color",     defaultValue = colors.gray},
         {name = "",                 attribute = nil,                type = "header",    defaultValue = nil},
         {name = "Autorun",          attribute = "autorun",          type = "boolean",   defaultValue = false},
         {name = "Multicasting",     attribute = "multicasting",     type = "boolean",   defaultValue = true},
