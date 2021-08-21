@@ -3,6 +3,8 @@ local colors = require("lib.graphics.colors")
 local ar = require("lib.graphics.ar")
 local screen = require("lib.utils.screen")
 local time = require("lib.utils.time")
+local parser = require("lib.utils.parser")
+local computer = require("computer")
 --
 
 local toolbar = {}
@@ -103,13 +105,13 @@ function toolbar.widget(glasses)
             hudObjects[i].dynamic.clock = ar.text(hudObjects[i].glasses, "", {x+w+7, y+13}, accentColor, 0.65)
             hudObjects[i].dynamic.realtime = ar.text(hudObjects[i].glasses, "", {x+w+3, y+30}, primaryColor, 0.8)
             --Uncomment to debug memory usage
-            --hudObjects[i].dynamic.memory = ar.text(hudObjects[i].glasses, "", {x+20, y-7}, primaryColor, 0.8)
+            hudObjects[i].dynamic.memory = ar.text(hudObjects[i].glasses, "", {x+20, y-7}, primaryColor, 0.8)
         end
         hudObjects[i].dynamic.clock.setText(timeString)
         --Uncomment to debug memory usage
-        --local maxMemory = computer.totalMemory()
-        --local usedMemory = maxMemory - computer.freeMemory()
-        --hudObjects[i].dynamic.memory.setText("Memory used: "..parser.percentage(usedMemory/maxMemory))
+        local maxMemory = computer.totalMemory()
+        local usedMemory = maxMemory - computer.freeMemory()
+        hudObjects[i].dynamic.memory.setText("Memory used: "..parser.percentage(usedMemory/maxMemory))
         if formattedTime ~= nil then
             hudObjects[i].dynamic.realtime.setText(formattedTime)
         end

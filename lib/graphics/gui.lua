@@ -6,15 +6,19 @@ local renderer = require("lib.graphics.renderer")
 local parser = require("lib.utils.parser")
 local gui = {}
 
-local borderColor = colors.darkGray
+local borderColor = colors.gray
 local primaryColor = colors.electricBlue
 local accentColor = colors.magenta
 
 function gui.setColors(primary, accent, border)
     primaryColor = primary or colors.electricBlue
     accentColor = accent or colors.magenta
-    borderColor = border or colors.darkGray
+    borderColor = border or colors.gray
 end
+
+function gui.borderColor() return borderColor end
+function gui.primaryColor() return primaryColor end
+function gui.accentColor() return accentColor end
 
 --Creates a bounded 3-tall button.
 --  text = Text to display on button

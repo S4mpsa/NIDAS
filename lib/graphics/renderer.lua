@@ -36,8 +36,9 @@ function renderer.leaveFocus()
 end
 
 function event.onError(message)
+    local _, y = graphics.context().gpu.getResolution()
     print(message)
-    graphics.text(1, graphics.context().heigth, message)
+    graphics.text(40, y*2-3, message)
 end
 
 function renderer.multicast()
