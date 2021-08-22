@@ -71,10 +71,10 @@ local function getWaypointData(label)
         if #wp.label > 0 then
             -- Waypoint with a label
             chancesToBeIt = chancesToBeIt + 1
-            if wp.label == label then
-                -- Waypoint with the correct label
-                chancesToBeIt = chancesToBeIt + 2
-            end
+        end
+        if wp.label == label then
+            -- Waypoint with the correct label
+            chancesToBeIt = chancesToBeIt + 2
         end
         if chancesToBeIt > previousChances then
             waypoint = wp
@@ -103,8 +103,14 @@ end
 
 local function sendWaypointData(_, _, senderAddress, port, _, messageName, label)
     if port == portNumber and messageName == "what_is_the_waypoint_data" then
-        print("Sending coordinate data for waypoint labeled " .. serialization.unserialize(label))
-        modem.send(senderAddress, portNumber, "waypoint_data", serialization.serialize(getWaypointData(label)))
+        local unserializedLabel = serialization.unserialize(label)
+        print("Sending coordinate data for waypoint labeled " .. unserializedLabel)
+        modem.send(
+            senderAddress,
+            portNumber,
+            "waypoint_data",
+            serialization.serialize(getWaypointData(unserializedLabel))
+        )
     end
 end
 event.listen("modem_message", sendWaypointData)

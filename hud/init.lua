@@ -100,7 +100,7 @@ function hud.configure(x, y, gui, graphics, renderer, page)
             {name = "Active Modules",   attribute = nil,                type = "header",    defaultValue = nil},
             {name = "  Energy Display", attribute = "energyDisplay",    type = "boolean",   defaultValue = true},
             {name = "  Toolbar Overlay",attribute = "toolbar",          type = "boolean",   defaultValue = true},
-            {name = "  Notifications",  attribute = "notifications",          type = "boolean",   defaultValue = true},
+            {name = "  Notifications",  attribute = "notifications",    type = "boolean",   defaultValue = true},
         }
         gui.multiAttributeList(x+3, y+3, page, currentConfigWindow, attributeChangeList, glassData, selectedGlasses)
     end
