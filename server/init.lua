@@ -7,6 +7,7 @@ local serialization = require("serialization")
 
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
+local savePowerLevel = require("server.usecases.save-power-level")
 
 local constants = require("configuration.constants")
 local portNumber = constants.machineStatusPort
@@ -92,6 +93,7 @@ function server.update()
         if namespace.statuses.power ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
+        savePowerLevel(powerStatus.storedEU)
         namespace.statuses.power = powerStatus
     else
         namespace.statuses.power = nil
