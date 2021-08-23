@@ -2,21 +2,9 @@
 
 local uptime = require("computer").uptime
 local maxWidth = (require("component").gpu.maxResolution())
+local scalesInSeconds = require("configuration.constants").scalesInSeconds
 
 --
-
-local scalesInSeconds = {
-    0,
-    1,
-    5,
-    15,
-    30,
-    60,
-    300,
-    900,
-    1800,
-    3600
-}
 
 local history = {}
 local lastTime = uptime()
@@ -25,19 +13,20 @@ local function exec(powerLevel)
     table.insert(history[0], 1, powerLevel)
     local thisTime = uptime()
 
-    for index = 2, #scalesInSeconds do
-        local pastScale = scalesInSeconds[index - 1]
-        local currentScale = scalesInSeconds[index]
-
-        if thisTime - lastTime >= currentScale then
-            local historyLength = #history[pastScale]
-            if pastScale ~= 0 and historyLength > currentScale then
-                historyLength = currentScale
-            end
+    if thisTime - lastTime > 0 then
+        for index = 2, #scalesInSeconds do
+            local pastScale = scalesInSeconds[index - 1]
+            local currentScale = scalesInSeconds[index]
 
             local mean = 0
-            for time = 1, historyLength do
-                mean = mean + history[pastScale][time] / historyLength
+            if pastScale == 0 then
+                for time = 1, #history[0] do
+                    mean = mean + history[pastScale][time] / #history[0]
+                end
+            else
+                for time = 1, currentScale do
+                    mean = mean + (history[pastScale][time] or 0) / currentScale
+                end
             end
 
             table.insert(history[currentScale], 1, mean)
