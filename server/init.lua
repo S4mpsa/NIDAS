@@ -9,7 +9,7 @@ local getPowerStatus = require("server.usecases.get-lsc-status")
 
 local constants = require("configuration.constants")
 local portNumber = constants.machineStatusPort
-local timeScales = constants.timeScales
+local timeScales = constants.scalesInSeconds
 
 local namespace = {
     serverData = {},
@@ -17,6 +17,10 @@ local namespace = {
     statuses = {multiblocks = {}, power = {}},
     powerHistory = {}
 }
+for _, scale in ipairs(timeScales) do
+    namespace.powerHistory[scale] = {}
+end
+
 local server = {}
 
 --
@@ -61,7 +65,6 @@ local function load()
         file:close()
     end
 end
-
 load()
 
 --Sets up the event listeners for the server

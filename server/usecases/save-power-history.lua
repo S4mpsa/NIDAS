@@ -10,7 +10,7 @@ local lastTime = uptime()
 
 local function setSavePowerHistory(server)
     local function savePowerHistory(powerLevel)
-        table.insert(server.history[0], 1, powerLevel)
+        table.insert(server.powerHistory[0], 1, powerLevel)
         local thisTime = uptime()
 
         if thisTime - lastTime > 0 then
@@ -20,23 +20,23 @@ local function setSavePowerHistory(server)
 
                 local mean = 0
                 if pastScale == 0 then
-                    for time = 1, #server.history[0] do
-                        mean = mean + server.history[pastScale][time] / #server.history[0]
+                    for time = 1, #server.powerHistory[0] do
+                        mean = mean + server.powerHistory[pastScale][time] / #server.powerHistory[0]
                     end
                 else
                     for time = 1, currentScale do
-                        mean = mean + (server.history[pastScale][time] or 0) / currentScale
+                        mean = mean + (server.powerHistory[pastScale][time] or 0) / currentScale
                     end
                 end
 
-                table.insert(server.history[currentScale], 1, mean)
-                if #server.history[currentScale] == maxWidth then
-                    server.history[currentScale][maxWidth] = nil
+                table.insert(server.powerHistory[currentScale], 1, mean)
+                if #server.powerHistory[currentScale] == maxWidth then
+                    server.powerHistory[currentScale][maxWidth] = nil
                 end
             end
 
             lastTime = thisTime
-            server.history[0] = {}
+            server.powerHistory[0] = {}
         end
     end
     return savePowerHistory
