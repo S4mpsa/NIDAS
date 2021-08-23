@@ -6,38 +6,40 @@ local scalesInSeconds = require("configuration.constants").scalesInSeconds
 
 --
 
-local history = {}
 local lastTime = uptime()
 
-local function exec(powerLevel)
-    table.insert(history[0], 1, powerLevel)
-    local thisTime = uptime()
+local function setSavePowerHistory(server)
+    local function savePowerHistory(powerLevel)
+        table.insert(server.history[0], 1, powerLevel)
+        local thisTime = uptime()
 
-    if thisTime - lastTime > 0 then
-        for index = 2, #scalesInSeconds do
-            local pastScale = scalesInSeconds[index - 1]
-            local currentScale = scalesInSeconds[index]
+        if thisTime - lastTime > 0 then
+            for index = 2, #scalesInSeconds do
+                local pastScale = scalesInSeconds[index - 1]
+                local currentScale = scalesInSeconds[index]
 
-            local mean = 0
-            if pastScale == 0 then
-                for time = 1, #history[0] do
-                    mean = mean + history[pastScale][time] / #history[0]
+                local mean = 0
+                if pastScale == 0 then
+                    for time = 1, #server.history[0] do
+                        mean = mean + server.history[pastScale][time] / #server.history[0]
+                    end
+                else
+                    for time = 1, currentScale do
+                        mean = mean + (server.history[pastScale][time] or 0) / currentScale
+                    end
                 end
-            else
-                for time = 1, currentScale do
-                    mean = mean + (history[pastScale][time] or 0) / currentScale
+
+                table.insert(server.history[currentScale], 1, mean)
+                if #server.history[currentScale] == maxWidth then
+                    server.history[currentScale][maxWidth] = nil
                 end
             end
 
-            table.insert(history[currentScale], 1, mean)
-            if #history[currentScale] == maxWidth then
-                history[currentScale][maxWidth] = nil
-            end
+            lastTime = thisTime
+            server.history[0] = {}
         end
-
-        lastTime = thisTime
-        history[0] = {}
     end
+    return savePowerHistory
 end
 
-return exec
+return setSavePowerHistory
