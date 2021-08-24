@@ -313,6 +313,12 @@ function gui.colorSelection(x, y, colorList)
     local gpu = context.gpu
     local colorTable = {}
     local longestName = 0
+    if x < 0 then
+        x = renderer.getX()
+    end
+    if y < 0 then
+        y = renderer.getY()
+    end
     for name, value in pairs(colorList) do
         if type(name) == "string" then
             if #name > longestName then longestName = #name end
@@ -388,6 +394,13 @@ function gui.selectionBox(x, y, choices)
     local maxY = context.height
     local gpu = context.gpu
     local longestName = 0
+    if type(x) == "function" then
+        x = x()
+    end
+    if type(y) == "function" then
+        y = y()
+    end
+
     for i = 1, #choices do
         if #choices[i].displayName > longestName then longestName = #choices[i].displayName end
     end
