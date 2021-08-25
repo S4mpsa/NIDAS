@@ -149,7 +149,7 @@ local function processQueue(hudObject)
 end
 
 
-displayedMachines = {}
+local displayedMachines = {}
 local function displayMaintenance(_, serializedData)
     local statusData = serialization.unserialize(serializedData)
     for address, values in pairs(statusData) do
