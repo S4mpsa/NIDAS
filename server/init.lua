@@ -1,6 +1,5 @@
 -- Import section
 
-local event = require("event")
 local component = require("component")
 local modem = component.modem
 local serialization = require("serialization")
@@ -10,12 +9,18 @@ local getPowerStatus = require("server.usecases.get-lsc-status")
 
 local constants = require("configuration.constants")
 local portNumber = constants.machineStatusPort
+local timeScales = constants.scalesInSeconds
 
 local namespace = {
     serverData = {},
     knownMachines = {},
-    statuses = {multiblocks = {}, power = {}}
+    statuses = {multiblocks = {}, power = {}},
+    powerHistory = {}
 }
+for _, scale in ipairs(timeScales) do
+    namespace.powerHistory[scale] = {}
+end
+
 local server = {}
 
 --
@@ -29,6 +34,9 @@ function namespace.save()
     file:close()
     file = io.open("/home/NIDAS/settings/known-machines", "w")
     file:write(serialization.serialize(namespace.knownMachines))
+    file:close()
+    file = io.open("/home/NIDAS/settings/power-history", "w")
+    file:write(serialization.serialize(namespace.powerHistory))
     file:close()
 end
 
@@ -48,6 +56,14 @@ local function load()
         namespace.knownMachines = serialization.unserialize(file:read("*a")) or {}
         file:close()
     end
+    file = io.open("/home/NIDAS/settings/power-history", "r")
+    if file then
+        namespace.powerHistory = serialization.unserialize(file:read("*a")) or {}
+        for _, scale in ipairs(timeScales) do
+            namespace.powerHistory[scale] = namespace.powerHistory[scale] or {}
+        end
+        file:close()
+    end
 end
 load()
 
@@ -59,6 +75,10 @@ local configure = require("server.configure")(namespace)
 function server.configure(x, y, _, _, _, page)
     return configure(x, y, page)
 end
+
+server.getPowerHistory = require("server.usecases.get-power-history")(namespace)
+
+local savePowerHistory = require("server.usecases.save-power-history")(namespace)
 
 local savingInterval = 500
 local savingCounter = savingInterval
@@ -92,13 +112,14 @@ function server.update()
         if namespace.statuses.power ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
+        savePowerHistory(powerStatus.storedEU / powerStatus.EUCapacity)
         namespace.statuses.power = powerStatus
     else
         namespace.statuses.power = nil
     end
     if savingCounter == savingInterval then
         namespace.save()
-        savingCounter = 1
+        savingCounter = 0
     end
     savingCounter = savingCounter + 1
     return namespace.statuses
