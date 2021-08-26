@@ -39,12 +39,19 @@ local function save()
 end
 
 local deactivateVar = nil
+
+local windows = {}
+local windowOffset = 40
 local function activate(module, displayName, desc, skipRendering)
     displayName = displayName or module
     if module == "server" or module == "local" then --Server or primary process is always #1
         table.insert(processes, 1, {func = require(module), returnValue = nil, name = displayName, module = module, desc = desc})
     else
-        table.insert(processes, {func = require(module), returnValue = nil, name = displayName, module = module, desc = desc})
+        local moduleFunctions = require(module)
+        table.insert(processes, {func = moduleFunctions, returnValue = nil, name = displayName, module = module, desc = desc})
+        if moduleFunctions.windowButton then
+            table.insert(windows, moduleFunctions.windowButton())
+        end
     end
     local found = 0
     for i = 1, #modules do
@@ -74,6 +81,14 @@ local function deactivate(module)
     renderer.update()
 end
 deactivateVar = deactivate
+
+local function addWindowButtons()
+    for i = 1, #windows do
+        local data = windows[i]
+        gui.bigButton(windowOffset, graphics.context().height-4, data.name, data.func, _, _, true)
+        windowOffset = windowOffset + #data.name + 2
+    end
+end
 
 local function load()
     local file = io.open("/home/NIDAS/settings/enabledModules", "r")
@@ -145,7 +160,6 @@ end
 activatorVar = activator
 
 local menuVariable = nil
-
 local menu = {}
 local function saveSettings()
     save()
@@ -160,6 +174,7 @@ local function saveSettings()
     renderer.setPrimaryScreen(primaryScreen)
     DEBUG = configurationData.debug or false
     renderer.setMulticasting(configurationData.multicasting and true)
+    windowOffset = 40
     menuVariable()
     graphics.context().gpu.fill(1, 1, 160, 50, " ")
     configScreen(location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, "NIDAS Settings", menu)
@@ -221,7 +236,7 @@ local function reboot()
     renderer.multicast()
     require("computer").shutdown(true)
 end
-
+local windowButtons = {}
 local function generateMenu()
     selector = activator(location.x, location.y, selectionBoxWidth, graphics.context().height-5, "Activate", activate, modules, "Available", selector)
     deselector = activator(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, graphics.context().height-5, "Disable", deactivate, processes, "Active", deselector)
@@ -232,6 +247,7 @@ local function generateMenu()
     gui.bigButton(location.x+26, location.y+graphics.context().height-5, "Settings", configScreen, {location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, "NIDAS Settings", menu})
     if updateAvailable() then gui.smallButton(graphics.context().width-21, graphics.context().height, "Update available!", update) end
     gui.smallLogo(graphics.context().width-20, graphics.context().height-4, require("nidas_version"))
+    addWindowButtons()
     component.gpu.fill(1, 1, 160, 50, " ")
     renderer.update()
 end
