@@ -51,6 +51,7 @@ local function listen(server)
                     server.statuses.multiblocks[address] = status
                 end
             end
+            event.push("notification", arg)
         end
         event.listen("modem_message", updateMachineStatuses)
         modem.broadcast(portNumber, "get_status")
