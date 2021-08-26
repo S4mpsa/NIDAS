@@ -13,9 +13,10 @@ local configurationData = {}
 
 
 local modules = {
-    {name = "HUD",              module = "hud", desc = descriptions.hud},
-    {name = "Primary Server",   module = "server", desc = descriptions.server},
-    {name = "Power Control",    module = "modules.tools.powerControl", desc = descriptions.powerControl}
+    {name = "HUD",              module = "hud",                             desc = descriptions.hud},
+    {name = "Primary Server",   module = "server",                          desc = descriptions.server},
+    {name = "Power Control",    module = "modules.tools.powerControl",      desc = descriptions.powerControl},
+    {name = "Machine Display",  module = "modules.displays.machineDisplay", desc = descriptions.machineDisplay}
 }
 local processes = {}
 
@@ -38,12 +39,19 @@ local function save()
 end
 
 local deactivateVar = nil
+
+local windows = {}
+local windowOffset = 40
 local function activate(module, displayName, desc, skipRendering)
     displayName = displayName or module
     if module == "server" or module == "local" then --Server or primary process is always #1
         table.insert(processes, 1, {func = require(module), returnValue = nil, name = displayName, module = module, desc = desc})
     else
-        table.insert(processes, {func = require(module), returnValue = nil, name = displayName, module = module, desc = desc})
+        local moduleFunctions = require(module)
+        table.insert(processes, {func = moduleFunctions, returnValue = nil, name = displayName, module = module, desc = desc})
+        if moduleFunctions.windowButton then
+            table.insert(windows, moduleFunctions.windowButton())
+        end
     end
     local found = 0
     for i = 1, #modules do
@@ -73,6 +81,14 @@ local function deactivate(module)
     renderer.update()
 end
 deactivateVar = deactivate
+
+local function addWindowButtons()
+    for i = 1, #windows do
+        local data = windows[i]
+        gui.bigButton(windowOffset, graphics.context().height-4, data.name, data.func, _, _, true)
+        windowOffset = windowOffset + #data.name + 2
+    end
+end
 
 local function load()
     local file = io.open("/home/NIDAS/settings/enabledModules", "r")
@@ -144,7 +160,6 @@ end
 activatorVar = activator
 
 local menuVariable = nil
-
 local menu = {}
 local function saveSettings()
     save()
@@ -159,6 +174,7 @@ local function saveSettings()
     renderer.setPrimaryScreen(primaryScreen)
     DEBUG = configurationData.debug or false
     renderer.setMulticasting(configurationData.multicasting and true)
+    windowOffset = 40
     menuVariable()
     graphics.context().gpu.fill(1, 1, 160, 50, " ")
     configScreen(location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, "NIDAS Settings", menu)
@@ -175,7 +191,7 @@ function menu.configure(x, y, _, _, _, page)
         {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 35, minValue = 20, maxValue = 50},
         {name = "Primary Color",    attribute = "primaryColor",     type = "color",     defaultValue = colors.electricBlue},
         {name = "Accent Color",     attribute = "accentColor",      type = "color",     defaultValue = colors.magenta},
-        {name = "Border Color",     attribute = "borderColor",      type = "color",     defaultValue = colors.darkGray},
+        {name = "Border Color",     attribute = "borderColor",      type = "color",     defaultValue = colors.gray},
         {name = "",                 attribute = nil,                type = "header",    defaultValue = nil},
         {name = "Autorun",          attribute = "autorun",          type = "boolean",   defaultValue = false},
         {name = "Multicasting",     attribute = "multicasting",     type = "boolean",   defaultValue = true},
@@ -220,7 +236,7 @@ local function reboot()
     renderer.multicast()
     require("computer").shutdown(true)
 end
-
+local windowButtons = {}
 local function generateMenu()
     selector = activator(location.x, location.y, selectionBoxWidth, graphics.context().height-5, "Activate", activate, modules, "Available", selector)
     deselector = activator(location.x+selectionBoxWidth+1, location.y, selectionBoxWidth, graphics.context().height-5, "Disable", deactivate, processes, "Active", deselector)
@@ -231,6 +247,7 @@ local function generateMenu()
     gui.bigButton(location.x+26, location.y+graphics.context().height-5, "Settings", configScreen, {location.x+2*selectionBoxWidth+2, location.y, graphics.context().width-(location.x+2*selectionBoxWidth+2), graphics.context().height-5, "NIDAS Settings", menu})
     if updateAvailable() then gui.smallButton(graphics.context().width-21, graphics.context().height, "Update available!", update) end
     gui.smallLogo(graphics.context().width-20, graphics.context().height-4, require("nidas_version"))
+    addWindowButtons()
     component.gpu.fill(1, 1, 160, 50, " ")
     renderer.update()
 end

@@ -6,22 +6,26 @@ local renderer = require("lib.graphics.renderer")
 local parser = require("lib.utils.parser")
 local gui = {}
 
-local borderColor = colors.darkGray
+local borderColor = colors.gray
 local primaryColor = colors.electricBlue
 local accentColor = colors.magenta
 
 function gui.setColors(primary, accent, border)
     primaryColor = primary or colors.electricBlue
     accentColor = accent or colors.magenta
-    borderColor = border or colors.darkGray
+    borderColor = border or colors.gray
 end
+
+function gui.borderColor() return borderColor end
+function gui.primaryColor() return primaryColor end
+function gui.accentColor() return accentColor end
 
 --Creates a bounded 3-tall button.
 --  text = Text to display on button
 --  onClick = Function to call when button is pressed
 --  args = Arguments to pass to the button
 --  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
-function gui.bigButton(x, y, text, onClick, args, width)
+function gui.bigButton(x, y, text, onClick, args, width, suppressFlash)
     width = width or #text+2
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, 3, true)
@@ -45,7 +49,7 @@ function gui.bigButton(x, y, text, onClick, args, width)
         local function done()
             gpu.bitblt(0, x, y, width, 3, page, 1, 1)
         end
-        event.timer(0.3, done, 1)
+        if not suppressFlash then event.timer(0.3, done, 1) end
     end
     renderer.setClickable(page, {flash, onClick}, args, {x, y}, {x+width, y+3})
     gpu.setActiveBuffer(0)
@@ -309,6 +313,12 @@ function gui.colorSelection(x, y, colorList)
     local gpu = context.gpu
     local colorTable = {}
     local longestName = 0
+    if x < 0 then
+        x = renderer.getX()
+    end
+    if y < 0 then
+        y = renderer.getY()
+    end
     for name, value in pairs(colorList) do
         if type(name) == "string" then
             if #name > longestName then longestName = #name end
@@ -384,6 +394,13 @@ function gui.selectionBox(x, y, choices)
     local maxY = context.height
     local gpu = context.gpu
     local longestName = 0
+    if type(x) == "function" then
+        x = x()
+    end
+    if type(y) == "function" then
+        y = y()
+    end
+
     for i = 1, #choices do
         if #choices[i].displayName > longestName then longestName = #choices[i].displayName end
     end
