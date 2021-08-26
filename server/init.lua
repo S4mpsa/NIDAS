@@ -3,6 +3,7 @@
 local component = require("component")
 local modem = component.modem
 local serialization = require("serialization")
+local event = require("event")
 
 local getMultiblockStatus = require("server.usecases.get-multiblock-status")
 local getPowerStatus = require("server.usecases.get-lsc-status")
