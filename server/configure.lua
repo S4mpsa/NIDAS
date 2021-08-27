@@ -42,9 +42,9 @@ local function setConfigure(server)
                 attribute = "powerAddress",
                 type = "component",
                 defaultValue = "None",
-                componentType = "gt_machine",
+                componentType = {"gt_machine", "gt_batterybuffer"},
                 nameTable = server.statuses.multiblocks
-            }
+            },
         }
         gui.multiAttributeList(x + 3, y + 1, page, currentConfigWindow, attributeChangeList, server.serverData)
 
