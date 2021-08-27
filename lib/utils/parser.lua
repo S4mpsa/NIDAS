@@ -34,6 +34,15 @@ function parser.getInteger(string)
     return nil
 end
 
+function parser.split(string, sep)
+    if sep == nil then sep = "%s" end
+    local words = {}
+    for str in string.gmatch(string, "([^"..sep.."]+)") do
+        table.insert(words, str)
+    end
+    return words
+end
+
 function parser.percentage(number) return
     (math.floor(number * 1000) / 10) .. "%" end
 
