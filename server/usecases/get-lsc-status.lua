@@ -37,7 +37,6 @@ local function exec(address, name, location)
     if problems > 0 then
         state = states.BROKEN
     end
-    obs = sensorInformation
     local status = {
         name = name,
         state = state,
