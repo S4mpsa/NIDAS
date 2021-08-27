@@ -15,7 +15,12 @@ local function exec(address, name, location)
     end
 
     local sensorInformation = lsc:getSensorInformation()
-
+    --Check for battery buffer
+    if require("component").list()[address] == "gt_batterybuffer" then
+        local energyData = parser.split(sensorInformation[3], "/")
+        sensorInformation[2] = energyData[1]
+        sensorInformation[3] = energyData[2]
+    end
     local problems = getNumberOfProblems(sensorInformation[9])
 
     local state = nil
@@ -32,7 +37,7 @@ local function exec(address, name, location)
     if problems > 0 then
         state = states.BROKEN
     end
-
+    obs = sensorInformation
     local status = {
         name = name,
         state = state,

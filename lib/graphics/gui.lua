@@ -512,14 +512,21 @@ end
 
 local function setComponentAttribute(x, y, tableToModify, tableValue, attribute, componentType, nameTable)
     local startValue = ""
+    if type(componentType) == "string" then componentType = {componentType} end
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or "None"
     else
         startValue = tableToModify[attribute] or "None"
     end
+    local function contains(type)
+        for i = 1, #componentType do
+            if componentType[i] == type then return true end
+        end
+        return false
+    end
     local components = {}
     for address, component in require("component").list() do
-        if component == componentType then
+        if contains(component) then
             local displayName = address
             if nameTable ~= nil then
                 if nameTable[address] ~= nil then
