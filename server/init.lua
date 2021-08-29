@@ -116,7 +116,7 @@ function server.update()
         if namespace.statuses.power ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
-        savePowerHistory(powerStatus.storedEU / powerStatus.EUCapacity)
+        if powerStatus.storedEU ~= nil then savePowerHistory(powerStatus.storedEU / powerStatus.EUCapacity) end
         namespace.statuses.power = powerStatus
     else
         namespace.statuses.power = nil
