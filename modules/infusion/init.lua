@@ -78,15 +78,15 @@ function infusion.update()
 
         local pattern = findMatchingPattern(itemsInChest)
         if pattern then
-            local patternOutput
+            local label
             for _, output in ipairs(pattern.outputs) do
-                if output then
-                    patternOutput = output
+                if output.name then
+                    label = output.name
                     break
                 end
             end
 
-            local craftable = component.me_interface.getCraftables({label = patternOutput.name})[1]
+            local craftable = component.me_interface.getCraftables({label = label})[1]
             print("Crafting " .. craftable.getItemStack().label)
             -- TODO: Check for the required essentia
             request = craftable.request()

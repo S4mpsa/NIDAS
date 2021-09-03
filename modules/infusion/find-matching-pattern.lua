@@ -3,13 +3,12 @@
 local component = require("component")
 
 --
+local maxInterfaceSlots = 36
 
 -- TODO: Get interface from getMachine
 local function exec(itemsInChest)
     -- Runs if there's an item in the chest
     if #itemsInChest > 0 then
-        local maxInterfaceSlots = 36
-
         -- Searches each slot of the interface for a matching pattern
         local slot = 1
         local pattern = component.me_interface.getInterfacePattern(slot)
