@@ -49,7 +49,7 @@ local function load()
     end
     file = io.open("/home/NIDAS/settings/machineData", "r")
     if file then
-        namespace.statuses = serialization.unserialize(file:read("*a")) or {}
+        namespace.statuses = serialization.unserialize(file:read("*a")) or {multiblocks = {}, power = {}}
         file:close()
     end
     file = io.open("/home/NIDAS/settings/known-machines", "r")
@@ -91,7 +91,7 @@ function server.update()
         local multiblockStatus = getMultiblockStatus(address, machine.name, machine.location)
         namespace.statuses.multiblocks[address] = namespace.statuses.multiblocks[address] or {}
 
-        if  multiblockStatus.state ~= namespace.statuses.multiblocks[address].state then
+        if multiblockStatus.state ~= namespace.statuses.multiblocks[address].state then
             shouldBroadcastStatuses = true
             statusesToBroadcast[address] = {
                 state = multiblockStatus.state,
@@ -116,7 +116,9 @@ function server.update()
         if namespace.statuses.power ~= powerStatus then
             modem.broadcast(portNumber, "local_power_status", serialization.serialize(powerStatus))
         end
-        if powerStatus.storedEU ~= nil then savePowerHistory(powerStatus.storedEU / powerStatus.EUCapacity) end
+        if powerStatus.storedEU then
+            savePowerHistory(powerStatus.storedEU / powerStatus.EUCapacity)
+        end
         namespace.statuses.power = powerStatus
     else
         namespace.statuses.power = nil
