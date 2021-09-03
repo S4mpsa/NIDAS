@@ -68,17 +68,25 @@ local savingInterval = 500
 local savingCounter = savingInterval
 function infusion.update()
     if not request or request.isDone() or request.isCanceled() then
-        local pattern = findMatchingPattern()
+        local itemsInChest = {}
+        -- Adds all items in the chest connected through the storage bus to the list
+        for item in component.me_interface.allItems() do
+            if item.size > 0 then
+                table.insert(itemsInChest, item)
+            end
+        end
+
+        local pattern = findMatchingPattern(itemsInChest)
         if pattern then
-            local output
-            for _, out in ipairs(pattern.outputs) do
-                if out then
-                    output = out
+            local patternOutput
+            for _, output in ipairs(pattern.outputs) do
+                if output then
+                    patternOutput = output
                     break
                 end
             end
 
-            local craftable = component.me_interface.getCraftables({label = output.name})[1]
+            local craftable = component.me_interface.getCraftables({label = patternOutput.name})[1]
             print("Crafting " .. craftable.getItemStack().label)
             -- TODO: Check for the required essentia
             request = craftable.request()

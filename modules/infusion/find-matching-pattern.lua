@@ -5,16 +5,7 @@ local component = require("component")
 --
 
 -- TODO: Get interface from getMachine
-local function exec()
-    local itemsInChest = {}
-
-    -- Adds all items in the chest connected through the storage bus to the list
-    for item in component.me_interface.allItems() do
-        if item.size > 0 then
-            table.insert(itemsInChest, item)
-        end
-    end
-
+local function exec(itemsInChest)
     -- Runs if there's an item in the chest
     if #itemsInChest > 0 then
         local maxInterfaceSlots = 36
