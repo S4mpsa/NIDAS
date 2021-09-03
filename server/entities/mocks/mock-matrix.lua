@@ -38,9 +38,7 @@ function mockMatrix:getAspects()
 end
 
 function mockMatrix.getAspectCount(aspectName, self)
-    if not type(aspectName) == string then
-        error("string expected, got " .. type(aspectName))
-    end
+    checkArg(1, aspectName, "string")
 
     local amount = 0.0
     for aspect in ipairs(self.aspects) do
