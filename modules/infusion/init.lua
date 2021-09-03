@@ -56,6 +56,10 @@ local infusion = {}
 --     return configure(x, y, page)
 -- end
 
+function infusion.configure()
+    return {}
+end
+
 -- --Sets up the event listeners for the infusion
 -- require("modules.infusion.event-listen")(namespace)
 
@@ -63,26 +67,27 @@ local request
 local savingInterval = 500
 local savingCounter = savingInterval
 function infusion.update()
-    if not request or request.isDone() or request.isCancelled() then
+    if not request or request.isDone() or request.isCanceled() then
         local pattern = findMatchingPattern()
-
-        local output
-        for _, out in ipairs(pattern.outputs) do
-            if out then
-                output = out
-                break
+        if pattern then
+            local output
+            for _, out in ipairs(pattern.outputs) do
+                if out then
+                    output = out
+                    break
+                end
             end
-        end
 
-        local craftable = component.me_interface.getCraftables(output)[1]
-        print("Crafting " .. craftable.label)
-        -- TODO: Check for the required essentia
-        request = craftable.request()
+            local craftable = component.me_interface.getCraftables({label = output.name})[1]
+            print("Crafting " .. craftable.getItemStack().label)
+            -- TODO: Check for the required essentia
+            request = craftable.request()
 
-        local isCancelled, reason = request.isCancelled()
-        if isCancelled then
-            print("Request cancelled.")
-            print(reason)
+            local isCancelled, reason = request.isCanceled()
+            if isCancelled then
+                print("Request cancelled.")
+                print(reason)
+            end
         end
     end
 
