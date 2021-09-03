@@ -11,7 +11,7 @@ local function exec()
     -- Adds all items in the chest connected through the storage bus to the list
     for item in component.me_interface.allItems() do
         if item.size > 0 then
-            itemsInChest[item.label] = item.size
+            table.insert(itemsInChest, item)
         end
     end
 
@@ -30,8 +30,8 @@ local function exec()
                 -- Searches for a matching item in the chest for the pattern input
                 if input.name then
                     local inputMatch = false
-                    for name, amount in pairs(itemsInChest) do
-                        if input.name == name and input.count == amount then
+                    for _, item in ipairs(itemsInChest) do
+                        if input.name == item.label and input.count <= item.size then
                             inputMatch = true
                             break
                         end
