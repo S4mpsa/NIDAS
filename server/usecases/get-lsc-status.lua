@@ -1,4 +1,5 @@
 -- Import section
+
 local parser = require("lib.utils.parser")
 
 local states = require("server.entities.states")
@@ -10,8 +11,9 @@ local getNumberOfProblems = require("server.usecases.get-number-of-problems")
 
 local function exec(address, name, location)
     local lsc = getMachine(address, name, location, require("server.entities.mocks.mock-lsc"))
-    if not lsc then
-        return {name = name, state = states.MISSING, location = location}
+    if not lsc.address then
+        lsc.state = states.MISSING
+        return lsc
     end
 
     local sensorInformation = lsc:getSensorInformation()
