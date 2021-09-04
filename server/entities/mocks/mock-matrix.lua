@@ -1,14 +1,13 @@
 -- Import section
 
-local machine = require("server.entities.machine")
+local matrix = require("server.entities.matrix")
 local inherits = require("lib.utils.inherits")
-local new = require("lib.utils.new")
 
 --
 
 local mockMatrix =
     inherits(
-    machine,
+    matrix,
     {
         mocks = {}
     }
