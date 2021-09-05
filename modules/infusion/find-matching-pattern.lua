@@ -10,10 +10,9 @@ local function exec(itemsInChest)
     -- Runs if there's an item in the chest
     if #itemsInChest > 0 then
         -- Searches each slot of the interface for a matching pattern
-        local slot = 1
-        local pattern = component.me_interface.getInterfacePattern(slot)
         local patternFound = false
-        while slot <= maxInterfaceSlots do
+        for slot = 1, maxInterfaceSlots do
+            local pattern = component.me_interface.getInterfacePattern(slot)
             -- Checks all patterns inputs
             patternFound = pattern and true
             for _, input in ipairs(pattern and pattern.inputs or {}) do
@@ -37,9 +36,6 @@ local function exec(itemsInChest)
             if patternFound then
                 return pattern
             end
-
-            pattern = component.me_interface.getInterfacePattern(slot)
-            slot = slot + 1
         end
     end
 end
