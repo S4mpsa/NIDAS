@@ -67,13 +67,14 @@ end
 -- require("modules.infusion.event-listen")(namespace)
 
 -- Finds any pedestal
--- FIXME: cannot run on import.
-for i = 0, 5 do
-    local inventoryName = component.transposer.getInventoryName(i)
-    if inventoryName == "tile.blockStoneDevice" then
-        infusion.centerPedestalNumber = i
-    elseif inventoryName then
-        infusion.outputSlotNumber = i
+if component.transposer then
+    for i = 0, 5 do
+        local inventoryName = component.transposer.getInventoryName(i)
+        if inventoryName == "tile.blockStoneDevice" then
+            infusion.centerPedestalNumber = i
+        elseif inventoryName then
+            infusion.outputSlotNumber = i
+        end
     end
 end
 
