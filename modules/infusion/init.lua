@@ -142,6 +142,11 @@ function infusion.update()
                     }
                     if not hasEnoughEssentia(namespace.recipes[label]) then
                         print("WARNING, NOT ENOUGH ESSENTIA!")
+                        while component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
+                            component.transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
+                            os.sleep(0)
+                        end
+                        print("Removed item from the center pedestal")
                     end
                 end
 
