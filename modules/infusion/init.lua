@@ -6,15 +6,18 @@ local serialization = require("serialization")
 local event = require("event")
 
 local findMatchingPattern = require("modules.infusion.find-matching-pattern")
+local hasEnoughEssentia = require("modules.infusion.check-required-essentia")
+local getRequiredEssentia = require("modules.infusion.get-required-essentia")
+local getFreeCPU = require("modules.infusion.get-free-cpu")
 
 local constants = require("configuration.constants")
 local portNumber = constants.machineStatusPort
 
--- local namespace = {
---     infusionData = {},
---     knownAltars = {},
---     recipes = {inputs = {}, outputs = {}}
--- }
+local namespace = {
+    --     infusionData = {},
+    --     knownAltars = {},
+    recipes = {}
+}
 local infusion = {}
 
 -- --
@@ -63,11 +66,22 @@ end
 -- --Sets up the event listeners for the infusion
 -- require("modules.infusion.event-listen")(namespace)
 
+-- Finds any pedestal
+-- FIXME: cannot run on import.
+for i = 0, 5 do
+    local inventoryName = component.transposer.getInventoryName(i)
+    if inventoryName == "tile.blockStoneDevice" then
+        infusion.centerPedestalNumber = i
+    elseif inventoryName then
+        infusion.outputSlotNumber = i
+    end
+end
+
 local request
 local savingInterval = 500
 local savingCounter = savingInterval
 function infusion.update()
-    if not request or request.isDone() or request.isCanceled() then
+    if (not request or request.isDone() or request.isCanceled()) and getFreeCPU(component.me_interface.address) then
         local itemsInChest = {}
         -- Adds all items in the chest connected through the storage bus to the list
         for item in component.me_interface.allItems() do
@@ -86,15 +100,73 @@ function infusion.update()
                 end
             end
 
-            local craftable = component.me_interface.getCraftables({label = label})[1]
-            print("Crafting " .. craftable.getItemStack().label)
-            -- TODO: Check for the required essentia
-            request = craftable.request()
+            if not namespace.recipes[label] or hasEnoughEssentia(namespace.recipes[label]) then
+                local craftable = component.me_interface.getCraftables({label = label})[1]
+                print("Crafting " .. label)
+                request = craftable.request()
 
-            local isCancelled, reason = request.isCanceled()
-            if isCancelled then
-                print("Request cancelled.")
-                print(reason)
+                local isCancelled, reason = request.isCanceled()
+                if isCancelled then
+                    print("Request cancelled. Please clean up your altar if that is the case")
+                    print(reason)
+                    return
+                end
+
+                -- TODO: event-based non-blocking code
+                -- Waits for an item to be in the center pedestal
+                local itemLabel
+                local item
+                while not itemLabel do
+                    item = component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1)
+                    itemLabel = item and item.label
+                    os.sleep(0)
+                end
+
+                -- Starts the infusion
+                component.redstone.setOutput({15, 15, 15, 15, 15, 15})
+
+                -- Checks for the required essentia on the first time the recipe is crafted
+                if not namespace.recipes[label] and not request.isCanceled() then
+                    local inputs = {}
+                    for _, input in ipairs(pattern and pattern.inputs or {}) do
+                        -- Searches for input items in the pattern
+                        if input.name then
+                            table.insert(inputs, input.name)
+                        end
+                    end
+
+                    namespace.recipes[label] = {
+                        inputs = inputs,
+                        essentia = getRequiredEssentia(component.blockstonedevice_2.address)
+                    }
+                    if not hasEnoughEssentia(namespace.recipes[label]) then
+                        print("WARNING, NOT ENOUGH ESSENTIA!")
+                    end
+                end
+
+                -- TODO: event-based non-blocking code
+                -- Waits for the item in the center pedestal to change
+                while itemLabel == item.label do
+                    item = component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1) or {}
+                    os.sleep(0)
+                end
+
+                -- Removes all items from the center pedestal
+                while component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
+                    component.transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
+                    os.sleep(0)
+                end
+                component.redstone.setOutput({0, 0, 0, 0, 0, 0})
+
+                if request.isDone() then
+                    print("Done")
+                else
+                    print("Oh, oh...")
+                    print("Removed " .. item.label .. " from the pedestal.")
+                    print("But the craft for " .. label .. " is still going in the ME system.")
+                end
+            else
+                print("Not enough essentia to craft " .. label)
             end
         end
     end

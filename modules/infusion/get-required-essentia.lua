@@ -10,6 +10,7 @@ local function exec(address)
         return {}
     end
 
+    -- TODO: event-based, non-blocking code
     local aspects
     while type(aspects) ~= "table" do
         aspects = matrix.getAspects().aspects
