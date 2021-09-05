@@ -10,12 +10,15 @@ local function exec(address)
         return {}
     end
 
-    local aspects = matrix.getAspects().aspects
+    local aspects
+    while type(aspects) ~= "table" do
+        aspects = matrix.getAspects().aspects
+        os.sleep(0)
+    end
+
     local formattedAspects = {}
-    if type(aspects) == "table" then
-        for _, aspectTable in ipairs(aspects) do
-            formattedAspects[aspectTable.name] = aspectTable.amount
-        end
+    for _, aspectTable in ipairs(aspects) do
+        formattedAspects[aspectTable.name] = aspectTable.amount
     end
 
     return formattedAspects

@@ -28,6 +28,9 @@ local function exec(itemsInChest)
                     end
 
                     patternFound = patternFound and inputMatch
+                    if not patternFound then
+                        break
+                    end
                 end
             end
 
