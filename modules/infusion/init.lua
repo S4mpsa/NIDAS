@@ -1,57 +1,34 @@
 -- Import section
 
 local component = require("component")
-local modem = component.modem
 local serialization = require("serialization")
-local event = require("event")
 
 local findMatchingPattern = require("modules.infusion.find-matching-pattern")
-local hasEnoughEssentia = require("modules.infusion.check-required-essentia")
+local checkForMissingEssentia = require("modules.infusion.check-for-missing-essentia")
 local getRequiredEssentia = require("modules.infusion.get-required-essentia")
 local getFreeCPU = require("modules.infusion.get-free-cpu")
 
-local constants = require("configuration.constants")
-local portNumber = constants.machineStatusPort
+--
 
 local namespace = {
-    --     infusionData = {},
-    --     knownAltars = {},
     recipes = {}
 }
 local infusion = {}
 
--- --
+function namespace.save()
+    local file = io.open("/home/NIDAS/settings/known-recipes", "w")
+    file:write(serialization.serialize(namespace.recipes))
+    file:close()
+end
 
--- function namespace.save()
---     local file = io.open("/home/NIDAS/settings/infusion-data", "w")
---     file:write(serialization.serialize(namespace.infusionData))
---     file:close()
---     file = io.open("/home/NIDAS/settings/known-altars", "w")
---     file:write(serialization.serialize(namespace.knownAltars))
---     file:close()
---     file = io.open("/home/NIDAS/settings/known-recipes", "w")
---     file:write(serialization.serialize(namespace.powerHistory))
---     file:close()
--- end
-
--- local function load()
---     local file = io.open("/home/NIDAS/settings/infusion-data", "r")
---     if file then
---         namespace.infusionData = serialization.unserialize(file:read("*a")) or {}
---         file:close()
---     end
---     file = io.open("/home/NIDAS/settings/known-altars", "r")
---     if file then
---         namespace.knownAltars = serialization.unserialize(file:read("*a")) or {}
---         file:close()
---     end
---     file = io.open("/home/NIDAS/settings/known-recipes", "r")
---     if file then
---         namespace.recipes = serialization.unserialize(file:read("*a")) or {inputs = {}, outputs = {}}
---         file:close()
---     end
--- end
--- load()
+local function load()
+    local file = io.open("/home/NIDAS/settings/known-recipes", "r")
+    if file then
+        namespace.recipes = serialization.unserialize(file:read("*a")) or {}
+        file:close()
+    end
+end
+load()
 
 -- -- Sets up configuration menu for the infusion
 -- local configure = require("modules.infusion.configure")(namespace)
@@ -79,8 +56,7 @@ if component.transposer then
 end
 
 local request
-local savingInterval = 500
-local savingCounter = savingInterval
+local hasWarnedAboutMissingEssentia = false
 function infusion.update()
     if (not request or request.isDone() or request.isCanceled()) and getFreeCPU(component.me_interface.address) then
         local itemsInChest = {}
@@ -101,7 +77,8 @@ function infusion.update()
                 end
             end
 
-            if not namespace.recipes[label] or hasEnoughEssentia(namespace.recipes[label]) then
+            local missingEssentia = checkForMissingEssentia(namespace.recipes[label])
+            if not namespace.recipes[label] or not missingEssentia then
                 local craftable = component.me_interface.getCraftables({label = label})[1]
                 print("Crafting " .. label)
                 request = craftable.request()
@@ -110,10 +87,12 @@ function infusion.update()
                 if isCancelled then
                     print("Request cancelled. Please clean up your altar if that is the case")
                     print(reason)
+                    print()
                     return
                 end
 
-                -- TODO: event-based non-blocking code
+                -- TODO: event-based, non-blocking code
+
                 -- Waits for an item to be in the center pedestal
                 local itemLabel
                 local item
@@ -125,6 +104,7 @@ function infusion.update()
 
                 -- Starts the infusion
                 component.redstone.setOutput({15, 15, 15, 15, 15, 15})
+                component.redstone.setOutput({0, 0, 0, 0, 0, 0})
 
                 -- Checks for the required essentia on the first time the recipe is crafted
                 if not namespace.recipes[label] and not request.isCanceled() then
@@ -140,13 +120,24 @@ function infusion.update()
                         inputs = inputs,
                         essentia = getRequiredEssentia(component.blockstonedevice_2.address)
                     }
-                    if not hasEnoughEssentia(namespace.recipes[label]) then
+                    namespace.save()
+
+                    missingEssentia = checkForMissingEssentia(namespace.recipes[label])
+                    if missingEssentia then
                         print("WARNING, NOT ENOUGH ESSENTIA!")
+                        print("Missing:")
+                        for essentia, amount in pairs(namespace.recipes[label]) do
+                            print("  " .. essentia .. ": " .. amount)
+                        end
+                        print()
                         while component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
                             component.transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
                             os.sleep(0)
                         end
-                        print("Removed item from the center pedestal")
+                        print("Removed " .. itemLabel .. " from the center pedestal. Sorry for the flux.")
+                        print("Please cancel the craft manually.")
+                        print()
+                        return
                     end
                 end
 
@@ -162,27 +153,33 @@ function infusion.update()
                     component.transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
                     os.sleep(0)
                 end
-                component.redstone.setOutput({0, 0, 0, 0, 0, 0})
 
                 if request.isDone() then
                     print("Done")
                 else
                     print("Oh, oh...")
-                    print("Removed " .. item.label .. " from the pedestal.")
+                    print("Removed " .. itemLabel .. " from the pedestal.")
                     print("But the craft for " .. label .. " is still going in the ME system.")
+                    print("Please cancel the craft manually.")
+                    print("Are you using a dummy item?")
                 end
+                print()
+                hasWarnedAboutMissingEssentia = false
             else
-                print("Not enough essentia to craft " .. label)
+                if not hasWarnedAboutMissingEssentia then
+                    print("Not enough essentia to craft " .. label)
+                    print("Missing:")
+                    for essentia, amount in pairs(missingEssentia) do
+                        print("  " .. essentia .. ": " .. amount)
+                    end
+                    print()
+                    hasWarnedAboutMissingEssentia = true
+                end
             end
+        else
+            hasWarnedAboutMissingEssentia = false
         end
     end
-
-    if savingCounter == savingInterval then
-        -- namespace.save()
-        savingCounter = 0
-    end
-    savingCounter = savingCounter + 1
-    -- return namespace.recipes
 end
 
 return infusion
