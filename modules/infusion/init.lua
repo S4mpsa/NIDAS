@@ -66,7 +66,7 @@ pcall(
 )
 
 function infusion.update()
-    -- TODO: support multiple altars, transposers, and interfaces
+    -- TODO: support multiple altars, transposers, redstone I/Os, and interfaces
     checkAndInfuse()
 end
 

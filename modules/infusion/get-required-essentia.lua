@@ -18,8 +18,10 @@ local function exec(address)
     end
 
     local formattedAspects = {}
-    for _, aspectTable in ipairs(aspects) do
-        formattedAspects[aspectTable.name] = aspectTable.amount
+    -- The first aspect will have one unit added to it in case there was enough essentia in the system to drain one from it before getAspects() could be run
+    formattedAspects[aspects[1].name] = aspects[1].amount + 1
+    for i = 2, #aspects do
+        formattedAspects[aspects[i].name] = aspects[i].amount
     end
 
     return formattedAspects
