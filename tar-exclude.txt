@@ -1,6 +1,7 @@
 tar-exclude.txt
-NIDAS.tar
+*.tar
 .gitignore
 .github
-README.md
+*.md
+*.png
 settings
