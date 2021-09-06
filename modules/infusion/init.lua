@@ -11,18 +11,27 @@ local getFreeCPU = require("modules.infusion.get-free-cpu")
 --
 
 local namespace = {
-    recipes = {}
+    recipes = {},
+    infusionData = {}
 }
 local infusion = {}
 
 function namespace.save()
-    local file = io.open("/home/NIDAS/settings/known-recipes", "w")
+    local file = io.open("/home/NIDAS/settings/infusion-data", "w")
+    file:write(serialization.serialize(namespace.infusionData))
+    file:close()
+    file = io.open("/home/NIDAS/settings/known-recipes", "w")
     file:write(serialization.serialize(namespace.recipes))
     file:close()
 end
 
 local function load()
-    local file = io.open("/home/NIDAS/settings/known-recipes", "r")
+    local file = io.open("/home/NIDAS/settings/infusion-data", "r")
+    if file then
+        namespace.infusionData = serialization.unserialize(file:read("*a")) or {}
+        file:close()
+    end
+    file = io.open("/home/NIDAS/settings/known-recipes", "r")
     if file then
         namespace.recipes = serialization.unserialize(file:read("*a")) or {}
         file:close()
@@ -51,9 +60,9 @@ pcall(
         for i = 0, 5 do
             local inventoryName = transposer.getInventoryName(i)
             if inventoryName == "tile.blockStoneDevice" then
-                infusion.centerPedestalNumber = i
+                namespace.infusionData.centerPedestalNumber = i
             elseif inventoryName then
-                infusion.outputSlotNumber = i
+                namespace.infusionData.outputSlotNumber = i
             end
         end
         return
@@ -102,7 +111,7 @@ function infusion.update()
                 local itemLabel
                 local item
                 while not itemLabel do
-                    item = transposer.getStackInSlot(infusion.centerPedestalNumber, 1)
+                    item = transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1)
                     itemLabel = item and item.label
                     os.sleep(0)
                 end
@@ -135,8 +144,11 @@ function infusion.update()
                             print("  " .. essentia .. ": " .. amount)
                         end
                         print()
-                        while transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
-                            transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
+                        while transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
+                            transposer.transferItem(
+                                namespace.infusionData.centerPedestalNumber,
+                                namespace.infusionData.outputSlotNumber
+                            )
                             os.sleep(0)
                         end
                         print("Removed " .. itemLabel .. " from the center pedestal. Sorry for the flux.")
@@ -149,13 +161,16 @@ function infusion.update()
                 -- TODO: event-based non-blocking code
                 -- Waits for the item in the center pedestal to change
                 while itemLabel == item.label do
-                    item = transposer.getStackInSlot(infusion.centerPedestalNumber, 1) or {}
+                    item = transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) or {}
                     os.sleep(0)
                 end
 
                 -- Removes all items from the center pedestal
-                while transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
-                    transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
+                while transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
+                    transposer.transferItem(
+                        namespace.infusionData.centerPedestalNumber,
+                        namespace.infusionData.outputSlotNumber
+                    )
                     os.sleep(0)
                 end
 
