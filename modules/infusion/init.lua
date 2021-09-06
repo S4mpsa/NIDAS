@@ -44,16 +44,21 @@ end
 -- require("modules.infusion.event-listen")(namespace)
 
 -- Finds any pedestal
-if component.transposer then
-    for i = 0, 5 do
-        local inventoryName = component.transposer.getInventoryName(i)
-        if inventoryName == "tile.blockStoneDevice" then
-            infusion.centerPedestalNumber = i
-        elseif inventoryName then
-            infusion.outputSlotNumber = i
+local transposer
+pcall(
+    function()
+        transposer = component.transposer
+        for i = 0, 5 do
+            local inventoryName = transposer.getInventoryName(i)
+            if inventoryName == "tile.blockStoneDevice" then
+                infusion.centerPedestalNumber = i
+            elseif inventoryName then
+                infusion.outputSlotNumber = i
+            end
         end
+        return
     end
-end
+)
 
 local request
 local hasWarnedAboutMissingEssentia = false
@@ -97,7 +102,7 @@ function infusion.update()
                 local itemLabel
                 local item
                 while not itemLabel do
-                    item = component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1)
+                    item = transposer.getStackInSlot(infusion.centerPedestalNumber, 1)
                     itemLabel = item and item.label
                     os.sleep(0)
                 end
@@ -130,8 +135,8 @@ function infusion.update()
                             print("  " .. essentia .. ": " .. amount)
                         end
                         print()
-                        while component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
-                            component.transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
+                        while transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
+                            transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
                             os.sleep(0)
                         end
                         print("Removed " .. itemLabel .. " from the center pedestal. Sorry for the flux.")
@@ -144,13 +149,13 @@ function infusion.update()
                 -- TODO: event-based non-blocking code
                 -- Waits for the item in the center pedestal to change
                 while itemLabel == item.label do
-                    item = component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1) or {}
+                    item = transposer.getStackInSlot(infusion.centerPedestalNumber, 1) or {}
                     os.sleep(0)
                 end
 
                 -- Removes all items from the center pedestal
-                while component.transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
-                    component.transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
+                while transposer.getStackInSlot(infusion.centerPedestalNumber, 1) do
+                    transposer.transferItem(infusion.centerPedestalNumber, infusion.outputSlotNumber)
                     os.sleep(0)
                 end
 
