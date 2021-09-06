@@ -18,8 +18,8 @@ end
 local function setCheckAndInfuse(namespace)
     -- TODO: Order missing essentia
     local hasWarnedAboutMissingEssentia = false
-    local function warnAboutMissingEssentia(missingEssentia)
-        printIfDebug("WARNING, NOT ENOUGH ESSENTIA!")
+    local function warnAboutMissingEssentia(missingEssentia, label)
+        printIfDebug("WARNING, NOT ENOUGH ESSENTIA" .. (label and " TO MAKE " .. label .. "!" or "!"))
         printIfDebug("Missing:")
         for essentia, amount in pairs(missingEssentia) do
             printIfDebug("  " .. essentia .. ": " .. amount)
@@ -110,7 +110,7 @@ local function setCheckAndInfuse(namespace)
 
                         missingEssentia = checkForMissingEssentia(namespace.recipes[label])
                         if missingEssentia then
-                            warnAboutMissingEssentia(missingEssentia)
+                            warnAboutMissingEssentia(missingEssentia, label)
 
                             emptyCenterPedestal()
 
@@ -148,7 +148,7 @@ local function setCheckAndInfuse(namespace)
                     hasWarnedAboutMissingEssentia = false
                 else
                     if not hasWarnedAboutMissingEssentia then
-                        warnAboutMissingEssentia(missingEssentia)
+                        warnAboutMissingEssentia(missingEssentia, label)
                     end
                 end
             else
