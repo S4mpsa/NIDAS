@@ -9,9 +9,9 @@ local getRequiredEssentia = require("modules.infusion.get-required-essentia")
 local getFreeCPU = require("modules.infusion.get-free-cpu")
 
 --
-local function printIfDebug(args)
+local function printIfDebug(...)
     if DEBUG then
-        print(args)
+        print(...)
     end
 end
 local namespace = {
@@ -73,8 +73,29 @@ pcall(
     end
 )
 
-local request
 local hasWarnedAboutMissingEssentia = false
+local function warnAboutMissingEssentia(missingEssentia)
+    printIfDebug("WARNING, NOT ENOUGH ESSENTIA!")
+    printIfDebug("Missing:")
+    for essentia, amount in pairs(missingEssentia) do
+        printIfDebug("  " .. essentia .. ": " .. amount)
+    end
+    printIfDebug()
+    hasWarnedAboutMissingEssentia = true
+end
+
+local function emptyCenterPedestal()
+    while transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
+        transposer.transferItem(
+            namespace.infusionData.centerPedestalNumber,
+            namespace.infusionData.outputSlotNumber
+        )
+        os.sleep(0)
+    end
+end
+
+
+local request
 function infusion.update()
     if (not request or request.isDone() or request.isCanceled()) and getFreeCPU(component.me_interface.address) then
         local itemsInChest = {}
@@ -101,8 +122,8 @@ function infusion.update()
                 printIfDebug("Crafting " .. label)
                 request = craftable.request()
 
-                local isCancelled, reason = request.isCanceled()
-                if isCancelled then
+                local isCanceled, reason = request.isCanceled()
+                if isCanceled then
                     printIfDebug("Request cancelled. Please clean up your altar if that is the case")
                     printIfDebug(reason)
                     printIfDebug()
@@ -142,19 +163,9 @@ function infusion.update()
 
                     missingEssentia = checkForMissingEssentia(namespace.recipes[label])
                     if missingEssentia then
-                        printIfDebug("WARNING, NOT ENOUGH ESSENTIA!")
-                        printIfDebug("Missing:")
-                        for essentia, amount in pairs(namespace.recipes[label]) do
-                            printIfDebug("  " .. essentia .. ": " .. amount)
-                        end
-                        printIfDebug()
-                        while transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
-                            transposer.transferItem(
-                                namespace.infusionData.centerPedestalNumber,
-                                namespace.infusionData.outputSlotNumber
-                            )
-                            os.sleep(0)
-                        end
+                        warnAboutMissingEssentia(missingEssentia)
+
+                        emptyCenterPedestal()
                         printIfDebug("Removed " .. itemLabel .. " from the center pedestal. Sorry for the flux.")
                         printIfDebug("Please cancel the craft manually.")
                         printIfDebug()
@@ -163,20 +174,14 @@ function infusion.update()
                 end
 
                 -- TODO: event-based non-blocking code
+
                 -- Waits for the item in the center pedestal to change
                 while itemLabel == item.label do
                     item = transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) or {}
                     os.sleep(0)
                 end
 
-                -- Removes all items from the center pedestal
-                while transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
-                    transposer.transferItem(
-                        namespace.infusionData.centerPedestalNumber,
-                        namespace.infusionData.outputSlotNumber
-                    )
-                    os.sleep(0)
-                end
+                emptyCenterPedestal()
 
                 if request.isDone() then
                     printIfDebug("Done")
@@ -191,13 +196,7 @@ function infusion.update()
                 hasWarnedAboutMissingEssentia = false
             else
                 if not hasWarnedAboutMissingEssentia then
-                    printIfDebug("Not enough essentia to craft " .. label)
-                    printIfDebug("Missing:")
-                    for essentia, amount in pairs(missingEssentia) do
-                        printIfDebug("  " .. essentia .. ": " .. amount)
-                    end
-                    printIfDebug()
-                    hasWarnedAboutMissingEssentia = true
+                    warnAboutMissingEssentia(missingEssentia)
                 end
             end
         else
