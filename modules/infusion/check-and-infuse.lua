@@ -59,7 +59,7 @@ local function setCheckAndInfuse(namespace)
                     end
                 end
 
-                local missingEssentia = checkForMissingEssentia(namespace.recipes[label])
+                local missingEssentia = checkForMissingEssentia(namespace.recipes[label] or {essentia = {}})
                 if not namespace.recipes[label] or not missingEssentia then
                     local craftable = component.me_interface.getCraftables({label = label})[1]
                     printIfDebug("Crafting " .. label)
