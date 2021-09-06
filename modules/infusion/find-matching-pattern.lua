@@ -1,18 +1,23 @@
 -- Import section
 
-local component = require("component")
+local getInterface = require("server.usecases.get-machine")
 
 --
+
 local maxInterfaceSlots = 36
 
--- TODO: Get interface from getMachine
-local function exec(itemsInChest)
+local function exec(itemsInChest, address)
+    local meInterface = getInterface(address)
+    if not meInterface.address then
+        return
+    end
+
     -- Runs if there's an item in the chest
     if #itemsInChest > 0 then
         -- Searches each slot of the interface for a matching pattern
         local patternFound = false
         for slot = 1, maxInterfaceSlots do
-            local pattern = component.me_interface.getInterfacePattern(slot)
+            local pattern = meInterface.getInterfacePattern(slot)
             -- Checks all patterns inputs
             patternFound = pattern and true
             for _, input in ipairs(pattern and pattern.inputs or {}) do

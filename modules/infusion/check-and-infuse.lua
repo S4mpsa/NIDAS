@@ -19,7 +19,7 @@ local function setCheckAndInfuse(namespace)
     -- TODO: Order missing essentia
     local hasWarnedAboutMissingEssentia = false
     local function warnAboutMissingEssentia(missingEssentia, label)
-        printIfDebug("WARNING, NOT ENOUGH ESSENTIA" .. (label and " TO MAKE " .. label .. "!" or "!"))
+        printIfDebug("WARNING! NOT ENOUGH ESSENTIA" .. (label and " TO MAKE " .. string.upper(label) .. "!" or "!"))
         printIfDebug("Missing:")
         for essentia, amount in pairs(missingEssentia) do
             printIfDebug("  " .. essentia .. ": " .. amount)
@@ -49,7 +49,7 @@ local function setCheckAndInfuse(namespace)
                 end
             end
 
-            local pattern = findMatchingPattern(itemsInChest)
+            local pattern = findMatchingPattern(itemsInChest, component.me_interface.address)
             if pattern then
                 local label
                 for _, output in ipairs(pattern.outputs) do
