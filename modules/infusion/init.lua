@@ -9,7 +9,11 @@ local getRequiredEssentia = require("modules.infusion.get-required-essentia")
 local getFreeCPU = require("modules.infusion.get-free-cpu")
 
 --
-
+local function printIfDebug(args)
+    if DEBUG then
+        print(args)
+    end
+end
 local namespace = {
     recipes = {},
     infusionData = {}
@@ -94,14 +98,14 @@ function infusion.update()
             local missingEssentia = checkForMissingEssentia(namespace.recipes[label])
             if not namespace.recipes[label] or not missingEssentia then
                 local craftable = component.me_interface.getCraftables({label = label})[1]
-                print("Crafting " .. label)
+                printIfDebug("Crafting " .. label)
                 request = craftable.request()
 
                 local isCancelled, reason = request.isCanceled()
                 if isCancelled then
-                    print("Request cancelled. Please clean up your altar if that is the case")
-                    print(reason)
-                    print()
+                    printIfDebug("Request cancelled. Please clean up your altar if that is the case")
+                    printIfDebug(reason)
+                    printIfDebug()
                     return
                 end
 
@@ -138,12 +142,12 @@ function infusion.update()
 
                     missingEssentia = checkForMissingEssentia(namespace.recipes[label])
                     if missingEssentia then
-                        print("WARNING, NOT ENOUGH ESSENTIA!")
-                        print("Missing:")
+                        printIfDebug("WARNING, NOT ENOUGH ESSENTIA!")
+                        printIfDebug("Missing:")
                         for essentia, amount in pairs(namespace.recipes[label]) do
-                            print("  " .. essentia .. ": " .. amount)
+                            printIfDebug("  " .. essentia .. ": " .. amount)
                         end
-                        print()
+                        printIfDebug()
                         while transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
                             transposer.transferItem(
                                 namespace.infusionData.centerPedestalNumber,
@@ -151,9 +155,9 @@ function infusion.update()
                             )
                             os.sleep(0)
                         end
-                        print("Removed " .. itemLabel .. " from the center pedestal. Sorry for the flux.")
-                        print("Please cancel the craft manually.")
-                        print()
+                        printIfDebug("Removed " .. itemLabel .. " from the center pedestal. Sorry for the flux.")
+                        printIfDebug("Please cancel the craft manually.")
+                        printIfDebug()
                         return
                     end
                 end
@@ -175,24 +179,24 @@ function infusion.update()
                 end
 
                 if request.isDone() then
-                    print("Done")
+                    printIfDebug("Done")
                 else
-                    print("Oh, oh...")
-                    print("Removed " .. itemLabel .. " from the pedestal.")
-                    print("But the craft for " .. label .. " is still going in the ME system.")
-                    print("Please cancel the craft manually.")
-                    print("Are you using a dummy item?")
+                    printIfDebug("Oh, oh...")
+                    printIfDebug("Removed " .. itemLabel .. " from the pedestal.")
+                    printIfDebug("But the craft for " .. label .. " is still going in the ME system.")
+                    printIfDebug("Please cancel the craft manually.")
+                    printIfDebug("Are you using a dummy item?")
                 end
-                print()
+                printIfDebug()
                 hasWarnedAboutMissingEssentia = false
             else
                 if not hasWarnedAboutMissingEssentia then
-                    print("Not enough essentia to craft " .. label)
-                    print("Missing:")
+                    printIfDebug("Not enough essentia to craft " .. label)
+                    printIfDebug("Missing:")
                     for essentia, amount in pairs(missingEssentia) do
-                        print("  " .. essentia .. ": " .. amount)
+                        printIfDebug("  " .. essentia .. ": " .. amount)
                     end
-                    print()
+                    printIfDebug()
                     hasWarnedAboutMissingEssentia = true
                 end
             end
