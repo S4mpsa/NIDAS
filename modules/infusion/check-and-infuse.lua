@@ -29,8 +29,8 @@ local function setCheckAndInfuse(namespace)
     end
 
     local function emptyCenterPedestal()
-        while namespace.transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
-            namespace.transposer.transferItem(
+        while namespace.infusionData.transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) do
+            namespace.infusionData.transposer.transferItem(
                 namespace.infusionData.centerPedestalNumber,
                 namespace.infusionData.outputSlotNumber
             )
@@ -79,7 +79,11 @@ local function setCheckAndInfuse(namespace)
                     local itemLabel
                     local item
                     while not itemLabel do
-                        item = namespace.transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1)
+                        item =
+                            namespace.infusionData.transposer.getStackInSlot(
+                            namespace.infusionData.centerPedestalNumber,
+                            1
+                        )
                         itemLabel = item and item.label
                         os.sleep(0)
                     end
@@ -109,6 +113,7 @@ local function setCheckAndInfuse(namespace)
                             warnAboutMissingEssentia(missingEssentia)
 
                             emptyCenterPedestal()
+
                             printIfDebug("Removed " .. itemLabel .. " from the center pedestal. Sorry for the flux.")
                             printIfDebug("Please cancel the craft manually.")
                             printIfDebug()
@@ -120,7 +125,11 @@ local function setCheckAndInfuse(namespace)
 
                     -- Waits for the item in the center pedestal to change
                     while itemLabel == item.label do
-                        item = namespace.transposer.getStackInSlot(namespace.infusionData.centerPedestalNumber, 1) or {}
+                        item =
+                            namespace.infusionData.transposer.getStackInSlot(
+                            namespace.infusionData.centerPedestalNumber,
+                            1
+                        ) or {}
                         os.sleep(0)
                     end
 

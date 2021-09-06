@@ -52,9 +52,9 @@ local checkAndInfuse = require("modules.infusion.check-and-infuse")(namespace)
 -- Finds any pedestal
 pcall(
     function()
-        namespace.transposer = component.transposer
+        namespace.infusionData.transposer = component.transposer
         for i = 0, 5 do
-            local inventoryName = namespace.transposer.getInventoryName(i)
+            local inventoryName = namespace.infusionData.transposer.getInventoryName(i)
             if inventoryName == "tile.blockStoneDevice" then
                 namespace.infusionData.centerPedestalNumber = i
             elseif inventoryName then
