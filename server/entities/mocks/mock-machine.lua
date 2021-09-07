@@ -2,7 +2,6 @@
 
 local machine = require("server.entities.machine")
 local inherits = require("lib.utils.inherits")
-local new = require("lib.utils.new")
 
 --
 
