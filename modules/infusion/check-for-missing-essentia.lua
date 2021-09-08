@@ -16,6 +16,7 @@ local function exec(pattern)
             if string.match(essentia.label, "(%w+)") == patternName then
                 if patternAmount > essentia.amount then
                     missingEssentia[patternName] = patternAmount - essentia.amount
+                    missing = true
                 end
                 found = true
                 break
