@@ -15,6 +15,7 @@ local function exec(pattern)
         for _, essentia in ipairs(essentiaInNetwork) do
             if string.match(essentia.label, "(%w+)") == patternName then
                 if patternAmount > essentia.amount then
+                    missing = true
                     missingEssentia[patternName] = patternAmount - essentia.amount
                 end
                 found = true
