@@ -22,7 +22,7 @@ local machine = {
     coordinates = {}
 }
 
-function machine.setWorkAllowed(allow, machine)
+function machine.setWorkAllowed(allow, self)
 end
 
 function machine:isWorkAllowed()

@@ -26,17 +26,13 @@ shell.setWorkingDirectory("/bin")
 shell.execute("wget -fq " .. tarBin)
 
 local NIDAS
-local release
 local arg = {...}
 if arg[1] == "test" or arg[1] == "latest" then
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v-1/NIDAS.tar"
-    release = "latest"
 elseif arg[1] == "dev" or arg[1] == "staging" then
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v0/NIDAS.tar"
-    release = "dev"
 else
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/latest/download/NIDAS.tar"
-    release = '"stable"'
 end
 
 local successful =

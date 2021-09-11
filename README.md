@@ -8,19 +8,19 @@
 ## **AR HUD (OpenGlasses)**
 ### **Power monitor**
 * Displays current power status: Total capacity, current capacity, input/output rate, and time to full/empty based on the rate.
-    
+
     (Only works for the Lapotronic Supercapacitor)
 
 ### **Toolbar decoration**
 * Provides an overlay for the toolbar, displaying both the ingame time and real world time.
 
 ### **Notifications**
-* Displays a HUD notification of important events, such as machines needing maintenance. 
+* Displays a HUD notification of important events, such as machines needing maintenance.
 
     ! Not implemented in stable !
 
 ### **Gregtech machine maintenance overlay**
-    Notifies of maintenance need on the HUD and displays an in-world location helper. 
+    Notifies of maintenance need on the HUD and displays an in-world location helper.
 
 ## **Machine monitoring**
     As of now, the server tracks machine names, locations, recipe progress, efficiency, power usage, and number of problems.
@@ -28,6 +28,9 @@
     Each machine has to be individually configured for location support.
 
     Local servers can display the data on a connected screen, while the main server provides HUD notifications of maintenace from all local servers.
+
+## **Automated Infusions**
+    NIDAS supports auto infusions. It checks for a pattern that maches the items in an ME subnetwork, checks for the required essentia for the infusion and infuses the thing! Pretty handy.
 
 ## **Configuration options**
 There are many things that can be configured.
@@ -48,7 +51,7 @@ There are many things that can be configured.
 * Name the owner of the glasses.
 * Change the rendering resolution.
 * Chose GUI scale on the video options of the game: 1 for Small, 2 for Medium, ,3 for Large and 4 for Auto.
-* Choose your timezone offset so the real world clock displays your time correctly. 
+* Choose your timezone offset so the real world clock displays your time correctly.
     (If the offset is negative, you must type the number first and then press -, blame @S4mpsa for that)
 
 ### **Power configuration**
@@ -56,7 +59,7 @@ There are many things that can be configured.
 * Configure the thresholds at which the power generators whould be turned on or off.
 
 # **Requirements**
-    Due to the AR glasses requiring tier 3 components, support is only provided for tier 3 components. You can try running it with worse hardware, just don't complain!
+    Due to the AR glasses requiring tier 3 components, support is only provided for tier 3 components. You can try running it with worse hardware, but don't expect everything to run the way it should.
     Both the local servers and the main server can run on in a T3 computer case, but server racks are suggested for extra component capacity.
 
 ## **Components**
@@ -67,7 +70,7 @@ There are many things that can be configured.
     * Is used for communication between different servers on the system.
 * Memory sticks
     * At least one Tier 3.5 or equivalent.
-    * We haven't calculated how much we need, but if you can build an OC, you can probably craft planty of those.
+    * We haven't calculated how much we need, but if you can build an OC, you can probably craft plenty of those.
 * Component busses
     * Main server does not necessarily need any.
     * Local servers will most likely want these to connect more than a few machines.
@@ -104,7 +107,7 @@ There are many things that can be configured.
 * Server
     * Place the main server first.
         (It could be later, but then you gotta change the setting that says it's the main server on it and on the local server you placed first).
-    * Place local servers after the main server has ran atleast once.
+    * Place local servers after the main server has ran at least once.
 * Robot
     * The robot is used to get the machine locations for displaying machine maintenance locations.
     * Place it by a charger so it doesn't run out of battery.
@@ -126,10 +129,34 @@ There are many things that can be configured.
     * (Optional): Name the waypoint. This will be the name of the machine in the system.
     * (Optional): Give it a redstone signal.
     * Place the adapter on the machine controller (You can use an MFU for that, so you don't need the adapter to be adjacent to the controller).
-    * Remove the waypoint after 10 seconds.
+    * Remove the waypoint after about 5 seconds.
+    * This is what it looks like:
+    ![Altar setup](machine-setup.png)
+    Notice the adapter have MFUs on them because they're not adjacent to the machine controllers.
 * Glasses
     * Place down a glasses terminal.
     * Bind you glasses to it.
     * Configure the glasses through the configuration screen on the main server.
+* Infusion altar
+    * Place your altar in the regular way.
+    * Place an ME interface with the patterns in a way that when the craft is requested, the first item that goes in is directed to the center pedestal.
+    * Place something that can be activated by redstone to start the infusion. (In GTNH, that's the Gadomancy infusion claw).
+    * Now for the OC part of it:
+        * Place adapters on the runic matrix and on the interface with the patterns.
+        * Place a transposer by the center altar and some kind of output inventory adjacent to the transposer.
+            * That output should go to the subnetwork so it can finish the craft, then it should go to the main network.
+            * Make sure no other inventories are adjacent to the transposer as well.
+        * Place a redstone I/O block by the infusion starter.
+    * The computer should be connected to an ME subnetwork.
+        * The main ME network interfaces with the user. That is: you order the craft from there.
+        * The ME subnetwork does the actual crafting and you don't need to interact with it.
+        * The items from that craft go into the subnetwork.
+            * The ME interface with the pattern from the main network could go to a chest with a storage bus from the subnetwork.
+        * The output first goes into the subnetwork first, then into the main network.
+            * You could set an output only storage bus from the subnetwork to the ME interface on the main network that configured to the infusion outputs.
+    * If you enable developer mode, there will be messages on the computer screen indicating the statuses of the infusions. Expect the pretty GUI to break.
+    * This is what it looks like:
+    ![Altar setup](altar-setup.png)
+
 
 It's recommended you go through all of the settings after you set things up to get the interfaces to your liking.
