@@ -14,7 +14,7 @@ local energyData = {
     readings = {},
     startTime = 0,
     endTime = 0,
-    updateInterval = 500,
+    updateInterval = 100,
     energyPerTick = 0
 }
 
