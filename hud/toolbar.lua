@@ -75,8 +75,11 @@ function toolbar.widget(glasses)
     local hours = timeString:sub(10, #timeString - 3)
     --year = year - 70 + 0
     timeString = hours .. " | " .. "Day " .. date .. " Year " .. year
+    realtime = ""
     if requestCounter == 500 then
-        realtime = internet.request("http://worldclockapi.com/api/json/utc/now")()
+        pcall(function()
+            realtime = internet.request("http://worldclockapi.com/api/json/utc/now")()
+        end)
         requestCounter = 1
     end
     for i = 1, #hudObjects do
