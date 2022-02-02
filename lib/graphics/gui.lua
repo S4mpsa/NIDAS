@@ -451,7 +451,6 @@ local function setTextAttribute(x, y, tableToModify, tableValue, attribute, maxL
         startValue = tableToModify[attribute] or "None"
     end
     local value = gui.textInput(x, y, maxLength, startValue)
-    graphics.text(55, 1, tostring(value))
     if value ~= nil then
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
@@ -564,7 +563,7 @@ end
 --The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
 --If dataValue is nil, then the main dataTable.attribute is modified instead.
 function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue, maxLength)
-    maxLength = maxLength or 50
+    maxLength = maxLength or nil
     local longestAttribute = 0
     for i = 1, #attributeData do
         if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end

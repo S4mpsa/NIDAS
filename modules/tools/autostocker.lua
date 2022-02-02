@@ -36,7 +36,7 @@ end
 function filterByLabel(data, keyword)
     local filtered = {}
     for i = 1, #data, 1 do
-        if string.find(data[i].label, keyword) ~= nil then
+        if string.find(string.lower(data[i].label), string.lower(keyword)) ~= nil then
             table.insert(filtered, 1, data[i])
         end
     end
@@ -81,10 +81,10 @@ local function displayPatterns(filterString)
     context.gpu.setActiveBuffer(0)
     local filteredPatterns = filterByLabel(craftablesList, filterString)
     formCurrentView(transforms.sub(filteredPatterns, 1, maxEntries))
-    renderer.update()
+    renderer.update(idPages)
 end
 
-searchKey = {keyword = "Im fag"}
+searchKey = {keyword = ""}
 local function searchBox()
     local context = graphics.context()
     local top = "╭"
@@ -163,7 +163,6 @@ end
 function machineDisplay.windowButton()
     return {name = "Autostocker", func = displayView}
 end
---gui.bigButton(40, graphics.context().height-4, "Machines", displayView, _, _, true)
 
 
 function machineDisplay.configure(x, y, _, _, _, page)
