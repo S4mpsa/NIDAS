@@ -61,14 +61,19 @@ end
 --  onClick = Function to call when button is pressed
 --  args = Arguments to pass to the button
 --  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
-function gui.smallButton(x, y, text, onClick, args, width, color)
+function gui.smallButton(x, y, text, onClick, args, width, color, leftAlign)
     color = color or primaryColor
     text = tostring(text)
     width = width or #text+2
+    leftAlign = leftAlign or false
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, 1, true)
     gpu.setActiveBuffer(page)
-    graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, color)
+    if leftAlign then
+        graphics.text(math.ceil(1), 1, text, color)
+    else
+        graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, color)
+    end
     renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+1})
     gpu.setActiveBuffer(0)
     return page
@@ -103,13 +108,19 @@ end
 --Creates a list of multiple small buttons at x, y, with borders.
 --Buttons are passed as a table of tables:
 --Each button is of the form {name = "Name", func = functionToCall, args = argsToPass}
-function gui.multiButtonList(x, y, buttons, width, height, title)
+function gui.multiButtonList(x, y, buttons, width, height, title, color, leftAlign)
+    leftAlign = leftAlign or false
+    color = color or primaryColor
     local pages = {}
     table.insert(pages, gui.listFrame(x, y, width, height, title))
     local titleOffset = 0
     if title ~= nil then titleOffset = 1 end
     for i = 0, #buttons-1 do
-        table.insert(pages, gui.smallButton(x+1, y+i+1+titleOffset, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2))
+        if leftAlign then
+            table.insert(pages, gui.smallButton(x+1, y+i+1+titleOffset, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2, color, true))
+        else
+            table.insert(pages, gui.smallButton(x+1, y+i+1+titleOffset, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2, color))
+        end
     end
     return pages
 end
@@ -154,24 +165,14 @@ function gui.textInput(x, y, maxWidth, startValue)
         renderer.multicast()
     end
     event.cancel(focusListener)
-    if value == 13 or value == 9 then
-        graphics.text(x, -1+2*y, returnString.." ", primaryColor)
-        renderer.multicast()
-        if value == 9 then
-            event.push("touch", _, x, y+1)
-        end
-        if returnString == "" then
-            graphics.text(x, -1+2*y, "None".." ", primaryColor)
-            return "None"
-        end
-        return returnString
-    else
-        local padded = startValue
-        for i = 1, maxWidth-#padded+1 do padded = padded.." " end
-        graphics.text(x, -1+2*y, padded, primaryColor)
-        renderer.multicast()
-        return nil
+    if value == 9 then
+        event.push("touch", _, x, y+1)
     end
+    local padded = returnString
+    for i = 1, maxWidth-#padded+1 do padded = padded.." " end
+    graphics.text(x, -1+2*y, padded, primaryColor)
+    renderer.multicast()
+    return returnString
 end
 
 local function split(string, sep)
@@ -441,14 +442,16 @@ function gui.selectionBox(x, y, choices)
     end
 end
 
-local function setTextAttribute(x, y, tableToModify, tableValue, attribute)
+local function setTextAttribute(x, y, tableToModify, tableValue, attribute, maxLength)
+    maxLength = maxLength or 50
     local startValue = ""
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or "None"
     else
         startValue = tableToModify[attribute] or "None"
     end
-    local value = gui.textInput(x, y, 50, startValue)
+    local value = gui.textInput(x, y, maxLength, startValue)
+    graphics.text(55, 1, tostring(value))
     if value ~= nil then
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
@@ -560,7 +563,8 @@ end
 --Creates a named list of attributes to change, given in attributeData in the format {name="Name", attribute="attr", type="string|number"}
 --The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
 --If dataValue is nil, then the main dataTable.attribute is modified instead.
-function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue)
+function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue, maxLength)
+    maxLength = maxLength or 50
     local longestAttribute = 0
     for i = 1, #attributeData do
         if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end
@@ -574,7 +578,7 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
         graphics.context().gpu.setActiveBuffer(page)
         graphics.text(3, 2*y+2*i-1, name)
         if type == "string" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, maxLength}, maxLength))
         elseif type == "number" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue, attributeData[i].maxValue}))
         elseif type == "color" then
