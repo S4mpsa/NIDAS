@@ -16,7 +16,8 @@ local modules = {
     {name = "Primary Server", module = "server", desc = descriptions.server},
     {name = "Power Control", module = "modules.tools.powerControl", desc = descriptions.powerControl},
     {name = "Machine Display", module = "modules.displays.machineDisplay", desc = descriptions.machineDisplay},
-    {name = "Infusion", module = "modules.infusion", desc = descriptions.infusion}
+    {name = "Infusion", module = "modules.infusion", desc = descriptions.infusion},
+    {name = "Autostocker", module = "modules.tools.autostocker", desc = descriptions.autostocker}
 }
 local processes = {}
 
