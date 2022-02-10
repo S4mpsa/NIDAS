@@ -256,7 +256,7 @@ local function displayView()
     graphics.text(1, 1, bar, gui.borderColor())
     context.gpu.setActiveBuffer(0)
     if not initialized then
-        discoverPatterns(250) --Debug number
+        discoverPatterns() --Debug number
         searchBox()
         stockingEditor()
     else
