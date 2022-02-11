@@ -14,8 +14,9 @@ local function save(data)
     local file = io.open("/home/NIDAS/settings/powerControlData", "w")
     enableLevel = tonumber(powerControlData.enableLevel)
     disableLevel = tonumber(powerControlData.disableLevel)
-    if enableLevel ~= nil and disableLevel ~= nil then
+    if enableLevel ~= nil and disableLevel ~= nil and powerControlData.address ~= nil then
         file:write(serialization.serialize(powerControlData))
+        os.sleep()
         file:close()
     end
 end
@@ -24,6 +25,7 @@ local function load()
     local file = io.open("/home/NIDAS/settings/powerControlData", "r")
     if file then
         powerControlData = serialization.unserialize(file:read("*a")) or {}
+        if powerControlData == nil then powerControlData = {} end
         if powerControlData.address then 
             if powerControlData.address ~= "None" then redstone = component.proxy(component.get(powerControlData.address)) else
                 redstone = nil
@@ -77,10 +79,10 @@ function powerControl.configure(x, y, gui, graphics, renderer, page)
     table.insert(currentConfigWindow, gui.smallButton(x+15, y+2, powerControlData.address or "None", gui.selectionBox, {x+16, y+2, onActivation}))
     table.insert(currentConfigWindow, gui.bigButton(x+2, y+tonumber(ySize)-4, "Save Configuration", save))
     local attributeChangeList = {
-        {name = "Active Level",     attribute = "enableLevel",  type = "string",    defaultValue = "Not Set"},
-        {name = "Disable Level",    attribute = "disableLevel", type = "string",    defaultValue = "Not Set"},
+        {name = "Active Level",     attribute = "enableLevel",  type = "string",    defaultValue = "None"},
+        {name = "Disable Level",    attribute = "disableLevel", type = "string",    defaultValue = "None"},
     }
-    gui.multiAttributeList(x+3, y+3, page, currentConfigWindow, attributeChangeList, powerControlData)
+    gui.multiAttributeList(x+3, y+3, page, currentConfigWindow, attributeChangeList, powerControlData, nil, nil)
 
     renderer.update()
     return currentConfigWindow
@@ -95,10 +97,12 @@ function powerControl.update(data)
         if data.power ~= nil and redstone ~= nil then
             if data.power.state ~= states.MISSING then
                 local level = getPercentage(data.power)
-                if level < enableLevel then
-                    engage()
-                elseif level > disableLevel then
-                    disengage()
+                if powerControlData.enableLevel ~= nil and powerControlData.disableLevel ~= nil then
+                    if level < enableLevel then
+                        engage()
+                    elseif level > disableLevel then
+                        disengage()
+                    end
                 end
             end
         end

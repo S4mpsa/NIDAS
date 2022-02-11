@@ -70,7 +70,7 @@ function gui.smallButton(x, y, text, onClick, args, width, color, leftAlign)
     local page = renderer.createObject(x, y, width, 1, true)
     gpu.setActiveBuffer(page)
     if leftAlign then
-        graphics.text(math.ceil(1), 1, text, color)
+        graphics.text(2, 1, text, color)
     else
         graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, color)
     end
@@ -445,6 +445,7 @@ end
 local function setTextAttribute(x, y, tableToModify, tableValue, attribute, maxLength)
     maxLength = maxLength or 50
     local startValue = ""
+    test = tableToModify
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or "None"
     else
@@ -456,6 +457,7 @@ local function setTextAttribute(x, y, tableToModify, tableValue, attribute, maxL
             tableToModify[tableValue][attribute] = value
         else
             tableToModify[attribute] = value
+            debugtable = tableToModify
         end
     end
 end
@@ -563,8 +565,9 @@ end
 --Creates a named list of attributes to change, given in attributeData in the format {name="Name", attribute="attr", type="string|number"}
 --The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
 --If dataValue is nil, then the main dataTable.attribute is modified instead.
-function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue, maxLength, optionalCallback)
-    maxLength = maxLength or nil
+function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue, maxLength)
+    maxLength = maxLength or 20
+    dataValue = dataValue or nil
     local longestAttribute = 0
     for i = 1, #attributeData do
         if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end
@@ -578,7 +581,7 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
         graphics.context().gpu.setActiveBuffer(page)
         graphics.text(3, 2*y+2*i-1, name)
         if type == "string" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, maxLength}, maxLength))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, maxLength}, maxLength, nil, true))
         elseif type == "number" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue, attributeData[i].maxValue, maxLength}))
         elseif type == "color" then
