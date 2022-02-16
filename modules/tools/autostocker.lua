@@ -225,7 +225,7 @@ local function discoverPatterns(amount)
             for i = 1, #cpus do
                 if cpus[i].busy then occupiedCpus = occupiedCpus + 1 end
             end
-            os.sleep()
+            os.sleep(5)
         end
     end
     renderer.removeObject(frame)
