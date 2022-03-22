@@ -71,13 +71,18 @@ function graphics.clear()
     context.gpu.fill(1, 1, context.width, context.height, " ")
 end
 
-function graphics.text(x, y, text, color)
+function graphics.text(x, y, text, color, useStandardY)
     color = color or 0xFFFFFF
-    if y % 2 == 0 then
+    if not useStandardY and y % 2 == 0 then
         error("Y must be odd.")
     else
         local gpu = context.gpu
-        local screenY = math.ceil(y/2)
+        local screenY
+        if useStandardY then
+            screenY = y
+        else
+            screenY = math.ceil(y/2)
+        end
         gpu.setForeground(color)
         gpu.set(x, screenY, text)
     end
