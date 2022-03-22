@@ -144,11 +144,21 @@ local function genericMachine(savedX, savedY, skipRendering)
             file:close()
         end
         local values = {}
+        local duplicate
         for address, machine in pairs(knownMachines) do
-            table.insert(values,
-            {displayName = machine.name,
-            value = address,
-            args = nil})
+            duplicate = false
+            for _, v in pairs(machineList) do
+                if address == v.address then
+                    duplicate = true
+                    break
+                end
+            end
+            if not duplicate then
+                table.insert(values,
+                {displayName = machine.name,
+                value = address,
+                args = nil})
+            end
         end
         local value = savedAddress or gui.selectionBox(xLoc, yLoc, values)
         if value then
