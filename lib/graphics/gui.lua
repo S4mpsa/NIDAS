@@ -660,4 +660,25 @@ function gui.smallLogo(x, y, version)
     gpu.setActiveBuffer(0)
 end
 
+--Unwrapped text box allowing for multiple instances of graphics.text() to be drawn at once
+--Supports drawing blank lines by omitting input.name
+--The input argument is a table with the following format:
+--input = {
+--    {
+--        text = "[string to display]",
+--        color = [color used, optional]
+--    },{
+--        text = "[string to display]",
+--        color = [color used, optional]
+--    }
+--}
+function gui.multiLineText(x, y, input, defaultColor)
+    local defaultColor = defaultColor or gui.primaryColor()
+    for i = 1, #input do
+        if input[i].text then
+            graphics.text(1, i, input[i].text, input[i].color or defaultColor, true)
+        end
+    end
+end
+
 return gui
