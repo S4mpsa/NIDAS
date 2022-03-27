@@ -665,10 +665,10 @@ end
 --The input argument is a table with the following format:
 --input = {
 --    {
---        text = "[string to display]"
+--        text = "[string to display]",
 --        color = [color used, optional]
 --    },{
---        text = "[string to display]"
+--        text = "[string to display]",
 --        color = [color used, optional]
 --    }
 --}
