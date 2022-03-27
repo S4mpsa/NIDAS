@@ -660,9 +660,9 @@ function gui.smallLogo(x, y, version)
     gpu.setActiveBuffer(0)
 end
 
---unwrapped text box allowing for multiple instances of graphics.text() to be drawn at once
---supports drawing blank lines by omitting input.name
---the input argument is a table with the following format:
+--Unwrapped text box allowing for multiple instances of graphics.text() to be drawn at once
+--Supports drawing blank lines by omitting input.name
+--The input argument is a table with the following format:
 --input = {
 --    {
 --        text = "[string to display]"
@@ -673,21 +673,12 @@ end
 --    }
 --}
 function gui.multiLineText(x, y, input, defaultColor)
-    local context = graphics.context()
     local defaultColor = defaultColor or gui.primaryColor()
-    local longestLine = 0
-    for i = 1, #input do
-        if input[i].text and #input[i].text > longestLine then longestLine = #input[i].text end
-    end
-    local page = renderer.createObject(x, y, longestLine, #input)
-    context.gpu.setActiveBuffer(page)
     for i = 1, #input do
         if input[i].text then
             graphics.text(1, i, input[i].text, input[i].color or defaultColor, true)
         end
     end
-    context.gpu.setActiveBuffer(0)
-    return page
 end
 
 return gui
