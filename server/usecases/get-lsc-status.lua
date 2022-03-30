@@ -22,6 +22,10 @@ local function exec(address, name, location)
         local energyData = parser.split(sensorInformation[3], "/")
         sensorInformation[2] = energyData[1]
         sensorInformation[3] = energyData[2]
+    --Ergon Addition
+    elseif string.match(sensorInformation[2], "Ergon") then
+        sensorInformation[2] = sensorInformation[3]
+        sensorInformation[3] = sensorInformation[4]
     end
     local problems = getNumberOfProblems(sensorInformation[9])
 
