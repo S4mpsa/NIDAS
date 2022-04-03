@@ -676,7 +676,7 @@ function gui.multiLineText(x, y, input, defaultColor)
     local defaultColor = defaultColor or gui.primaryColor()
     for i = 1, #input do
         if input[i].text then
-            graphics.text(1, i, input[i].text, input[i].color or defaultColor, true)
+            graphics.text(x, y + i, input[i].text, input[i].color or defaultColor, true)
         end
     end
 end
