@@ -9,7 +9,6 @@ local gui = require("lib.graphics.gui")
 local graphics = require("lib.graphics.graphics")
 local renderer = require("lib.graphics.renderer")
 
-local interface = component.me_interface
 local craftablesList = {}
 local stockingLevels = {}
 local currentlyCrafting = {}
@@ -192,7 +191,7 @@ local function discoverPatterns(amount)
     local context = graphics.context()
     local frame = gui.listFrame(context.width/2 - 11, context.height/2-3, 26, 4, "Discovering Patterns")
     renderer.update()
-    local craftables = interface.getCraftables()
+    local craftables = component.me_interface.getCraftables()
     local total = #craftables
     context.gpu.setActiveBuffer(0)
     graphics.text(context.width/2 + 1, context.height-4, "/ "..tostring(total), gui.primaryColor())
