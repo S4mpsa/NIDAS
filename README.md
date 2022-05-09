@@ -121,7 +121,7 @@ There are many things that can be configured.
     * Install the program just like you did for the server. You can also install NIDAS to the hard drive before creating the robot.
     * Whenever you place your robot in a new location, it'll prompt you for that location. Use the terminal to give the X, Y and Z coordinates.
 * New machines
-    * Place down a waypoint so the particle effects are inside the machine controller location. The waypoint has to be connected to the server that is monitoring the machines via cable.
+    * Place down a waypoint so the particle effects are inside the machine controller location.
     * (Optional): Name the waypoint. This will be the name of the machine in the system.
     * (Optional): Give it a redstone signal.
     * Place the adapter on the machine controller (You can use an MFU for that, so you don't need the adapter to be adjacent to the controller).
