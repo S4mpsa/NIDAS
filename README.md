@@ -102,9 +102,8 @@ There are many things that can be configured.
 # **Configuration**
     To get things up and running, you'll need to set some things up.
 * Server
-    * Place the main server first.
-        (It could be later, but then you gotta change the setting that says it's the main server on it and on the local server you placed first).
-    * Place local servers after the main server has ran atleast once.
+    * Place the main server first. Activate the "Primary Server" and make sure that the "Main Server" is Enabled in Cofigure menu.
+    * Place local servers after the main server has ran atleast once. Activate the "Primary Server" and in this case set "Main Server" to Disabled in Configure menu.
 * Robot
     * The robot is used to get the machine locations for displaying machine maintenance locations.
     * Place it by a charger so it doesn't run out of battery.
@@ -122,7 +121,7 @@ There are many things that can be configured.
     * Install the program just like you did for the server. You can also install NIDAS to the hard drive before creating the robot.
     * Whenever you place your robot in a new location, it'll prompt you for that location. Use the terminal to give the X, Y and Z coordinates.
 * New machines
-    * Place down a waypoint so the particle effects are inside the machine controller location.
+    * Place down a waypoint so the particle effects are inside the machine controller location. The waypoint has to be connected to the server that is monitoring the machines via cable.
     * (Optional): Name the waypoint. This will be the name of the machine in the system.
     * (Optional): Give it a redstone signal.
     * Place the adapter on the machine controller (You can use an MFU for that, so you don't need the adapter to be adjacent to the controller).
