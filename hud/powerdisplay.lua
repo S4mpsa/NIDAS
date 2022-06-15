@@ -130,12 +130,17 @@ function powerDisplay.widget(glasses, data)
             hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
             hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
             hudObjects[i].dynamic.state = ar.text(hudObjects[i].glasses, "", {x+w-95, y+2*hDivisor+hProgress+2}, colors.red)
-            if compact then hudObjects[i].dynamic.state.setPosition(x+w/2-15, y+hDivisor+2) end
+            if compact then
+                hudObjects[i].dynamic.state.setPosition(x+w/2-15, y+hDivisor+2)
+                hudObjects[i].dynamic.filltime.setPosition(x+hProgress, y+hDivisor+2)
+                hudObjects[i].dynamic.maxEU.setPosition(x+w-32, y-9)
+                hudObjects[i].dynamic.percentage.setPosition(x+w/2-10, y-9)
+            end
         end
         hudObjects[i].dynamic.energyBar.setVertex(3, x+3+hProgress+energyBarLength*percentage, y+hDivisor+hProgress)
         hudObjects[i].dynamic.energyBar.setVertex(4, x+3+energyBarLength*percentage, y+hDivisor)
         if compact then
-            hudObjects[i].dynamic.currentEU.setText(parser.metricNumber(currentEU).." "..energyUnit)
+            hudObjects[i].dynamic.currentEU.setText(parser.metricNumber(currentEU))
         else
             hudObjects[i].dynamic.currentEU.setText(parser.splitNumber(currentEU).." "..energyUnit)
         end
@@ -144,11 +149,13 @@ function powerDisplay.widget(glasses, data)
             hudObjects[i].dynamic.maxEU.setPosition(x+w-25, y-9)
         else
             if compact then
-                hudObjects[i].dynamic.maxEU.setText(parser.metricNumber(maxEU).." "..energyUnit)
+                hudObjects[i].dynamic.maxEU.setText(parser.metricNumber(maxEU))
             else
                 hudObjects[i].dynamic.maxEU.setText(parser.splitNumber(maxEU).." "..energyUnit)
             end
-            hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#parser.splitNumber(maxEU)), y-9)
+            if not compact then
+                hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#parser.splitNumber(maxEU)), y-9)
+            end
         end
         hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
         local hIOString = ""
@@ -166,16 +173,14 @@ function powerDisplay.widget(glasses, data)
             hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
         end
         local fillTimeString = ""
-        if not compact then
-            if energyData.energyPerTick > 0 then
-                local fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
-                fillTimeString = "Full: " .. time.format(math.abs(fillTime))
-            elseif energyData.energyPerTick < 0 then
-                local fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
-                fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
-            else
-                fillTimeString = ""
-            end
+        if energyData.energyPerTick > 0 then
+            local fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
+            fillTimeString = "Full: " .. time.format(math.abs(fillTime))
+        elseif energyData.energyPerTick < 0 then
+            local fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
+            fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
+        else
+            fillTimeString = ""
         end
         if data.state == states.OFF then
             hudObjects[i].dynamic.state.setText("Disabled")
