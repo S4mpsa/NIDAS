@@ -8,7 +8,6 @@
 ## **AR HUD (OpenGlasses)**
 ### **Power monitor**
 * Displays current power status: Total capacity, current capacity, input/output rate, and time to full/empty based on the rate.
-
     (Only works for the Lapotronic Supercapacitor)
 
 ### **Toolbar decoration**
@@ -31,7 +30,6 @@
 
 ## **Automated Infusions**
     NIDAS supports auto infusions. It checks for a pattern that maches the items in an ME subnetwork, checks for the required essentia for the infusion and infuses the thing! Pretty handy.
-
 ## **Configuration options**
 There are many things that can be configured.
 
@@ -52,6 +50,7 @@ There are many things that can be configured.
 * Change the rendering resolution.
 * Chose GUI scale on the video options of the game: 1 for Small, 2 for Medium, ,3 for Large and 4 for Auto.
 * Choose your timezone offset so the real world clock displays your time correctly.
+
     (If the offset is negative, you must type the number first and then press -, blame @S4mpsa for that)
 
 ### **Power configuration**
@@ -157,6 +156,5 @@ There are many things that can be configured.
     * If you enable developer mode, there will be messages on the computer screen indicating the statuses of the infusions. Expect the pretty GUI to break.
     * This is what it looks like:
     ![Altar setup](altar-setup.png)
-
 
 It's recommended you go through all of the settings after you set things up to get the interfaces to your liking.
