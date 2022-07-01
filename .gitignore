@@ -3,3 +3,4 @@
 *.png
 settings/*
 available_version.lua
+node_modules
