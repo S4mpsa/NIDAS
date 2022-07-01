@@ -3,31 +3,13 @@ local component = require("component")
 local event = require("event")
 local renderer = {}
 
-local testObject = {
-    gpu = component.gpu,
-    page = 0,
-    x = 0,
-    y = 0,
-    width = 160,
-    height = 50,
-    state = 0,
-    clickable = false,
-    clickArea = {{0, 0}, {0, 0}},
-    clickFunction = nil,
-    boundScreens = 0
-}
-
-
 local objects = {}
+local windows = {}
 local primaryScreen = component.screen.address
-local debug = false
 local multicasting = true
 
 function renderer.setMulticasting(value)
     multicasting = value
-end
-function renderer.setDebug(value)
-    debug = value
 end
 
 function renderer.setPrimaryScreen(address)
@@ -40,6 +22,24 @@ function renderer.clear()
     objects = {}
 end
 
+local activeWindow = "main"
+
+function renderer.clearWindow(name)
+    local gpu = graphics.context().gpu
+    for i = 1, #windows[name] do
+        gpu.freeBuffer(windows[name][i].page)
+    end
+    windows[name] = {}
+end
+
+function renderer.switchWindow(name)
+    windows[activeWindow] = objects
+    objects = windows[name] or {}
+    activeWindow = name
+    graphics.clear()
+    renderer.update()
+end
+
 local focused = false
 --To disable click detection
 function renderer.setFocus()
@@ -50,9 +50,13 @@ function renderer.leaveFocus()
     focused = false
 end
 
+function renderer.focused()
+    return focused
+end
 function event.onError(message)
+    local _, y = graphics.context().gpu.getResolution()
     print(message)
-    graphics.text(1, graphics.context().heigth, message)
+    graphics.text(40, y*2-3, message)
 end
 
 function renderer.multicast()
@@ -148,13 +152,14 @@ end
 --Function is the function that is called with function(arguments) on click of the area.
 --Arguments is a table {arg1, arg2, arg3, ...} which is passed to the function given.
 --v1 and v2 are the top left and bottom right bounds of the clickable area, given as a pair {x1, y1} and {x2, y2}
-function renderer.setClickable(object, onClick, args, v1, v2)
+function renderer.setClickable(object, onClick, args, v1, v2, lowPriority)
     for i = 1, #objects do
         if objects[i].page == object then
             objects[i].clickable = true
             objects[i].clickArea = {v1, v2}
             objects[i].clickFunction = onClick
             objects[i].args = args
+            if lowPriority then objects[i].lowPriority = true end
             return true
         end
     end
@@ -164,8 +169,6 @@ end
 --All changes are buffered in video memory and only rendered on calling renderer.update()
 --This will render all objects at their x and y locations. Rendering is first-in-first-rendered, so to overlay things on top of other objects, you need to create the underlying object first.
 --Passing a list of pages only updates those pages.
-local whitelist = {}
-
 function renderer.update(pages)
     local gpu = graphics.context().gpu
     gpu.bind(primaryScreen, false)
@@ -193,7 +196,7 @@ function renderer.update(pages)
         gpu.bitblt(0, o.x, o.y, o.width, o.height, o.page, 1, 1)
     end
     renderer.multicast()
-    if debug then
+    if DEBUG then
         local str = ""
         local bufferSum = 0
         for i = 1, #objects do
@@ -213,12 +216,41 @@ function renderer.update(pages)
     end
 end
 
+local clickX, clickY
+function renderer.getX() return clickX end
+function renderer.getY() return clickY end
+
 local function checkClick(_, _, X, Y)
     if not focused then
-        if debug then
+        if DEBUG then
             local _, y = graphics.context().gpu.getResolution()
             graphics.text(35, y*2-1, "Registered click at: "..X.." "..Y.."      ")
         end
+        clickX = X
+        clickY = Y
+        local function activate(o)
+            if o.args ~= nil then
+                if type(o.clickFunction) == "function" then
+                    o.clickFunction(table.unpack(o.args))
+                elseif type(o.clickFunction) == "table" then
+                    for f = 1, #o.clickFunction do
+                        o.clickFunction[f](table.unpack(o.args))
+                    end
+                end
+                return
+            else
+                if type(o.clickFunction) == "function" then
+                    o.clickFunction()
+                elseif type(o.clickFunction) == "table" then
+                    for f = 1, #o.clickFunction do
+                        o.clickFunction[f]()
+                    end
+                end
+                return
+            end
+        end
+        local lowPriorityObject = nil
+        local clicked = false
         for i = 1, #objects do
             local o = objects[i]
             if o ~= nil then
@@ -226,29 +258,17 @@ local function checkClick(_, _, X, Y)
                     local v1 = o.clickArea[1]
                     local v2 = o.clickArea[2]
                     if X >= v1[1] and X < v2[1] and Y >= v1[2] and Y < v2[2] then
-                        if o.args ~= nil then
-                            if type(o.clickFunction) == "function" then
-                                o.clickFunction(table.unpack(o.args))
-                            elseif type(o.clickFunction) == "table" then
-                                for f = 1, #o.clickFunction do
-                                    o.clickFunction[f](table.unpack(o.args))
-                                end
-                            end
-                            return
+                        if o.lowPriority then
+                            lowPriorityObject = o
                         else
-                            if type(o.clickFunction) == "function" then
-                                o.clickFunction()
-                            elseif type(o.clickFunction) == "table" then
-                                for f = 1, #o.clickFunction do
-                                    o.clickFunction[f]()
-                                end
-                            end
-                            return
+                            activate(o)
+                            clicked = true
                         end
                     end
                 end
             end
         end
+        if not clicked then activate(lowPriorityObject) end
     end
 end
 

@@ -12,7 +12,7 @@ end
 function time.offset(offset, timeJSON)
     offset = offset or 0
     local data = timeJSON
-    if #data < 3 then return nil end
+    if #data < 3 then return "-" end
     data = split(data, ",")[2]
     data = split(data, "-")[3]
     data = data:sub(data:find("T") + 1, data:find("Z") - 1)

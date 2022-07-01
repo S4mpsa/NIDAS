@@ -27,7 +27,20 @@ function parser.metricNumber(number)
 end
 
 function parser.getInteger(string)
-    return math.floor(string.gsub(string, "([^0-9]+)", "") + 0)
+    local numberString = string.gsub(string, "([^0-9]+)", "")
+    if tonumber(numberString) then
+        return math.floor(tonumber(numberString) + 0)
+    end
+    return nil
+end
+
+function parser.split(string, sep)
+    if sep == nil then sep = "%s" end
+    local words = {}
+    for str in string.gmatch(string, "([^"..sep.."]+)") do
+        table.insert(words, str)
+    end
+    return words
 end
 
 function parser.percentage(number) return

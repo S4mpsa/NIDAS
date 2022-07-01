@@ -9,14 +9,17 @@ local getEfficiencyPercentage = require("server.usecases.get-efficiency-percenta
 
 --
 
-local function exec(address, name)
-    local multiblock = getMachine(address, name)
+local function exec(address, name, location)
+    local multiblock = getMachine(address, name, location)
     if not multiblock.address then
-        return {state = states.MISSING}
+        multiblock.state = states.MISSING
+        return multiblock
     end
     local sensorInformation = multiblock:getSensorInformation()
 
-    local problems = getNumberOfProblems(sensorInformation[5])
+    local gtPlusPlus = string.match(sensorInformation[5] or "", "EU") and 7 or 5
+    if gtPlusPlus == 7 then gtPlusPlus = string.match(sensorInformation[18] or "", "Problems") and 18 or 7 end
+    local problems = getNumberOfProblems(sensorInformation[gtPlusPlus])
 
     local state = {}
     if multiblock:isWorkAllowed() then
@@ -34,12 +37,14 @@ local function exec(address, name)
     end
 
     local status = {
+        name = name,
+        state = state,
         progress = multiblock.getWorkProgress(),
         maxProgress = multiblock.getWorkMaxProgress(),
         problems = problems,
         probablyUses = multiblock.getWorkMaxProgress() and parser.getInteger(sensorInformation[3]) or 0,
         efficiencyPercentage = getEfficiencyPercentage(sensorInformation[5]),
-        state = state
+        location = location
     }
     return status
 end

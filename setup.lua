@@ -1,5 +1,5 @@
 -- Paste this into OpenComputer terminal to download and set up NIDAS
--- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/develop/setup.lua -f
+-- wget https://raw.githubusercontent.com/S4mpsa/NIDAS/master/setup.lua -f
 
 local shell = require("shell")
 local filesystem = require("filesystem")
@@ -26,17 +26,13 @@ shell.setWorkingDirectory("/bin")
 shell.execute("wget -fq " .. tarBin)
 
 local NIDAS
-local release
 local arg = {...}
 if arg[1] == "test" or arg[1] == "latest" then
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v-1/NIDAS.tar"
-    release = "latest"
 elseif arg[1] == "dev" or arg[1] == "staging" then
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/download/v0/NIDAS.tar"
-    release = "dev"
 else
     NIDAS = "https://github.com/S4mpsa/NIDAS/releases/latest/download/NIDAS.tar"
-    release = '"stable"'
 end
 
 local successful =
@@ -78,6 +74,12 @@ local successful =
             end
         end
         filesystem.remove("/home/temp/")
+
+        filesystem.remove("/lib/core/boot.lua")
+        filesystem.copy(workDir .. "nidas_boot.lua", "/lib/core/boot.lua")
+
+        filesystem.remove("/etc/profile.lua")
+        filesystem.copy(workDir .. "nidas_profile.lua", "/etc/profile.lua")
 
         gpu.set(width / 2 - 7, height / 2, "                ")
         gpu.set(width / 2 - 7, height / 2, "Update complete.  ")

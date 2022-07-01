@@ -6,22 +6,26 @@ local renderer = require("lib.graphics.renderer")
 local parser = require("lib.utils.parser")
 local gui = {}
 
-local borderColor = colors.darkGray
+local borderColor = colors.gray
 local primaryColor = colors.electricBlue
 local accentColor = colors.magenta
 
 function gui.setColors(primary, accent, border)
     primaryColor = primary or colors.electricBlue
     accentColor = accent or colors.magenta
-    borderColor = border or colors.darkGray
+    borderColor = border or colors.gray
 end
+
+function gui.borderColor() return borderColor end
+function gui.primaryColor() return primaryColor end
+function gui.accentColor() return accentColor end
 
 --Creates a bounded 3-tall button.
 --  text = Text to display on button
 --  onClick = Function to call when button is pressed
 --  args = Arguments to pass to the button
 --  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
-function gui.bigButton(x, y, text, onClick, args, width)
+function gui.bigButton(x, y, text, onClick, args, width, suppressFlash)
     width = width or #text+2
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, 3, true)
@@ -45,7 +49,7 @@ function gui.bigButton(x, y, text, onClick, args, width)
         local function done()
             gpu.bitblt(0, x, y, width, 3, page, 1, 1)
         end
-        event.timer(0.3, done, 1)
+        if not suppressFlash then event.timer(0.3, done, 1) end
     end
     renderer.setClickable(page, {flash, onClick}, args, {x, y}, {x+width, y+3})
     gpu.setActiveBuffer(0)
@@ -57,14 +61,19 @@ end
 --  onClick = Function to call when button is pressed
 --  args = Arguments to pass to the button
 --  [width] = Optional width to force the button to be a certain width. Defaults to the length of the text + 2
-function gui.smallButton(x, y, text, onClick, args, width, color)
+function gui.smallButton(x, y, text, onClick, args, width, color, leftAlign)
     color = color or primaryColor
     text = tostring(text)
     width = width or #text+2
+    leftAlign = leftAlign or false
     local gpu = graphics.context().gpu
     local page = renderer.createObject(x, y, width, 1, true)
     gpu.setActiveBuffer(page)
-    graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, color)
+    if leftAlign then
+        graphics.text(2, 1, text, color)
+    else
+        graphics.text(math.ceil(width/2 - #text/2 + 1), 1, text, color)
+    end
     renderer.setClickable(page, onClick, args, {x, y}, {x+width, y+1})
     gpu.setActiveBuffer(0)
     return page
@@ -99,13 +108,19 @@ end
 --Creates a list of multiple small buttons at x, y, with borders.
 --Buttons are passed as a table of tables:
 --Each button is of the form {name = "Name", func = functionToCall, args = argsToPass}
-function gui.multiButtonList(x, y, buttons, width, height, title)
+function gui.multiButtonList(x, y, buttons, width, height, title, color, leftAlign)
+    leftAlign = leftAlign or false
+    color = color or primaryColor
     local pages = {}
     table.insert(pages, gui.listFrame(x, y, width, height, title))
     local titleOffset = 0
     if title ~= nil then titleOffset = 1 end
     for i = 0, #buttons-1 do
-        table.insert(pages, gui.smallButton(x+1, y+i+1+titleOffset, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2))
+        if leftAlign then
+            table.insert(pages, gui.smallButton(x+1, y+i+1+titleOffset, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2, color, true))
+        else
+            table.insert(pages, gui.smallButton(x+1, y+i+1+titleOffset, buttons[i+1].name, buttons[i+1].func, buttons[i+1].args, width-2, color))
+        end
     end
     return pages
 end
@@ -150,24 +165,14 @@ function gui.textInput(x, y, maxWidth, startValue)
         renderer.multicast()
     end
     event.cancel(focusListener)
-    if value == 13 or value == 9 then
-        graphics.text(x, -1+2*y, returnString.." ", primaryColor)
-        renderer.multicast()
-        if value == 9 then
-            event.push("touch", _, x, y+1)
-        end
-        if returnString == "" then
-            graphics.text(x, -1+2*y, "None".." ", primaryColor)
-            return "None"
-        end
-        return returnString
-    else
-        local padded = startValue
-        for i = 1, maxWidth-#padded+1 do padded = padded.." " end
-        graphics.text(x, -1+2*y, padded, primaryColor)
-        renderer.multicast()
-        return nil
+    if value == 9 then
+        event.push("touch", _, x, y+1)
     end
+    local padded = returnString
+    for i = 1, maxWidth-#padded+1 do padded = padded.." " end
+    graphics.text(x, -1+2*y, padded, primaryColor)
+    renderer.multicast()
+    return returnString
 end
 
 local function split(string, sep)
@@ -285,6 +290,7 @@ function gui.numberInput(x, y, maxWidth, startValue, startLeft, delim, minValue,
             event.push("touch", _, x, y+1)
         end
         if minValue and number < minValue then return minValue end
+        if maxValue and number > maxValue then return maxValue end
         return number
     else
         padded = parser.splitNumber(tonumber(startValue),delim)
@@ -308,6 +314,12 @@ function gui.colorSelection(x, y, colorList)
     local gpu = context.gpu
     local colorTable = {}
     local longestName = 0
+    if x < 0 then
+        x = renderer.getX()
+    end
+    if y < 0 then
+        y = renderer.getY()
+    end
     for name, value in pairs(colorList) do
         if type(name) == "string" then
             if #name > longestName then longestName = #name end
@@ -383,6 +395,13 @@ function gui.selectionBox(x, y, choices)
     local maxY = context.height
     local gpu = context.gpu
     local longestName = 0
+    if type(x) == "function" then
+        x = x()
+    end
+    if type(y) == "function" then
+        y = y()
+    end
+
     for i = 1, #choices do
         if #choices[i].displayName > longestName then longestName = #choices[i].displayName end
     end
@@ -423,30 +442,34 @@ function gui.selectionBox(x, y, choices)
     end
 end
 
-local function setTextAttribute(x, y, tableToModify, tableValue, attribute)
+local function setTextAttribute(x, y, tableToModify, tableValue, attribute, maxLength)
+    maxLength = maxLength or 50
     local startValue = ""
+    test = tableToModify
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or "None"
     else
         startValue = tableToModify[attribute] or "None"
     end
-    local value = gui.textInput(x, y, 50, startValue)
+    local value = gui.textInput(x, y, maxLength, startValue)
     if value ~= nil then
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
         else
             tableToModify[attribute] = value
+            debugtable = tableToModify
         end
     end
 end
-local function setNumberAttribute(x, y, tableToModify, tableValue, attribute, minValue)
+local function setNumberAttribute(x, y, tableToModify, tableValue, attribute, minValue, maxValue, maxLength)
+    maxLength = maxLength or 50
     local startValue = 0
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or 0
     else
         startValue = tableToModify[attribute] or 0
     end
-    local value = gui.numberInput(x, y, 50, startValue, true, "", minValue)
+    local value = gui.numberInput(x, y, maxLength, startValue, true, "", minValue, maxValue)
     if value ~= nil then
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
@@ -462,12 +485,11 @@ local function setColorAttribute(x, y, tableToModify, tableValue, attribute)
         if tableValue ~= nil then
             tableToModify[tableValue][attribute] = value
             for i = 1, longest-#name do name = name .. " " end
-            graphics.text(x, 2*y-1, name, value)
         else
             tableToModify[attribute] = value
             for i = 1, longest-#name do name = name .. " " end
-            graphics.text(x, 2*y-1, name, value)
         end
+        graphics.text(x, 2*y-1, name, value)
     end
 end
 
@@ -495,14 +517,21 @@ end
 
 local function setComponentAttribute(x, y, tableToModify, tableValue, attribute, componentType, nameTable)
     local startValue = ""
+    if type(componentType) == "string" then componentType = {componentType} end
     if tableValue ~= nil then
         startValue = tableToModify[tableValue][attribute] or "None"
     else
         startValue = tableToModify[attribute] or "None"
     end
+    local function contains(type)
+        for i = 1, #componentType do
+            if componentType[i] == type then return true end
+        end
+        return false
+    end
     local components = {}
     for address, component in require("component").list() do
-        if component == componentType then
+        if contains(component) then
             local displayName = address
             if nameTable ~= nil then
                 if nameTable[address] ~= nil then
@@ -515,13 +544,18 @@ local function setComponentAttribute(x, y, tableToModify, tableValue, attribute,
             args = nil})
         end
     end
-
+    table.insert(components,
+    {displayName = "None",
+    value = "None",
+    args = nil})
     local value = gui.selectionBox(x+2, y, components)
     if value ~= nil then
         if tableValue ~= nil then
+            if value == "None" then tableToModify[tableValue][attribute] = nil end
             tableToModify[tableValue][attribute] = value
             graphics.text(x, y*2-1, value, primaryColor)
         else
+            if value == "None" then tableToModify[attribute] = nil end
             tableToModify[attribute] = value
             graphics.text(x, y*2-1, value, primaryColor)
         end
@@ -531,7 +565,9 @@ end
 --Creates a named list of attributes to change, given in attributeData in the format {name="Name", attribute="attr", type="string|number"}
 --The attributes to modify should be on the third level of a list: dataTable.dataValue.attribute
 --If dataValue is nil, then the main dataTable.attribute is modified instead.
-function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue)
+function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable, dataValue, maxLength)
+    maxLength = maxLength or 20
+    dataValue = dataValue or nil
     local longestAttribute = 0
     for i = 1, #attributeData do
         if #attributeData[i].name > longestAttribute then longestAttribute = #attributeData[i].name end
@@ -545,9 +581,9 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
         graphics.context().gpu.setActiveBuffer(page)
         graphics.text(3, 2*y+2*i-1, name)
         if type == "string" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setTextAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, maxLength}, maxLength, nil, true))
         elseif type == "number" then
-            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue}))
+            table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, displayName or attributeData[i].defaultValue or "None", setNumberAttribute, {x+longestAttribute+1, y+i, dataTable, dataValue, attribute, attributeData[i].minValue, attributeData[i].maxValue, maxLength}))
         elseif type == "color" then
             table.insert(pageTable, gui.smallButton(x+longestAttribute, y+i, colors[displayName] or "Custom", setColorAttribute,
             {x+longestAttribute+1, y+i, dataTable, dataValue, attribute}, _, displayName or attributeData[i].defaultValue))
@@ -563,7 +599,10 @@ function gui.multiAttributeList(x, y, page, pageTable, attributeData, dataTable,
     return pageTable
 end
 
-function gui.logo(x, y, version)
+function gui.logo(x, y, version, border, primary, accent)
+    local bColor = border or borderColor
+    local pColor = primary or primaryColor
+    local aColor = accent or accentColor
     local logo1 = {
         "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
         "█◥◣ █  █  █  ◥◣ ◢◤ ◥◣ █   ",
@@ -582,17 +621,18 @@ function gui.logo(x, y, version)
         "█   █",
         "█   █"
     }
-    local page = renderer.createObject(x, y, 29, 8)
-    local gpu = graphics.context().gpu
-    gpu.setActiveBuffer(page)
-    graphics.text(1, 3, "◢", borderColor)
-    graphics.rectangle(1, 5, 1, 12, borderColor)
-    graphics.rectangle(2, 16, 27, 1, borderColor)
-    graphics.outline(3, 1, logo1, primaryColor)
-    graphics.outline(19, 1, logo2, accentColor)
-    graphics.text(27, 3, "Ver", accentColor)
-    graphics.text(27, 5, version, accentColor)
-    gpu.setActiveBuffer(0)
+    --local page = renderer.createObject(x, y, 29, 8)
+    --local gpu = graphics.context().gpu
+    --gpu.setActiveBuffer(page)
+    graphics.text(x+1, y+3, "◢", bColor)
+    graphics.text(x+1, y+14, "◥", bColor)
+    graphics.rectangle(x+1, y+5, 1, 12, bColor)
+    graphics.rectangle(x+2, y+14, 27, 1, bColor)
+    graphics.outline(x+3, y+1, logo1, pColor)
+    graphics.outline(x+19, y+1, logo2, aColor)
+    graphics.text(x+27, y+3, "Ver", aColor)
+    graphics.text(x+27, y+5, version, aColor)
+    --gpu.setActiveBuffer(0)
 end
 
 function gui.smallLogo(x, y, version)
@@ -618,6 +658,27 @@ function gui.smallLogo(x, y, version)
     graphics.text(20, 5, "◢", borderColor)
     graphics.text(20, 7, "◤", borderColor)
     gpu.setActiveBuffer(0)
+end
+
+--Unwrapped text box allowing for multiple instances of graphics.text() to be drawn at once
+--Supports drawing blank lines by omitting input.name
+--The input argument is a table with the following format:
+--input = {
+--    {
+--        text = "[string to display]",
+--        color = [color used, optional]
+--    },{
+--        text = "[string to display]",
+--        color = [color used, optional]
+--    }
+--}
+function gui.multiLineText(x, y, input, defaultColor)
+    local defaultColor = defaultColor or gui.primaryColor()
+    for i = 1, #input do
+        if input[i].text then
+            graphics.text(x, y + i, input[i].text, input[i].color or defaultColor, true)
+        end
+    end
 end
 
 return gui
