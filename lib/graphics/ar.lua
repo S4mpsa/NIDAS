@@ -57,7 +57,19 @@ function arGraphics.text(glasses, string, v1, color, scale)
     text.setText(string)
     text.setPosition(v1[1], v1[2])
     text.setColor(RGB(color))
-    text.setScale(scale)
+    if legacyScaling then
+        if scale == 1 then
+            text.setScale(scale)
+        else
+            local oldX, oldY = text.getPosition()
+            oldX = oldX * text.getScale()
+            oldY = oldY * text.getScale()
+            text.setScale(scale)
+            text.setPosition(oldX/(scale * 2), oldY/(scale * 2))
+        end
+    else
+        text.setScale(scale)
+    end
     return text
 end 
 

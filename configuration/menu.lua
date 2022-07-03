@@ -175,6 +175,7 @@ local function load()
             graphics.context().height = graphics.context().height
             renderer.setPrimaryScreen(primaryScreen)
             DEBUG = configurationData.debug or false
+            legacyScaling = configurationData.legacyScaling or false
             renderer.setMulticasting(configurationData.multicasting and true)
         else
             configurationData = {}
@@ -313,6 +314,7 @@ function menu.configure(x, y, _, _, _, page)
         {name = "Border Color", attribute = "borderColor", type = "color", defaultValue = colors.gray},
         {name = "", attribute = nil, type = "header", defaultValue = nil},
         {name = "Autorun", attribute = "autorun", type = "boolean", defaultValue = false},
+        {name = "Legacy Text Scaling", attribute = "legacyScaling", type = "boolean", defaultValue = false},
         {name = "Multicasting", attribute = "multicasting", type = "boolean", defaultValue = true},
         {name = "Developer Mode", attribute = "debug", type = "boolean", defaultValue = false}
     }
