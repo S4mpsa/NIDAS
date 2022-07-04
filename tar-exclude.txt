@@ -1,7 +1,0 @@
-tar-exclude.txt
-*.tar
-.gitignore
-.github
-*.md
-*.png
-settings
