@@ -24,7 +24,7 @@ jobs:
         run: tar -cvf NIDAS.tar .shrc --exclude-from=tar-exclude.txt *
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${{ github.events.ref }})"
+        run: echo "##[set-output name=branch;]$(echo ${{ github.event.ref }} - ${{ github.event.ref_type }})"
         id: get_branch_name
       - uses: dev-drprasad/delete-tag-and-release@v0.1.3
         with:
