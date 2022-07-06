@@ -123,7 +123,6 @@ function renderer.resizeWindow(name, direction, x, y)
                 {x=window.size.x + (window.pos.x - x), y=window.size.y + (window.pos.y - y)},
                 {x=x, y=y}, window.depth, window.components, window.context)
             end
-            graphics.windowBorder(_, true)
             renderer.addWindow(newWindow)
             sortWindows()
             gpu.setActiveBuffer(0)
@@ -169,6 +168,18 @@ function renderer.update()
     for _, window in ipairs(activeWindows) do
         gpu.bitblt(0, window.pos.x, window.pos.y, window.size.x, window.size.y, window.buffer, 1, 1)
         end
+end
+
+---Refreshes a specfic window.
+---@param name string
+function renderer.updateWindow(name)
+    gpu.setActiveBuffer(0)
+    for _, window in ipairs(activeWindows) do
+        if window.name == name then
+            gpu.bitblt(0, window.pos.x, window.pos.y, window.size.x, window.size.y, window.buffer, 1, 1)
+            return
+        end
+    end
 end
 
 return renderer
