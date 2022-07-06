@@ -31,7 +31,6 @@ jobs:
       - uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.RELEASE_SECRET }}
-          tag: ${{ steps.get_tag_name.outputs.VERSION }}
           prerelease: false
           gzip: false
           files: NIDAS.tar
