@@ -7,9 +7,6 @@ on:
   # Triggers the workflow on push events for every branch
   push:
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -23,15 +20,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
-        run: tar -cvf NIDAS.tar .shrc --exclude-from=tar-exclude.txt *
+        run: tar -cvf NIDAS.tar --exclude-from=tar-exclude.txt *
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"; echo ${GITHUB_REF#refs/heads/}
         id: get_branch_name
       - uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.RELEASE_SECRET }}
-          tag: ${{ steps.get_branch_name.outputs.branch }}
+          tag: 'auto-release-${{ steps.get_branch_name.outputs.branch }}'
           prerelease: true
           gzip: false
           files: NIDAS.tar
