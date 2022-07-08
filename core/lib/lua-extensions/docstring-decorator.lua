@@ -1,4 +1,4 @@
-local Decorator = require('lib.lua-extensions.decorator')
+local Decorator = require("lib.lua-extensions.decorator")
 
 
 --- Makes the function.__tostring = description.
