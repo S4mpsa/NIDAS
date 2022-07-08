@@ -5,3 +5,8 @@ tar-exclude.txt
 *.md
 *.png
 settings
+modules
+.releaserc
+test
+package*
+yarn.lock
