@@ -12,7 +12,7 @@ local inventory = {}
 ---@return inventory
 function inventory.new(address, location)
     ---@type inventory
-    local self = tileEntity.new(address, location)
+    local self = tileEntity.bind(address, location)
 
     local proxy = component.proxy(address)
     self.name = proxy.getInventoryName()

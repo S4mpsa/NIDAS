@@ -29,15 +29,11 @@ function tileEntity.refreshKnownEntitiesList()
     end
 end
 
----Creates a new tileEntity object
+---Binds a tileEntity object
 ---@param address string
 ---@param location coordinates
 ---@return tileEntity
-function tileEntity.new(address, location)
-    if not isKnownType(component.type(address)) then
-        error('Unknown component type!')
-    end
-
+function tileEntity.bind(address, location)
     ---@type tileEntity
     local self = {}
     self.address = address
@@ -49,6 +45,18 @@ function tileEntity.new(address, location)
     function self.update() error("I am abstract!") end
 
     return self
+end
+
+---Creates a new tileEntity object
+---@param address string
+---@param location coordinates
+---@param ... any
+---@return tileEntity
+function tileEntity.new(address, location, ...)
+    if not isKnownType(component.type(address)) then
+        error('Unknown component type!')
+    end
+    return knownEntityTypes[component.type(address)].new(address, location, ...)
 end
 
 event.listen("component_added", function(address, componentType)
