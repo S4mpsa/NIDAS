@@ -1,23 +1,23 @@
 local component = require("component")
 local tileEntity = require("core.tile-entity")
 
----@class altar: tileEntity
-local altar = {componentType = 'blockstonedevice_2'}
+---@class matrix: tileEntity
+local matrix = {componentType = 'blockstonedevice_2'}
 
-tileEntity.addType(altar.componentType, 'TC4 altar')
+tileEntity.addType(matrix.componentType, matrix)
 
 ---Creates a new Altar object
 ---@param address string
 ---@param location coordinates
----@return altar
-function altar.new(address, location)
-    if not component.type(address) == altar.componentType then
+---@return matrix
+function matrix.new(address, location)
+    if not component.type(address) == matrix.componentType then
         error("Wrong component type! \
-        " .. 'Expected "' .. altar.componentType .. '" and got "' ..
+        " .. 'Expected "' .. matrix.componentType .. '" and got "' ..
                   component.type(address) .. '".')
     end
 
-    ---@type altar
+    ---@type matrix
     local self = tileEntity.new(address, location)
 
     local proxy = component.proxy(address)
@@ -27,4 +27,4 @@ function altar.new(address, location)
     return self
 end
 
-return altar
+return matrix
