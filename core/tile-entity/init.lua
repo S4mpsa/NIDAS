@@ -3,14 +3,14 @@ local event = require("event")
 
 ---@class tileEntity
 ---@field address string
----@field position coordinates
+---@field location coordinates
 local tileEntity = {}
 
 local knownEntities = {}
 local knownEntityTypes = {}
 
-function tileEntity.addType(componentName, description)
-    knownEntityTypes[componentName] = description or componentName
+function tileEntity.addType(componentName, class)
+    knownEntityTypes[componentName] = class
 end
 
 function tileEntity.listKnownEntities() return pairs(knownEntities) end
@@ -31,9 +31,9 @@ end
 
 ---Creates a new tileEntity object
 ---@param address string
----@param position coordinates
+---@param location coordinates
 ---@return tileEntity
-function tileEntity.new(address, position)
+function tileEntity.new(address, location)
     if not isKnownType(component.type(address)) then
         error('Unknown component type!')
     end
@@ -41,7 +41,7 @@ function tileEntity.new(address, position)
     ---@type tileEntity
     local self = {}
     self.address = address
-    self.position = position
+    self.location = location
 
     local proxy = component.proxy(address)
     knownEntities[address] = proxy
