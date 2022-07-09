@@ -1,0 +1,5 @@
+---@meta
+---
+---
+---@class essentia
+---@field amount number
