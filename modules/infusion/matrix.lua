@@ -6,7 +6,7 @@ local matrix = {componentType = 'blockstonedevice_2'}
 
 tileEntity.addType(matrix.componentType, matrix)
 
----Creates a new Altar object
+---Creates a new matrix object
 ---@param address string
 ---@param location coordinates
 ---@return matrix
@@ -18,7 +18,7 @@ function matrix.new(address, location)
     end
 
     ---@type matrix
-    local self = tileEntity.new(address, location)
+    local self = tileEntity.bind(address, location)
 
     local proxy = component.proxy(address)
 
