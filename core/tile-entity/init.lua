@@ -9,6 +9,9 @@ local tileEntity = {}
 local knownEntities = {}
 local knownEntityTypes = {}
 
+---comment
+---@param componentName string
+---@param class tileEntity
 function tileEntity.addType(componentName, class)
     knownEntityTypes[componentName] = class
 end
@@ -16,7 +19,7 @@ end
 function tileEntity.listKnownEntities() return pairs(knownEntities) end
 
 local function isKnownType(componentType)
-    for type in pairs(knownEntityTypes) do
+    for _, type in pairs(knownEntityTypes) do
         if componentType == type then return true end
     end
 end
@@ -36,7 +39,7 @@ end
 function tileEntity.bind(address, location)
     ---@type tileEntity
     local self = {}
-    self.address = address
+    self.address = address 
     self.location = location
 
     local proxy = component.proxy(address)
@@ -53,19 +56,22 @@ end
 ---@param ... any
 ---@return tileEntity
 function tileEntity.new(address, location, ...)
-    if not isKnownType(component.type(address)) then
+    local type = component.type(address)
+    if not isKnownType(type) then
         error('Unknown component type!')
     end
-    return knownEntityTypes[component.type(address)].new(address, location, ...)
+    return knownEntityTypes[type].new(address, location, ...)
 end
 
-event.listen("component_added", function(address, componentType)
+event.listen("component_added", function(_, address, componentType)
     if isKnownType(componentType) then
-        knownEntities[address] = component.proxy(address)
+        knownEntities[address] = knownEntities[address] or
+                                     knownEntityTypes[componentType]
+                                         .new(address)
     end
 end)
 
 event.listen("component_removed",
-             function(address) knownEntities[address] = nil end)
+             function(_, address) knownEntities[address] = nil end)
 
 return tileEntity
