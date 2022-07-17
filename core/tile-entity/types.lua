@@ -1,0 +1,10 @@
+---@meta
+---
+---
+---@class itemStack
+---@field maxStackSize number
+---
+---@class coordinates
+---@field x number
+---@field y number
+---@field z number
