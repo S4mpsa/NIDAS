@@ -15,7 +15,8 @@ local energyData = {
     startTime = 0,
     endTime = 0,
     updateInterval = 100,
-    energyPerTick = 0
+    energyPerTick = 0,
+    offset = 0
 }
 
 local energyUnit = "EU"
@@ -47,6 +48,7 @@ end
 --Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [heigth]}
 --Only the glass proxy is required, rest have default values.
+
 function powerDisplay.widget(glasses, data)
     if data ~= nil then
     if data.state ~= states.MISSING then
@@ -76,6 +78,7 @@ function powerDisplay.widget(glasses, data)
         energyData.energyPerTick = math.floor((energyData.readings[2] - energyData.readings[1])/ticks)
         energyData.intervalCounter = 1
     end
+    energyData.offset = energyData.offset + 5
     if #hudObjects < #glasses then
         for i = 1, #glasses do
             if glasses[i][1] == nil then
@@ -130,6 +133,7 @@ function powerDisplay.widget(glasses, data)
             hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
             hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
             hudObjects[i].dynamic.state = ar.text(hudObjects[i].glasses, "", {x+w-95, y+2*hDivisor+hProgress+2}, colors.red)
+            hudObjects[i].dynamic.fillIndicator = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, colors.golden, 0.7)
             if compact then
                 hudObjects[i].dynamic.state.setPosition(x+w/2-15, y+hDivisor+2)
                 hudObjects[i].dynamic.filltime.setPosition(x+hProgress, y+hDivisor+2)
@@ -192,6 +196,32 @@ function powerDisplay.widget(glasses, data)
             end
         end
         hudObjects[i].dynamic.filltime.setText(fillTimeString)
+        local function moveForward(quad)
+            --quad.setVertex(1, x+3+energyBarLength*percentage, y+hDivisor)
+            if energyData.energyPerTick > 0 then
+                local remaining = (x+w-hIO-6) - (x+3+energyBarLength*percentage)
+                if energyData.offset < 102 then
+                    local remaining = (x+w-hIO-6) - (x+3+energyBarLength*percentage)
+                    local xOffset = remaining * (energyData.offset/100)
+                    quad.setAlpha(0.0 + (energyData.offset/120.0))
+                    quad.setVertex(1, x+3+energyBarLength*percentage + xOffset, y+hDivisor)
+                    quad.setVertex(2, x+3+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
+                    quad.setVertex(3, x+3+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
+                    quad.setVertex(4, x+3+energyBarLength*percentage+3 + xOffset, y+hDivisor)
+                else
+                    quad.setAlpha(0.8 - (energyData.offset-100)/30)
+                end
+            else
+                quad.setAlpha(0.0)
+            end
+            if energyData.offset > 120 then
+                energyData.offset = 0
+            end
+        end
+        --quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, colors.golden)
+
+        --Charging indicator
+        moveForward(hudObjects[i].dynamic.fillIndicator)
     end
     end
     end
