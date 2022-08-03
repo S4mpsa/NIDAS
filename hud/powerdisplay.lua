@@ -229,13 +229,15 @@ function powerDisplay.widget(glasses, data)
                 end
             else
                 local remaining = math.min((x+3+energyBarLength*percentage), energyBarLength/8)
-                local xOffset = -remaining * (energyData.offset/100)
                 quad.setColor(screen.toRGB(colors.maroon))
-                quad.setAlpha(0.9 - (energyData.offset/100.0))
-                quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
-                quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
-                quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
-                quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
+                if energyData.offset < 102 then
+                    local xOffset = -remaining * (energyData.offset/100)
+                    quad.setAlpha(0.9 - (energyData.offset/100.0))
+                    quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
+                    quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
+                    quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
+                    quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
+                end
             end
             if energyData.offset > 120 then
                 energyData.offset = 0
