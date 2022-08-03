@@ -16,7 +16,9 @@ local energyData = {
     endTime = 0,
     updateInterval = 100,
     energyPerTick = 0,
-    offset = 0
+    offset = 0,
+    highestInput = 1,
+    highestOutput= -1
 }
 
 local energyUnit = "EU"
@@ -48,7 +50,6 @@ end
 --Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [heigth]}
 --Only the glass proxy is required, rest have default values.
-
 function powerDisplay.widget(glasses, data)
     if data ~= nil then
     if data.state ~= states.MISSING then
@@ -57,7 +58,10 @@ function powerDisplay.widget(glasses, data)
     if maxEU < 0 then
         maxEU = math.abs(maxEU)
     end
+
     local percentage = math.min(currentEU/maxEU, 1.0)
+
+    
     if percentage >= 0.999 then
         currentEU = maxEU
         percentage = 1.0
@@ -76,9 +80,24 @@ function powerDisplay.widget(glasses, data)
 
         local ticks = math.ceil((energyData.endTime - energyData.startTime) * 20)
         energyData.energyPerTick = math.floor((energyData.readings[2] - energyData.readings[1])/ticks)
+        if energyData.energyPerTick >= 0 then
+            if energyData.energyPerTick > energyData.highestInput then
+                energyData.highestInput = energyData.energyPerTick
+            end
+        else
+            if energyData.energyPerTick < energyData.highestOutput then
+                energyData.highestOutput = energyData.energyPerTick
+            end
+        end
         energyData.intervalCounter = 1
     end
-    energyData.offset = energyData.offset + 5
+    energyData.offset = energyData.offset + 2
+    if energyData.energyPerTick >= 0 then
+        energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestInput)
+    else
+        energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestOutput)
+    end
+
     if #hudObjects < #glasses then
         for i = 1, #glasses do
             if glasses[i][1] == nil then
@@ -197,22 +216,26 @@ function powerDisplay.widget(glasses, data)
         end
         hudObjects[i].dynamic.filltime.setText(fillTimeString)
         local function moveForward(quad)
-            --quad.setVertex(1, x+3+energyBarLength*percentage, y+hDivisor)
             if energyData.energyPerTick > 0 then
-                local remaining = (x+w-hIO-6) - (x+3+energyBarLength*percentage)
+                local remaining = math.min((x+w-hIO-6) - (x+3+energyBarLength*percentage), ((x+w-hIO-6 - x+3) / 8))
+                quad.setColor(screen.toRGB(colors.golden))
                 if energyData.offset < 102 then
-                    local remaining = (x+w-hIO-6) - (x+3+energyBarLength*percentage)
                     local xOffset = remaining * (energyData.offset/100)
-                    quad.setAlpha(0.0 + (energyData.offset/120.0))
-                    quad.setVertex(1, x+3+energyBarLength*percentage + xOffset, y+hDivisor)
-                    quad.setVertex(2, x+3+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
-                    quad.setVertex(3, x+3+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
-                    quad.setVertex(4, x+3+energyBarLength*percentage+3 + xOffset, y+hDivisor)
-                else
-                    quad.setAlpha(0.8 - (energyData.offset-100)/30)
+                    quad.setAlpha(0.9 - (energyData.offset/100.0))
+                    quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
+                    quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
+                    quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
+                    quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
                 end
             else
-                quad.setAlpha(0.0)
+                local remaining = math.min((x+3+energyBarLength*percentage), energyBarLength/8)
+                local xOffset = -remaining * (energyData.offset/100)
+                quad.setColor(screen.toRGB(colors.maroon))
+                quad.setAlpha(0.9 - (energyData.offset/100.0))
+                quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
+                quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
+                quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
+                quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
             end
             if energyData.offset > 120 then
                 energyData.offset = 0
