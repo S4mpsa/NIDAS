@@ -77,7 +77,7 @@ function toolbar.widget(glasses)
     timeString = hours .. " | " .. "Day " .. date .. " Year " .. year
     if requestCounter == 500 then
         pcall(function()
-            realtime = internet.request("http://worldclockapi.com/api/json/utc/now")()
+            --realtime = internet.request("http://worldclockapi.com/api/json/utc/now")()
         end)
         requestCounter = 1
     end
@@ -85,7 +85,8 @@ function toolbar.widget(glasses)
         local resolution = screen.size(hudObjects[i].resolution, hudObjects[i].scale)
         local x = resolution[1] / 2 - w / 2
         local y = resolution[2] - h
-        local formattedTime = time.offset(hudObjects[i].offset, realtime)
+        --local formattedTime = time.offset(hudObjects[i].offset, realtime)
+        local formattedTime = "Test"
         if #hudObjects[i].static == 0 and #hudObjects[i].glasses ~= nil then
             local borderColor = hudObjects[i].borderColor
             local primaryColor = hudObjects[i].primaryColor

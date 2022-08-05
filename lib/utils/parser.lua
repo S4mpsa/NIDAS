@@ -18,12 +18,13 @@ function parser.splitNumber(number, delim)
     return table.concat(formattedNumber, "")
 end
 
-function parser.metricNumber(number)
+function parser.metricNumber(number, format)
+    format = format or "%.1f"
     if math.abs(number) < 1000 then return tostring(math.floor(number)) end
-    local suffixes = {"K", "M", "G", "T", "P", "E", "Z"}
+    local suffixes = {"k", "M", "G", "T", "P", "E", "Z", "Y"}
     local power = 1
     while math.abs((number / 1000 ^ power)) > 1000 do power = power + 1 end
-    return tostring(string.format("%.1f", (number / 1000 ^ power)))..suffixes[power]
+    return tostring(string.format(format, (number / 1000 ^ power)))..suffixes[power]
 end
 
 function parser.getInteger(string)
