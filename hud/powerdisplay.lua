@@ -180,7 +180,6 @@ function powerDisplay.widget(glasses, data)
                 hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#parser.splitNumber(maxEU)), y-9)
             end
         end
-        hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
         local hIOString = ""
         if compact then
             hIOString = parser.metricNumber(energyData.energyPerTick)
@@ -196,14 +195,22 @@ function powerDisplay.widget(glasses, data)
             hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
         end
         local fillTimeString = ""
+        local fillTime = 0
         if energyData.energyPerTick > 0 then
-            local fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
+            fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
             fillTimeString = "Full: " .. time.format(math.abs(fillTime))
         elseif energyData.energyPerTick < 0 then
-            local fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
+            fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
             fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
         else
             fillTimeString = ""
+        end
+        if fillTime > 500000 then
+            hudObjects[i].dynamic.percentage.setPosition(x+w/2-20, y-9)
+            hudObjects[i].dynamic.percentage.setText(tostring(math.floor(percentage*10000000)/100000).."%")
+        else
+            hudObjects[i].dynamic.percentage.setPosition(x+w/2-5, y-9)
+            hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
         end
         if data.state == states.OFF then
             hudObjects[i].dynamic.state.setText("Disabled")
