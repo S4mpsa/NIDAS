@@ -115,141 +115,143 @@ function powerDisplay.widget(glasses, data)
         end 
     end
     for i = 1, #hudObjects do
-        if hudObjects[i].width == 0 then hudObjects[i].width = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[1]/2 - 91 end
-        local h = hudObjects[i].heigth
-        local w = hudObjects[i].width
-        local compact = w < 250
-        local x = 0
-        local y = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[2] - h
-        local hProgress = math.ceil(h * 0.4)
-        local energyBarLength = w-4-hProgress
-        local hDivisor = 3
-        local hIO = h-hProgress-2*hDivisor-1
-        if #hudObjects[i].static == 0 and #hudObjects[i].glasses ~= nil then
-            local borderColor = hudObjects[i].borderColor
-            local primaryColor = hudObjects[i].primaryColor
-            local accentColor = hudObjects[i].accentColor
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, h, borderColor, 0.6))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-2}, w, 5+hProgress, borderColor, 0.6))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-4}, w, 2, borderColor, 0.5))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-6}, w, 2, borderColor, 0.4))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-8}, w, 2, borderColor, 0.3))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-10}, w, 2, borderColor, 0.2))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, hDivisor, borderColor))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+hDivisor+hProgress}, w, hDivisor, borderColor))
-            table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+h-1}, w, 1, borderColor))
-            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+hDivisor}, {x, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, borderColor))
-            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-1-hProgress, y+hDivisor}, {x+w-1, y+hDivisor+hProgress}, {x+w, y+hDivisor+hProgress}, {x+w, y+hDivisor}, borderColor))
-            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+2*hDivisor+hProgress}, {x, y+2*hDivisor+hProgress+hIO}, {x+30+hIO, y+2*hDivisor+hProgress+hIO}, {x+30, y+2*hDivisor+hProgress}, borderColor))
-            table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-30-hIO, y+2*hDivisor+hProgress}, {x+w-30, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress}, borderColor))
-            hudObjects[i].dynamic.energyBar = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, primaryColor)
-            hudObjects[i].dynamic.currentEU = ar.text(hudObjects[i].glasses, "", {x+2, y-9}, primaryColor)
-            hudObjects[i].dynamic.maxEU = ar.text(hudObjects[i].glasses, "", {x+w-90, y-9}, accentColor)
-            hudObjects[i].dynamic.percentage = ar.text(hudObjects[i].glasses, "", {x+w/2-5, y-9}, accentColor)
-            hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
-            hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
-            hudObjects[i].dynamic.state = ar.text(hudObjects[i].glasses, "", {x+w-95, y+2*hDivisor+hProgress+2}, colors.red)
-            hudObjects[i].dynamic.fillIndicator = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, colors.golden, 0.7)
+        if hudObjects[i] then
+            if hudObjects[i].width == 0 then hudObjects[i].width = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[1]/2 - 91 end
+            local h = hudObjects[i].heigth
+            local w = hudObjects[i].width
+            local compact = w < 250
+            local x = 0
+            local y = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[2] - h
+            local hProgress = math.ceil(h * 0.4)
+            local energyBarLength = w-4-hProgress
+            local hDivisor = 3
+            local hIO = h-hProgress-2*hDivisor-1
+            if #hudObjects[i].static == 0 and #hudObjects[i].glasses ~= nil then
+                local borderColor = hudObjects[i].borderColor
+                local primaryColor = hudObjects[i].primaryColor
+                local accentColor = hudObjects[i].accentColor
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, h, borderColor, 0.6))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-2}, w, 5+hProgress, borderColor, 0.6))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-4}, w, 2, borderColor, 0.5))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-6}, w, 2, borderColor, 0.4))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-8}, w, 2, borderColor, 0.3))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y-10}, w, 2, borderColor, 0.2))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y}, w, hDivisor, borderColor))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+hDivisor+hProgress}, w, hDivisor, borderColor))
+                table.insert(hudObjects[i].static, ar.rectangle(hudObjects[i].glasses, {x, y+h-1}, w, 1, borderColor))
+                table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+hDivisor}, {x, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, borderColor))
+                table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-1-hProgress, y+hDivisor}, {x+w-1, y+hDivisor+hProgress}, {x+w, y+hDivisor+hProgress}, {x+w, y+hDivisor}, borderColor))
+                table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+2*hDivisor+hProgress}, {x, y+2*hDivisor+hProgress+hIO}, {x+30+hIO, y+2*hDivisor+hProgress+hIO}, {x+30, y+2*hDivisor+hProgress}, borderColor))
+                table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-30-hIO, y+2*hDivisor+hProgress}, {x+w-30, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress}, borderColor))
+                hudObjects[i].dynamic.energyBar = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, primaryColor)
+                hudObjects[i].dynamic.currentEU = ar.text(hudObjects[i].glasses, "", {x+2, y-9}, primaryColor)
+                hudObjects[i].dynamic.maxEU = ar.text(hudObjects[i].glasses, "", {x+w-90, y-9}, accentColor)
+                hudObjects[i].dynamic.percentage = ar.text(hudObjects[i].glasses, "", {x+w/2-5, y-9}, accentColor)
+                hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
+                hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
+                hudObjects[i].dynamic.state = ar.text(hudObjects[i].glasses, "", {x+w-95, y+2*hDivisor+hProgress+2}, colors.red)
+                hudObjects[i].dynamic.fillIndicator = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, colors.golden, 0.7)
+                if compact then
+                    hudObjects[i].dynamic.state.setPosition(x+w/2-15, y+hDivisor+2)
+                    hudObjects[i].dynamic.filltime.setPosition(x+hProgress, y+hDivisor+2)
+                    hudObjects[i].dynamic.maxEU.setPosition(x+w-32, y-9)
+                    hudObjects[i].dynamic.percentage.setPosition(x+w/2-10, y-9)
+                end
+            end
+            hudObjects[i].dynamic.energyBar.setVertex(3, x+3+hProgress+energyBarLength*percentage, y+hDivisor+hProgress)
+            hudObjects[i].dynamic.energyBar.setVertex(4, x+3+energyBarLength*percentage, y+hDivisor)
             if compact then
-                hudObjects[i].dynamic.state.setPosition(x+w/2-15, y+hDivisor+2)
-                hudObjects[i].dynamic.filltime.setPosition(x+hProgress, y+hDivisor+2)
-                hudObjects[i].dynamic.maxEU.setPosition(x+w-32, y-9)
-                hudObjects[i].dynamic.percentage.setPosition(x+w/2-10, y-9)
+                hudObjects[i].dynamic.currentEU.setText(parser.metricNumber(currentEU))
+            else
+                hudObjects[i].dynamic.currentEU.setText(parser.splitNumber(currentEU).." "..energyUnit)
             end
-        end
-        hudObjects[i].dynamic.energyBar.setVertex(3, x+3+hProgress+energyBarLength*percentage, y+hDivisor+hProgress)
-        hudObjects[i].dynamic.energyBar.setVertex(4, x+3+energyBarLength*percentage, y+hDivisor)
-        if compact then
-            hudObjects[i].dynamic.currentEU.setText(parser.metricNumber(currentEU))
-        else
-            hudObjects[i].dynamic.currentEU.setText(parser.splitNumber(currentEU).." "..energyUnit)
-        end
-        if maxEU > 9000000000000000000 then
-            hudObjects[i].dynamic.maxEU.setText("∞ "..energyUnit)
-            hudObjects[i].dynamic.maxEU.setPosition(x+w-25, y-9)
-        else
+            if maxEU > 9000000000000000000 then
+                hudObjects[i].dynamic.maxEU.setText("∞ "..energyUnit)
+                hudObjects[i].dynamic.maxEU.setPosition(x+w-25, y-9)
+            else
+                if compact then
+                    hudObjects[i].dynamic.maxEU.setText(parser.metricNumber(maxEU))
+                else
+                    hudObjects[i].dynamic.maxEU.setText(parser.splitNumber(maxEU).." "..energyUnit)
+                end
+                if not compact then
+                    hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#parser.splitNumber(maxEU)), y-9)
+                end
+            end
+            local hIOString = ""
             if compact then
-                hudObjects[i].dynamic.maxEU.setText(parser.metricNumber(maxEU))
+                hIOString = parser.metricNumber(energyData.energyPerTick)
             else
-                hudObjects[i].dynamic.maxEU.setText(parser.splitNumber(maxEU).." "..energyUnit)
+                hIOString = parser.splitNumber(energyData.energyPerTick)
             end
-            if not compact then
-                hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#parser.splitNumber(maxEU)), y-9)
-            end
-        end
-        local hIOString = ""
-        if compact then
-            hIOString = parser.metricNumber(energyData.energyPerTick)
-        else
-            hIOString = parser.splitNumber(energyData.energyPerTick)
-        end
-        hudObjects[i].dynamic.fillrate.setPosition(x+w/2-18-(#hIOString*1.6), y+2*hDivisor+hProgress+2)
-        if energyData.energyPerTick >= 0 then
-            hudObjects[i].dynamic.fillrate.setText("+"..hIOString.." "..energyUnit.."/t") 
-            hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.lime))
-        else
-            hudObjects[i].dynamic.fillrate.setText(hIOString.." "..energyUnit.."/t")
-            hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
-        end
-        local fillTimeString = ""
-        local fillTime = 0
-        if energyData.energyPerTick > 0 then
-            fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
-            fillTimeString = "Full: " .. time.format(math.abs(fillTime))
-        elseif energyData.energyPerTick < 0 then
-            fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
-            fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
-        else
-            fillTimeString = ""
-        end
-        if fillTime > 500000 then
-            hudObjects[i].dynamic.percentage.setPosition(x+w/2-20, y-9)
-            hudObjects[i].dynamic.percentage.setText(tostring(math.floor(percentage*10000000)/100000).."%")
-        else
-            hudObjects[i].dynamic.percentage.setPosition(x+w/2-5, y-9)
-            hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
-        end
-        if data.state == states.OFF then
-            hudObjects[i].dynamic.state.setText("Disabled")
-        else
-            if data.problems > 0 then
-                hudObjects[i].dynamic.state.setText("Maintenance")
+            hudObjects[i].dynamic.fillrate.setPosition(x+w/2-18-(#hIOString*1.6), y+2*hDivisor+hProgress+2)
+            if energyData.energyPerTick >= 0 then
+                hudObjects[i].dynamic.fillrate.setText("+"..hIOString.." "..energyUnit.."/t") 
+                hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.lime))
             else
-                hudObjects[i].dynamic.state.setText("")
+                hudObjects[i].dynamic.fillrate.setText(hIOString.." "..energyUnit.."/t")
+                hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
             end
-        end
-        hudObjects[i].dynamic.filltime.setText(fillTimeString)
-        local function moveForward(quad)
+            local fillTimeString = ""
+            local fillTime = 0
             if energyData.energyPerTick > 0 then
-                local remaining = math.min((x+w-hIO-6) - (x+3+energyBarLength*percentage), ((x+w-hIO-6 - x+3) / 8))
-                quad.setColor(screen.toRGB(colors.golden))
-                if energyData.offset < 102 then
-                    local xOffset = remaining * (energyData.offset/100)
-                    quad.setAlpha(0.9 - (energyData.offset/100.0))
-                    quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
-                    quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
-                    quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
-                    quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
-                end
+                fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
+                fillTimeString = "Full: " .. time.format(math.abs(fillTime))
+            elseif energyData.energyPerTick < 0 then
+                fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
+                fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
             else
-                local remaining = math.min((x+3+energyBarLength*percentage), energyBarLength/8)
-                quad.setColor(screen.toRGB(colors.maroon))
-                if energyData.offset < 102 then
-                    local xOffset = -remaining * (energyData.offset/100)
-                    quad.setAlpha(0.9 - (energyData.offset/100.0))
-                    quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
-                    quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
-                    quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
-                    quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
+                fillTimeString = ""
+            end
+            if fillTime > 500000 then
+                hudObjects[i].dynamic.percentage.setPosition(x+w/2-20, y-9)
+                hudObjects[i].dynamic.percentage.setText(tostring(math.floor(percentage*10000000)/100000).."%")
+            else
+                hudObjects[i].dynamic.percentage.setPosition(x+w/2-5, y-9)
+                hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
+            end
+            if data.state == states.OFF then
+                hudObjects[i].dynamic.state.setText("Disabled")
+            else
+                if data.problems > 0 then
+                    hudObjects[i].dynamic.state.setText("Maintenance")
+                else
+                    hudObjects[i].dynamic.state.setText("")
                 end
             end
-            if energyData.offset > 120 then
-                energyData.offset = 0
+            hudObjects[i].dynamic.filltime.setText(fillTimeString)
+            local function moveForward(quad)
+                if energyData.energyPerTick > 0 then
+                    local remaining = math.min((x+w-hIO-6) - (x+3+energyBarLength*percentage), ((x+w-hIO-6 - x+3) / 8))
+                    quad.setColor(screen.toRGB(colors.golden))
+                    if energyData.offset < 102 then
+                        local xOffset = remaining * (energyData.offset/100)
+                        quad.setAlpha(0.9 - (energyData.offset/100.0))
+                        quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
+                        quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
+                        quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
+                        quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
+                    end
+                else
+                    local remaining = math.min((x+3+energyBarLength*percentage), energyBarLength/8)
+                    quad.setColor(screen.toRGB(colors.maroon))
+                    if energyData.offset < 102 then
+                        local xOffset = -remaining * (energyData.offset/100)
+                        quad.setAlpha(0.9 - (energyData.offset/100.0))
+                        quad.setVertex(1, x+energyBarLength*percentage + xOffset, y+hDivisor)
+                        quad.setVertex(2, x+hProgress+energyBarLength*percentage + xOffset, y+hDivisor+hProgress)
+                        quad.setVertex(3, x+hProgress+energyBarLength*percentage+3 + xOffset, y+hDivisor+hProgress)
+                        quad.setVertex(4, x+energyBarLength*percentage+3 + xOffset, y+hDivisor)
+                    end
+                end
+                if energyData.offset > 120 then
+                    energyData.offset = 0
+                end
             end
+            --Charging indicator
+            moveForward(hudObjects[i].dynamic.fillIndicator)
         end
-        --Charging indicator
-        moveForward(hudObjects[i].dynamic.fillIndicator)
-    end
+        end
     end
     end
 end

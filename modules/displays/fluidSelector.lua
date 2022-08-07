@@ -159,7 +159,9 @@ refresh = stockingEditor
 
 local function addFluidToGlasses(fluid)
     if userFluids[selectedGlasses] then
-        table.insert(userFluids[selectedGlasses], fluid)
+        if #userFluids[selectedGlasses] <= 20 then
+            table.insert(userFluids[selectedGlasses], fluid)
+        end
     else
         userFluids[selectedGlasses] = {}
         table.insert(userFluids[selectedGlasses], fluid)
@@ -214,10 +216,11 @@ local function displayPatterns(filterString)
         end
         context.gpu.setActiveBuffer(levelPage)
         graphics.rectangle(2, 5, x-3, 2*(height)-6, colors.black)
-        j = 0
+        j = 1
         for fluidID, _ in pairs(fluids) do
-            graphics.text(3, 5+j*2, "┅┅┅┅┅┅┅┅┅┅┅┅┅", fluidColors[fluidID] or gui.borderColor())
+            graphics.text(3, 3+j*2, "┅┅┅┅┅┅┅┅┅┅┅┅┅", fluidColors[fluidID] or gui.borderColor())
             j = j + 1
+            if j > maxEntries then break end
         end
         local row = 5
         i = 1
