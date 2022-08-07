@@ -53,11 +53,8 @@ end
 function powerDisplay.widget(glasses, data)
     if data ~= nil then
     if data.state ~= states.MISSING then
-    local currentEU = math.floor(data.storedEU)
-    local maxEU = math.floor(data.EUCapacity)
-    if maxEU < 0 then
-        maxEU = math.abs(maxEU)
-    end
+    local currentEU = math.abs(math.floor(data.storedEU))
+    local maxEU = math.abs(math.floor(data.EUCapacity))
 
     local percentage = math.min(currentEU/maxEU, 1.0)
 
@@ -250,8 +247,6 @@ function powerDisplay.widget(glasses, data)
                 energyData.offset = 0
             end
         end
-        --quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, colors.golden)
-
         --Charging indicator
         moveForward(hudObjects[i].dynamic.fillIndicator)
     end
@@ -268,9 +263,12 @@ function powerDisplay.remove(glassAddress)
                 for j = 1, #hudObjects[i].static do
                     hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
                 end
+                hudObjects[i].static = {}
                 for name, value in pairs(hudObjects[i].dynamic) do
                     hudObjects[i].glasses.removeObject(hudObjects[i].dynamic[name].getID())
                 end
+                hudObjects[i].dynamic = {}
+                hudObjects[i] = nil
             end
         end
     end
