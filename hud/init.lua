@@ -161,7 +161,9 @@ end
 
 local function updateFluidData()
     local doSave = false
-    if #component.list("me_interface") > 0 then
+    local I = 0
+    for _, _ in pairs(component.list"me_interface") do I = I + 1 end
+    if I > 0 then
         local fluids = component.me_interface.getFluidsInNetwork()
         for _, f in pairs(fluids) do
             if type(f) == "table" then 
