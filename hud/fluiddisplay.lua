@@ -17,19 +17,21 @@ local fluidData = {
 function fluidDisplay.changeColor(glasses, backgroundColor, primaryColor, accentColor)
     local graphics = require("lib.graphics.graphics")
     for i = 1, #hudObjects do
-        if hudObjects[i].glasses ~= nil then
-            if hudObjects[i].glasses.address == glasses then
-                if backgroundColor ~= nil then
-                    for j = 1, #hudObjects[i].static do
-                        hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
+        if hudObjects[i] then
+            if hudObjects[i].glasses ~= nil then
+                if hudObjects[i].glasses.address == glasses then
+                    if backgroundColor ~= nil then
+                        for j = 1, #hudObjects[i].static do
+                            hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
+                        end
+                        --Add background colored widgets
                     end
-                    --Add background coloredw widgets
-                end
-                if primaryColor ~= nil then
-                    --Add Primary colored widgets
-                end
-                if accentColor ~= nil then
-                    --Add accent colored widgets
+                    if primaryColor ~= nil then
+                        --Add Primary colored widgets
+                    end
+                    if accentColor ~= nil then
+                        --Add accent colored widgets
+                    end
                 end
             end
         end
@@ -102,8 +104,15 @@ function fluidDisplay.widget(glasses, fluids, configuration)
                             local percentage = math.min((1.0 - fluid.amount/fluid.max), 1.0)
                             local xTop = x + (w - x)*percentage
                             local xBot = x+hBar + (w - x)*percentage
+                            local fluidName = fluid.name:gsub("Molten ", ""):gsub(" Gas", "")
+                            local textScaling = 0.7
+                            if #fluidName > 20 then
+                                textScaling = 0.5
+                            elseif #fluidName > 12 then
+                                textScaling = 0.6
+                            end
                             table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y}, {x, y + hBar}, {w, y+hBar}, {w, y}, borderColor))
-                            table.insert(hudObjects[i].static, ar.text(hudObjects[i].glasses, fluid.name:gsub("Molten ", ""):gsub(" Gas", ""), {x+1, y+1}, primaryColor, 0.7))
+                            table.insert(hudObjects[i].static, ar.text(hudObjects[i].glasses, fluid.name:gsub("Molten ", ""):gsub(" Gas", ""), {x+1, y+1}, primaryColor, textScaling))
                             table.insert(hudObjects[i].static, ar.triangle(hudObjects[i].glasses, {x, y+hBar}, {x, y + hBar*2}, {x+hBar, y+hBar*2}, borderColor))
                             local barColor = fluidColors[fluid.id] or primaryColor
 

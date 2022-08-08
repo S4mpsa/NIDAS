@@ -26,21 +26,23 @@ local energyUnit = "EU"
 function powerDisplay.changeColor(glasses, backgroundColor, primaryColor, accentColor)
     local graphics = require("lib.graphics.graphics")
     for i = 1, #hudObjects do
-        if hudObjects[i].glasses ~= nil then
-            if hudObjects[i].glasses.address == glasses then
-                if backgroundColor ~= nil then
-                    for j = 1, #hudObjects[i].static do
-                        hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
+        if hudObjects[i] then
+            if hudObjects[i].glasses ~= nil then
+                if hudObjects[i].glasses.address == glasses then
+                    if backgroundColor ~= nil then
+                        for j = 1, #hudObjects[i].static do
+                            hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
+                        end
                     end
-                end
-                if primaryColor ~= nil then
-                    hudObjects[i].dynamic.energyBar.setColor(screen.toRGB(primaryColor))
-                    hudObjects[i].dynamic.currentEU.setColor(screen.toRGB(primaryColor))
-                end
-                if accentColor ~= nil then
-                    hudObjects[i].dynamic.maxEU.setColor(screen.toRGB(accentColor))
-                    hudObjects[i].dynamic.percentage.setColor(screen.toRGB(accentColor))
-                    hudObjects[i].dynamic.filltime.setColor(screen.toRGB(accentColor))
+                    if primaryColor ~= nil then
+                        hudObjects[i].dynamic.energyBar.setColor(screen.toRGB(primaryColor))
+                        hudObjects[i].dynamic.currentEU.setColor(screen.toRGB(primaryColor))
+                    end
+                    if accentColor ~= nil then
+                        hudObjects[i].dynamic.maxEU.setColor(screen.toRGB(accentColor))
+                        hudObjects[i].dynamic.percentage.setColor(screen.toRGB(accentColor))
+                        hudObjects[i].dynamic.filltime.setColor(screen.toRGB(accentColor))
+                    end
                 end
             end
         end
