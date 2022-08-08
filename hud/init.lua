@@ -189,18 +189,16 @@ local function updateFluidData()
     end
 end
 
-function hud.updateFluidSettings(glassAddress)
+function hud.updateFluidSettings()
     file = io.open("/home/NIDAS/settings/userFluids", "r")
     if file ~= nil then
         fluidConfiguration = serialization.unserialize(file:read("*a"))
         file:close()
     end
     for address, data in pairs(glassData) do
-        if data.fluidDisplay and address == glassAddress then
-            fluidDisplay.remove(address)
-            table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
-            fluidDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
-        end
+        fluidDisplay.remove(address)
+        table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+        fluidDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
     end
 end
 

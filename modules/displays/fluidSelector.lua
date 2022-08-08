@@ -27,7 +27,7 @@ local function save()
     file:write(serialization.serialize(fluidsList))
     file:close()
     windowRefresh(searchKey.keyword)
-    hud.updateFluidSettings(selectedGlasses)
+    hud.updateFluidSettings()
 end
 
 local function load()
@@ -80,7 +80,6 @@ local function swapTableElements(glasses, a, b)
         copy[b] = e1
         copy[a] = e2
         userFluids[selectedGlasses] = copy
-        save()
         refresh()
         windowRefresh(searchKey.keyword)
     end
@@ -98,7 +97,7 @@ local function removeFluidFromGlasses(fluid)
             local copy = userFluids[selectedGlasses]
             table.remove(copy, i)
             userFluids[selectedGlasses] = copy
-            save()
+            windowRefresh(searchKey.keyword)
             refresh()
         end
     end
@@ -166,7 +165,7 @@ local function addFluidToGlasses(fluid)
         userFluids[selectedGlasses] = {}
         table.insert(userFluids[selectedGlasses], fluid)
     end
-    save()
+    windowRefresh(searchKey.keyword)
     refresh()
 end
 
