@@ -6,6 +6,7 @@ local parser = require("lib.utils.parser")
 local time = require("lib.utils.time")
 local screen = require("lib.utils.screen")
 local states = require("server.entities.states")
+local serialization = require("serialization")
 
 local fluidDisplay = {}
 
@@ -14,37 +15,25 @@ local fluidData = {
 
 }
 
-function fluidDisplay.changeColor(glasses, backgroundColor, primaryColor, accentColor)
-    local graphics = require("lib.graphics.graphics")
-    for i = 1, #hudObjects do
-        if hudObjects[i] then
-            if hudObjects[i].glasses ~= nil then
-                if hudObjects[i].glasses.address == glasses then
-                    if backgroundColor ~= nil then
-                        for j = 1, #hudObjects[i].static do
-                            hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
-                        end
-                        --Add background colored widgets
-                    end
-                    if primaryColor ~= nil then
-                        --Add Primary colored widgets
-                    end
-                    if accentColor ~= nil then
-                        --Add accent colored widgets
-                    end
-                end
-            end
-        end
-    end
+local displaySettings = {}
+local file = io.open("/home/NIDAS/settings/fluidDisplaySettings", "r")
+if file then
+    displaySettings = serialization.unserialize(file:read("*a")) or {}
+    file:close()
 end
 
---Test stuff
-
---Test stuff
+local displayWidth = displaySettings.displayWidth or 50
+local heightOffset = displaySettings.heightOffset or 0
+local hBar = displaySettings.barHeight or 8
+local textColor = displaySettings.textColor or 0x111111
+local textScale = displaySettings.nameScale or 70
+local amountScale = displaySettings.amountScale or 40
+textScale = textScale / 100
+amountScale = amountScale / 100
 
 --Scales: Small = 1, Normal = 2, Large = 3, Auto = 4x to 10x (Even)
 --Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
---Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [heigth]}
+--Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [height]}
 --Only the glass proxy is required, rest have default values.
 function fluidDisplay.widget(glasses, fluids, configuration)
 
@@ -63,7 +52,7 @@ function fluidDisplay.widget(glasses, fluids, configuration)
                 primaryColor    = glasses[i][5] or colors.electricBlue,
                 accentColor     = glasses[i][6] or colors.magenta,
                 width           = glasses[i][7] or 0,
-                heigth          = glasses[i][8] or 29
+                height          = glasses[i][8] or 29
             })
         end 
     end
@@ -79,11 +68,9 @@ function fluidDisplay.widget(glasses, fluids, configuration)
 
                 local h = hudObjects[i].resolution[2]/hudObjects[i].scale
                 local w = hudObjects[i].width
-                local displayWidth = 50
                 local hDivisor = 3
-                local hBar = 8
                 local hIO = h-hBar-2*hDivisor-1
-                local startH = h - 15 - 2*hBar*fluidsToDisplay
+                local startH = h - 15 - 2*hBar*fluidsToDisplay - heightOffset
                 local fluidDisplays = 0
                 --Initialization
                 if #hudObjects[i].static == 0 and #hudObjects[i].glasses ~= nil and fluidsToDisplay > 0 then
@@ -105,19 +92,20 @@ function fluidDisplay.widget(glasses, fluids, configuration)
                             local xTop = x + (w - x)*percentage
                             local xBot = x+hBar + (w - x)*percentage
                             local fluidName = fluid.name:gsub("Molten ", ""):gsub(" Gas", "")
-                            local textScaling = 0.7
+                            local nameScaling = textScale
                             if #fluidName > 20 then
-                                textScaling = 0.5
+                                nameScaling = nameScaling - 0.2
                             elseif #fluidName > 12 then
-                                textScaling = 0.6
+                                nameScaling = nameScaling - 0.1
                             end
+                            
                             table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y}, {x, y + hBar}, {w, y+hBar}, {w, y}, borderColor))
-                            table.insert(hudObjects[i].static, ar.text(hudObjects[i].glasses, fluid.name:gsub("Molten ", ""):gsub(" Gas", ""), {x+1, y+1}, primaryColor, textScaling))
+                            table.insert(hudObjects[i].static, ar.text(hudObjects[i].glasses, fluid.name:gsub("Molten ", ""):gsub(" Gas", ""), {x+1, y+1}, primaryColor, nameScaling))
                             table.insert(hudObjects[i].static, ar.triangle(hudObjects[i].glasses, {x, y+hBar}, {x, y + hBar*2}, {x+hBar, y+hBar*2}, borderColor))
                             local barColor = fluidColors[fluid.id] or primaryColor
 
                             hudObjects[i].dynamic[fluid.id.."bar"] =  ar.quad(hudObjects[i].glasses, {xTop, y+hBar}, {xBot, y + hBar*2}, {w, y+hBar*2}, {w, y+hBar}, barColor, 0.5)
-                            hudObjects[i].dynamic[fluid.id.."text"] =  ar.text(hudObjects[i].glasses, amountString, {(x+w)/2 - 4*(#amountString/2) + 2, y+1+hBar}, 0x111111, 0.7, 0.4)
+                            hudObjects[i].dynamic[fluid.id.."text"] =  ar.text(hudObjects[i].glasses, amountString, {(x+w)/2 - 4*(#amountString/2) + 2, y+1+hBar}, textColor, amountScale)
                             fluidData[fluid.id] = {amount=fluid.amount, max=fluid.max, position = position - 1}
                     end
 
@@ -161,6 +149,30 @@ function fluidDisplay.widget(glasses, fluids, configuration)
                         hudObjects[i].dynamic[fluid.id.."bar"].setVertex(3, w, startH + 2*hBar * fluidData[fluid.id].position+hBar*2)
                     end
                     hudObjects[i].dynamic[fluid.id.."text"].setText(amountString)
+                end
+            end
+        end
+    end
+end
+
+function fluidDisplay.changeColor(glasses, backgroundColor, primaryColor, accentColor)
+    local graphics = require("lib.graphics.graphics")
+    for i = 1, #hudObjects do
+        if hudObjects[i] then
+            if hudObjects[i].glasses ~= nil then
+                if hudObjects[i].glasses.address == glasses then
+                    if backgroundColor ~= nil then
+                        for j = 1, #hudObjects[i].static do
+                            hudObjects[i].static[j].setColor(screen.toRGB(backgroundColor))
+                        end
+                        --Add background colored widgets
+                    end
+                    if primaryColor ~= nil then
+                        --Add Primary colored widgets
+                    end
+                    if accentColor ~= nil then
+                        --Add accent colored widgets
+                    end
                 end
             end
         end

@@ -15,6 +15,7 @@ local fluidsList = {}
 local userFluids = {}
 local windowRefresh = nil
 local currentConfigWindow = {}
+local configurationData = {}
 local searchKey = {keyword = ""}
 local selectedGlasses = nil
 local updateFlag = false
@@ -42,6 +43,11 @@ local function load()
         fluidsList = serialization.unserialize(file:read("*a")) or {}
         file:close()
         renderer.update()
+    end
+    file = io.open("/home/NIDAS/settings/fluidDisplaySettings", "r")
+    if file then
+        configurationData = serialization.unserialize(file:read("*a")) or {}
+        file:close()
     end
 end
 
@@ -331,11 +337,30 @@ function fluidDisplay.windowButton()
     return {name = "Fluid Selector", func = displayView}
 end
 
-function fluidDisplay.configure(x, y, _, _, _, page)
-    local renderingData = {x, y, gui, graphics, renderer, page}
+local function saveSettings()
+    local file = io.open("/home/NIDAS/settings/fluidDisplaySettings", "w")
+    if file then
+        file:write(serialization.serialize(configurationData))
+        file:close()
+    end
+end
+
+function fluidDisplay.configure(configX, configY, _, _, _, page)
+    local _, ySize = graphics.context().gpu.getBufferSize(page)
     graphics.context().gpu.setActiveBuffer(page)
+    local configWindow = {}
+    local attributeChangeList = {
+        {name = "Name Scale (10-200)", attribute = "nameScale", type = "number", defaultValue = 70, minValue = 10, maxValue = 200},
+        {name = "Amount Scale (10-200)", attribute = "amountScale", type = "number", defaultValue = 40, minValue = 10, maxValue = 200},
+        {name = "Text Color (Hex)", attribute = "textColor", type = "color", defaultValue = 0x111111},
+        {name = "Display Width", attribute = "displayWidth", type = "number", defaultValue = 50, minValue = 10, maxValue = 200},
+        {name = "Bar Height", attribute = "barHeight", type = "number", defaultValue = 8, minValue = 1, maxValue = 100},
+        {name = "Display Height Offset", attribute = "heightOffset", type = "number", defaultValue = 0, minValue = -50, maxValue = 2000},
+    }
+    gui.multiAttributeList(configX + 3, configY + 3, page, configWindow, attributeChangeList, configurationData)
+    table.insert(configWindow, gui.bigButton(configX + 2, configY + tonumber(ySize) - 4, "Save Configuration", saveSettings))
     renderer.update()
-    return currentConfigWindow
+    return configWindow
 end
 
 local lastKeyword = searchKey.keyword

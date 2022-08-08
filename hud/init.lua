@@ -161,31 +161,33 @@ end
 
 local function updateFluidData()
     local doSave = false
-    local fluids = component.me_interface.getFluidsInNetwork()
-    for _, f in pairs(fluids) do
-        if type(f) == "table" then 
-            local amount = f.amount
-            local name = f.label
-            local id = f.name
-            local data = fluidMaximums[id]
-            local maximum = 0
-            if not data then
-                maxium = getMax(amount)
-                fluidMaximums[id] = {max=maxium, name=name}
-                doSave = true
-            else
-                maximum = data.max
-                if data.max < amount then
+    if #component.list("me_interface") > 0 then
+        local fluids = component.me_interface.getFluidsInNetwork()
+        for _, f in pairs(fluids) do
+            if type(f) == "table" then 
+                local amount = f.amount
+                local name = f.label
+                local id = f.name
+                local data = fluidMaximums[id]
+                local maximum = 0
+                if not data then
                     maxium = getMax(amount)
                     fluidMaximums[id] = {max=maxium, name=name}
                     doSave = true
+                else
+                    maximum = data.max
+                    if data.max < amount then
+                        maxium = getMax(amount)
+                        fluidMaximums[id] = {max=maxium, name=name}
+                        doSave = true
+                    end
                 end
+                fluidData[id] = {amount=amount, name=name, max=maximum, id=id}
             end
-            fluidData[id] = {amount=amount, name=name, max=maximum, id=id}
         end
-    end
-    if doSave then
-        save()
+        if doSave then
+            save()
+        end
     end
 end
 
