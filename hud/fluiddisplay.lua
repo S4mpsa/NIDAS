@@ -27,7 +27,7 @@ local heightOffset = displaySettings.heightOffset or 0
 local hBar = displaySettings.barHeight or 8
 local textColor = displaySettings.textColor or 0x111111
 local textScale = displaySettings.nameScale or 70
-local amountScale = displaySettings.amountScale or 40
+local amountScale = displaySettings.amountScale or 70
 textScale = textScale / 100
 amountScale = amountScale / 100
 

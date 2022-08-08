@@ -351,7 +351,7 @@ function fluidDisplay.configure(configX, configY, _, _, _, page)
     local configWindow = {}
     local attributeChangeList = {
         {name = "Name Scale (10-200)", attribute = "nameScale", type = "number", defaultValue = 70, minValue = 10, maxValue = 200},
-        {name = "Amount Scale (10-200)", attribute = "amountScale", type = "number", defaultValue = 40, minValue = 10, maxValue = 200},
+        {name = "Amount Scale (10-200)", attribute = "amountScale", type = "number", defaultValue = 70, minValue = 10, maxValue = 200},
         {name = "Text Color (Hex)", attribute = "textColor", type = "color", defaultValue = 0x111111},
         {name = "Display Width", attribute = "displayWidth", type = "number", defaultValue = 50, minValue = 10, maxValue = 200},
         {name = "Bar Height", attribute = "barHeight", type = "number", defaultValue = 8, minValue = 1, maxValue = 100},
