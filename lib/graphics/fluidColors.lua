@@ -12,8 +12,18 @@ local fluidColors = {
     ["molten.polyvinylchloride"] = 0xb9c4c4,
     ["oxygen"] = 0x698790,
     ["phosphoricacid_gt5u"] = 0xaeae0d,
-    ["sulfuricacid_gt5u"] = 0xe88c1c,
-    ["radon"] = 0xff52ff
+    ["sulfuricacid"] = 0xe88c1c,
+    ["hydrochloricacid_gt5u"] = 0x94a19e,
+    ["hydrofluoricacid_gt5u"] = 0x94a19e,
+    ["radon"] = 0xff52ff,
+    ["chlorine"] = 0x447373,
+    ["nitrofuel"] = 0xbece2c,
+    ["ironiiichloride"] = 0x1e1e19,
+    ["lubricant"] = 0xfbeab1,
+    ["ic2coolant"] = 0x124858,
+    ["ic2distilledwater"] = 0x5963d3,
+    ["ic2uumatter"] = 0x34062d,
+    ["oganesson"] = 0x173264
 
 }
 

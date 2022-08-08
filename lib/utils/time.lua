@@ -28,6 +28,9 @@ function time.offset(offset, UNIXTime)
     offset = offset or 0
     local offsetTime = UNIXTime + (3600 * offset)
     local timetable = os.date("*t", offsetTime)
+    if timetable.min < 10 then
+        timetable.min = "0"..timetable.min
+    end
     return timetable.hour .. ":" .. timetable.min
 end
 
