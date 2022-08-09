@@ -159,12 +159,19 @@ local function getMax(fluidAmount)
     return max * 2 ^ power
 end
 
+local function saveFluidData()
+    local file = io.open("/home/NIDAS/settings/fluidData", "w")
+    file:write(serialization.serialize(fluidMaximums))
+    file:close()
+end
+
 local function updateFluidData()
     local doSave = false
     local I = 0
     for _, _ in pairs(component.list"me_interface") do I = I + 1 end
     if I > 0 then
         local fluids = component.me_interface.getFluidsInNetwork()
+        local iter = 0
         for _, f in pairs(fluids) do
             if type(f) == "table" then 
                 local amount = f.amount
@@ -186,9 +193,13 @@ local function updateFluidData()
                 end
                 fluidData[id] = {amount=amount, name=name, max=maximum, id=id}
             end
+            iter = iter + 1
+            if iter == 20 then
+                os.sleep()
+            end
         end
         if doSave then
-            save()
+            saveFluidData()
         end
     end
 end
@@ -206,13 +217,13 @@ function hud.updateFluidSettings()
     end
 end
 
-local loop = 5
+local loop = 20
 function hud.update(serverInfo)
     if serverInfo then
         powerDisplay.widget(powerDisplayUsers, serverInfo.power)
         toolbar.widget(toolbarUsers)
         notifications.widget(notificationsUsers)
-        if loop == 5 then
+        if loop == 20 then
             updateFluidData()
             fluidDisplay.widget(fluidDisplayUsers, fluidData, fluidConfiguration)
             loop = 0

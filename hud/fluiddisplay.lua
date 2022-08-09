@@ -182,16 +182,18 @@ end
 function fluidDisplay.remove(glassAddress)
     for i = 1, #hudObjects do
         local hudObject = hudObjects[i]
-        local glasses = hudObject.glasses
-        if glasses ~= nil then
-            if glasses.address == glassAddress then
-                for j = 1, #hudObjects[i].static do
-                    hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
+        if hudObject then
+            local glasses = hudObject.glasses
+            if glasses ~= nil then
+                if glasses.address == glassAddress then
+                    for j = 1, #hudObjects[i].static do
+                        hudObjects[i].glasses.removeObject(hudObjects[i].static[j].getID())
+                    end
+                    for name, value in pairs(hudObjects[i].dynamic) do
+                        hudObjects[i].glasses.removeObject(hudObjects[i].dynamic[name].getID())
+                    end
+                    hudObjects[i] = nil
                 end
-                for name, value in pairs(hudObjects[i].dynamic) do
-                    hudObjects[i].glasses.removeObject(hudObjects[i].dynamic[name].getID())
-                end
-                hudObjects[i] = nil
             end
         end
     end
