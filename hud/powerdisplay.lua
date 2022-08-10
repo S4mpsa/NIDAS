@@ -205,7 +205,7 @@ function powerDisplay.widget(glasses, data)
             else
                 fillTimeString = ""
             end
-            if fillTime > 500000 then
+            if math.abs(fillTime) > 500000 or percentage < 0.05 then
                 hudObjects[i].dynamic.percentage.setPosition(x+w/2-20, y-9)
                 hudObjects[i].dynamic.percentage.setText(tostring(math.floor(percentage*10000000)/100000).."%")
             else
