@@ -1,77 +1,82 @@
 local component = require("component")
 local event = require("event")
 
----@class tileEntity
+---@class TileEntity
 ---@field address string
----@field location coordinates
-local tileEntity = {}
+---@field location Coordinates
+local TileEntity = {}
 
 local knownEntities = {}
-local knownEntityTypes = {}
+local knownEntityClasses = {}
 
 ---comment
 ---@param componentName string
----@param class tileEntity
-function tileEntity.addType(componentName, class)
-    knownEntityTypes[componentName] = class
+---@param class TileEntity
+function TileEntity.addType(componentName, class)
+    knownEntityClasses[componentName] = class
 end
 
-function tileEntity.listKnownEntities() return pairs(knownEntities) end
-
-local function isKnownType(componentType)
-    for _, type in pairs(knownEntityTypes) do
-        if componentType == type then return true end
-    end
+function TileEntity.listKnownEntities()
+    return pairs(knownEntities)
 end
 
-function tileEntity.refreshKnownEntitiesList()
-    for address, componentType in component.list() do
-        if isKnownType(componentType) then
+local function getEntityClass(entityType)
+    return knownEntityClasses[entityType]
+end
+
+function TileEntity.refreshKnownEntitiesList()
+    for address, entityType in component.list() do
+        if getEntityClass(entityType) then
             knownEntities[address] = component.proxy(address)
         end
     end
 end
 
----Binds a tileEntity object
+---Binds a TileEntity object
 ---@param address string
----@param location coordinates
----@return tileEntity
-function tileEntity.bind(address, location)
-    ---@type tileEntity
+---@param location Coordinates
+---@return TileEntity
+function TileEntity.bind(address, location, entityType)
+    if not component.type(address) == entityType then
+        error("Wrong component type! \
+        " .. 'Expected "' .. entityType .. '" and got "' .. component.type(address) .. '".')
+    end
+
+    ---@type TileEntity
     local self = {}
-    self.address = address 
+    self.address = address
     self.location = location
 
     local proxy = component.proxy(address)
     knownEntities[address] = proxy
 
-    function self.update() error("I am abstract!") end
-
     return self
 end
 
----Creates a new tileEntity object
+---Creates a new TileEntity object
 ---@param address string
----@param location coordinates
+---@param location Coordinates
 ---@param ... any
----@return tileEntity
-function tileEntity.new(address, location, ...)
-    local type = component.type(address)
-    if not isKnownType(type) then
+---@return TileEntity
+function TileEntity.new(address, location, entityType, ...)
+    if not getEntityClass(entityType) then
         error('Unknown component type!')
     end
-    return knownEntityTypes[type].new(address, location, ...)
+    return knownEntityClasses[entityType].new(address, location, ...)
 end
 
-event.listen("component_added", function(_, address, componentType)
-    if isKnownType(componentType) then
-        knownEntities[address] = knownEntities[address] or
-                                     knownEntityTypes[componentType]
-                                         .new(address)
+event.listen("component_added", function(_, address, entityType)
+    if getEntityClass(entityType) then
+        knownEntities[address] = knownEntities[address] or knownEntityClasses[entityType].new(address)
     end
 end)
 
-event.listen("component_removed",
-             function(_, address) knownEntities[address] = nil end)
+event.listen("component_removed", function(_, address)
+    knownEntities[address] = nil
+end)
 
-return tileEntity
+return setmetatable(TileEntity, {
+    __index = function(_, entityType)
+        return getEntityClass(entityType)
+    end,
+})

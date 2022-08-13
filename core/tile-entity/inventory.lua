@@ -1,78 +1,93 @@
 local component = require("component")
-local tileEntity = require("core.tile-entity")
+local TileEntity = require("core.tile-entity")
+local sides = require('sides')
 
-local relativeSidePositions = {
-    [0] = 'below',
-    'above',
-    'north of',
-    'south of',
-    'west of',
-    'east of'
-}
-
----@class inventory: tileEntity
+---@class Inventory: TileEntity
 ---@field name string
 ---@field size number
-local inventory = {componentType = 'inventory_controller'}
+local Inventory = { entityType = 'inventory_controller' }
 
----Creates a new inventory object
+local relativeSidePositions = {
+    [sides.down] = 'below',
+    [sides.up] = 'above',
+    [sides.north] = 'north of',
+    [sides.south] = 'south of',
+    [sides.west] = 'west of',
+    [sides.east] = 'east of',
+}
+
+---Creates a new Inventory object
 ---@param address string
----@param location coordinates
+---@param location Coordinates
 ---@param controllerSide number index 0
----@return inventory
-function inventory.new(address, location, controllerSide)
-    ---@type inventory
-    local self = tileEntity.bind(address, location)
+---@return Inventory
+function Inventory.new(address, location, controllerSide, overridingEntityType)
+    ---@type Inventory
+    local self = TileEntity.bind(address, location, overridingEntityType or Inventory.entityType)
 
     local proxy = component.proxy(address)
 
-    if not controllerSide then
-        for i = 0, 5 do
-            self.name = proxy.getInventoryName(i)
-            if self.name then
-                controllerSide = i
-                break
+    function self.updateControllerSide(newSide)
+        if not newSide then
+            for i = 0, 5 do
+                self.name = proxy.getInventoryName(i)
+                if self.name then
+                    newSide = i
+                    break
+                end
             end
         end
+        controllerSide = newSide
+        self.name = proxy.getInventoryName(controllerSide)
     end
-    self.name = proxy.getInventoryName(controllerSide)
+
+    self.updateControllerSide(controllerSide)
     if not self.name then
-        error("No inventory " .. relativeSidePositions[controllerSide] ..
-                  " the given transposer.")
+        error("No inventory " .. relativeSidePositions[controllerSide] .. " the given transposer.")
     end
     self.size = proxy.getInventorySize(controllerSide)
 
     function self.compareStacks(slot1, slot2)
         return proxy.compareStacks(controllerSide, slot1, slot2)
     end
-    function self.transferItem(otherTransposerSide, itemCount, slot, otherSlot)
-        return proxy.transferItem(controllerSide, otherTransposerSide,
-                                  itemCount, slot, otherSlot)
+
+    ---@param otherControllerSide side
+    ---@param itemCount number
+    ---@param slot number
+    ---@param otherSlot number
+    ---@return number transferredCount
+    function self.transferItem(otherControllerSide, itemCount, slot, otherSlot)
+        if not otherControllerSide then
+            for i = 0, 5 do
+                if i ~= controllerSide and proxy.getInventoryName(i) then
+                    otherControllerSide = i
+                    break
+                end
+            end
+        end
+        return proxy.transferItem(controllerSide, otherControllerSide, itemCount, slot or 1, otherSlot or 1)
     end
 
     ---@param slot number index 1
-    ---@return itemStack
+    ---@return ItemStack
     function self.getStackInSlot(slot)
-        ---@type itemStack
+        ---@type ItemStack
         local stack = proxy.getStackInSlot(controllerSide, slot)
         stack.maxStackSize = proxy.getSlotMaxStackSize(controllerSide, slot)
         return stack
     end
 
     local content = {}
-    local function getContent()
+    function self.getContent()
         content = proxy.getAllStacks(controllerSide)
         for i in ipairs(content) do
-            content[i].maxStackSize = proxy.getSlotMaxStackSize(controllerSide,
-                                                                i)
+            content[i].maxStackSize = proxy.getSlotMaxStackSize(controllerSide, i)
         end
     end
-
-    function self.update() return {content = getContent()} end
 
     return self
 end
 
-tileEntity.addType(inventory.componentType, inventory)
+TileEntity.addType(Inventory.entityType, Inventory)
 
-return inventory
+return Inventory
