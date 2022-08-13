@@ -1,5 +1,23 @@
 ---@meta
 ---
 ---
----@class essentia
+---@class Essentia
 ---@field amount number
+---@field label string
+---
+---@class PatternItem
+---@field count number
+---@field name string
+---
+---@class Pattern
+---@field inputs PatternItem[]
+---@field outputs PatternItem[]
+---
+---@class InfusionRecipe
+---@field altar Altar
+---@field pattern Pattern
+---@field requiredEssentia Essentia[]
+---
+---@class Craft
+---@field isCanceled fun():boolean
+---@field isDone fun():boolean
