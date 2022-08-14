@@ -1,8 +1,8 @@
 local getRequiredEssentia = require('modules.infusion.core.usecases.get-required-essentia')
-local findPattern = require('modules.infusion.core.usecases.find-pattern')
+local findPatterns = require('modules.infusion.core.usecases.find-patterns')
 
 local function getRecipeToInfuse(knownAltars)
-    local pattern, altar = findPattern(knownAltars)
+    local pattern, altar = findPatterns(knownAltars)
     if not pattern then
         return nil
     end

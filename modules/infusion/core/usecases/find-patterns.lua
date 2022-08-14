@@ -1,10 +1,13 @@
-local function findPattern(knownAltars)
+local function findPatterns(knownAltars)
     if #knownAltars < 1 then
         return
     end
 
     local allPatterns = {}
     for _, altar in ipairs(knownAltars) do
+        if altar.isBusy() then
+            break
+        end
         local patterns = altar.meInterface.getPatterns()
         for _, pattern in ipairs(patterns) do
             allPatterns[pattern] = altar
@@ -28,4 +31,4 @@ local function findPattern(knownAltars)
     end
 end
 
-return findPattern
+return findPatterns

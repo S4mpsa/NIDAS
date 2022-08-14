@@ -23,12 +23,22 @@ function Altar.new(clawAddress,
                    location)
 
     ---@type Altar
-    local self = { meInterface = MeInterface.new(meInterfaceAddress, location) }
+    local self = {}
 
     local claw = Redstone.new(clawAddress, location, { sides.top })
     local essentiaProvider = Redstone.new(essentiaProviderAddress, location, nil, { sides.bottom, sides.top })
     local matrix = Matrix.new(matrixAddress, location)
+    local meInterface = MeInterface.new(meInterfaceAddress, location)
     local transposer = Transposer.new(transposerAddress, location)
+
+    ---@type Craft
+    local craft = {}
+    function craft.isDone()
+        return true
+    end
+    function craft.isCanceled()
+        return true
+    end
 
     ---Gets the essentia a matrix still requires for the ongoing infusion
     ---@return Essentia[]
@@ -51,6 +61,21 @@ function Altar.new(clawAddress,
 
     function self.retireveCraftedItem()
         transposer.transferItem()
+    end
+
+    function self.requestCraft(recipeToInfuse)
+        craft = meInterface.requestCraft(recipeToInfuse)
+        return craft
+    end
+
+    function self.getStoredEssentia()
+        return meInterface.getStoredEssentia()
+    end
+
+    ---Tells if the altar already has an ongoing craft
+    ---@return any
+    function self.isBusy()
+        return not (craft.isDone() or craft.isCanceled())
     end
 
     return self
