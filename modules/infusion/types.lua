@@ -1,10 +1,6 @@
 ---@meta
 ---
 ---
----@class Essentia
----@field amount number
----@field label string
----
 ---@class PatternItem
 ---@field count number
 ---@field name string
@@ -21,3 +17,4 @@
 ---@class Craft
 ---@field isCanceled fun():boolean
 ---@field isDone fun():boolean
+---

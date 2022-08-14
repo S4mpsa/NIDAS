@@ -1,5 +1,6 @@
 local component = require("component")
 local TileEntity = require("core.tile-entity")
+local Essentia = require("modules.infusion.core.entities.essentia")
 
 ---@class Matrix: TileEntity
 local Matrix = { entityType = 'blockstonedevice_2' }
@@ -17,7 +18,7 @@ function Matrix.new(address, location)
     ---Gets the essentia a matrix still requires for the ongoing infusion
     ---@return Essentia[]
     function self.read()
-        return proxy.getAspects()
+        return Essentia.new(proxy.getAspects())
     end
 
     return self
