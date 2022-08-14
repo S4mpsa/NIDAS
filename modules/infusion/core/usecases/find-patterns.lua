@@ -1,3 +1,9 @@
+local component = require('component')
+
+---comment
+---@param knownAltars Altar[]
+---@return Pattern
+---@return Altar
 local function findPatterns(knownAltars)
     if #knownAltars < 1 then
         return
@@ -8,15 +14,15 @@ local function findPatterns(knownAltars)
         if altar.isBusy() then
             break
         end
-        local patterns = altar.meInterface.getPatterns()
+        local patterns = altar.getPatterns()
         for _, pattern in ipairs(patterns) do
             allPatterns[pattern] = altar
         end
     end
 
-    local allItems = knownAltars[1].meInterface.allItems
+    local allItems = component.me_interface.allItems
     for item in allItems() do
-        for pattern, altar in ipairs(allPatterns) do
+        for pattern, altar in pairs(allPatterns) do
             local allFulfilled = true
             for _, input in ipairs(pattern.inputs) do
                 if input.name == item.label and input.count <= item.size then

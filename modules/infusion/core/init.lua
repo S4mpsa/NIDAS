@@ -1,6 +1,6 @@
 local event = require('event')
 
-local getKnownAltars = require('modules.infusion.core.usecases.get-known-altars')
+local getKnownAltars = require('modules.infusion.core.persistence.get-known-altars')
 local getRecipeToInfuse = require('modules.infusion.core.usecases.get-recipe-to-infuse')
 local makeInfuseFunction = require('modules.infusion.core.usecases.make-infuse-function')
 

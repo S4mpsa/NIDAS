@@ -18,15 +18,15 @@ function MeInterface.new(address, location)
         return proxy.getEssentiaInNetwork()
     end
 
-    ---Requests a craft labeled craftableLabel and returns that craft
-    ---@param craftableLabel string
+    ---Requests a craft for patternItem and returns that craft
+    ---@param patternItem PatternItem | Essentia
     ---@return Craft
-    function self.requestCraft(craftableLabel)
-        local craftable = proxy.getCraftables({ label = craftableLabel })[1]
+    function self.requestCraft(patternItem)
+        local craftable = proxy.getCraftables({ label = patternItem.name or patternItem.label })[1]
         if not craftable then
-            error('No craftable with label ' .. craftableLabel .. ' found.')
+            error('No craftable with label ' .. patternItem .. ' found.')
         end
-        return craftable.request()
+        return craftable.request(patternItem.amount)
     end
 
     ---Returns all patterns stored in the meInterface

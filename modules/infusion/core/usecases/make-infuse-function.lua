@@ -1,4 +1,4 @@
-local storeRequiredEssentia = require('modules.infusion.core.usecases.store-required-essentia')
+local storeRequiredEssentia = require('modules.infusion.core.persistence.store-required-essentia')
 
 ---comment
 ---@param recipeToInfuse InfusionRecipe
@@ -6,19 +6,19 @@ local storeRequiredEssentia = require('modules.infusion.core.usecases.store-requ
 local function makeInfuseFunction(recipeToInfuse)
     return function()
         local altar = recipeToInfuse.altar
-        altar.requestCraft(recipeToInfuse)
+        altar.requestCraft(recipeToInfuse.pattern.outputs[1])
 
         local requiredEssentia = recipeToInfuse.requiredEssentia
         if not requiredEssentia then
             altar.blockEssentiaProvider()
             altar.activateMatrix()
             local essentia = altar.readMatrix()
-            storeRequiredEssentia(recipeToInfuse, essentia)
+            storeRequiredEssentia(recipeToInfuse.pattern, essentia)
             altar.unblockEssentiaProvider()
         end
 
         local missingEssentia = altar.getStoredEssentia() - requiredEssentia
-        altar.requestCraft(missingEssentia)
+        altar.requestEssentia(missingEssentia)
         while missingEssentia do
             missingEssentia = altar.getStoredEssentia() - requiredEssentia
             coroutine.yield("waiting_on_essentia", missingEssentia)

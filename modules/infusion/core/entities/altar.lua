@@ -63,8 +63,23 @@ function Altar.new(clawAddress,
         transposer.transferItem()
     end
 
-    function self.requestCraft(recipeToInfuse)
-        craft = meInterface.requestCraft(recipeToInfuse)
+    function self.getPatterns()
+        return meInterface.getPatterns()
+    end
+
+    ---@param patternItem PatternItem
+    ---@return Craft
+    function self.requestCraft(patternItem)
+        craft = meInterface.requestCraft(patternItem)
+        return craft
+    end
+
+    ---@param missingEssentia Essentia[]
+    ---@return Craft
+    function self.requestEssentia(missingEssentia)
+        for _, essentia in ipairs(missingEssentia) do
+            craft = meInterface.requestCraft(essentia)
+        end
         return craft
     end
 

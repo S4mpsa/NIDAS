@@ -1,4 +1,4 @@
-local getRequiredEssentia = require('modules.infusion.core.usecases.get-required-essentia')
+local getRequiredEssentia = require('modules.infusion.core.persistence.get-required-essentia')
 local findPatterns = require('modules.infusion.core.usecases.find-patterns')
 
 local function getRecipeToInfuse(knownAltars)
