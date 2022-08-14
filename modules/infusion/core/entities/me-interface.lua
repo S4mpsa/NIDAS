@@ -18,8 +18,8 @@ function MeInterface.new(address, location)
         return proxy.getEssentiaInNetwork()
     end
 
-    ---comment
-    ---@param craftableLabel any
+    ---Requests a craft labeled craftableLabel and returns that craft
+    ---@param craftableLabel string
     ---@return Craft
     function self.requestCraft(craftableLabel)
         local craftable = proxy.getCraftables({ label = craftableLabel })[1]

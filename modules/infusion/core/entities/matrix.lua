@@ -14,6 +14,8 @@ function Matrix.new(address, location)
 
     local proxy = component.proxy(address)
 
+    ---Gets the essentia a matrix still requires for the ongoing infusion
+    ---@return Essentia[]
     function self.read()
         return proxy.getAspects()
     end
