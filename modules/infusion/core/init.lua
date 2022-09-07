@@ -1,27 +1,36 @@
-local event = require('event')
-
-local getKnownAltars = require('modules.infusion.core.persistence.get-known-altars')
 local getRecipeToInfuse = require('modules.infusion.core.usecases.get-recipe-to-infuse')
 local makeInfuseFunction = require('modules.infusion.core.usecases.make-infuse-function')
 
-local knownAltars = getKnownAltars()
-event.listen("altars_update", function(_, updatedAltars)
-    knownAltars = updatedAltars
-end)
+local function resumeOngoingInfusions(ongoingInfusions)
+    for index, infusion in ipairs(ongoingInfusions) do
+        if coroutine.status(infusion) == "dead" then
+            table.remove(ongoingInfusions, index)
+            coroutine.yield('dead')
+        else
+            local _, message, complement = coroutine.resume(infusion)
+            coroutine.yield(message, complement)
+        end
+    end
+    return ongoingInfusions
+end
 
 local infusionCoroutine = coroutine.create(function()
+    ---@type InfusionRecipe
+    local recipeToInfuse
+    local ongoingInfusions = {}
     while true do
-        local infusionsInProgress = {}
-        local recipeToInfuse
-        while not recipeToInfuse do
-            for _, infusion in ipairs(infusionsInProgress) do
-                coroutine.yield(coroutine.resume(infusion))
-            end
-            recipeToInfuse = getRecipeToInfuse(knownAltars)
-            coroutine.yield()
+        if #ongoingInfusions > 0 then
+            ongoingInfusions = resumeOngoingInfusions(ongoingInfusions)
+        else
+            recipeToInfuse = getRecipeToInfuse()
+            coroutine.yield('No ongoing infusions')
         end
 
-        table.insert(infusionsInProgress, coroutine.create(makeInfuseFunction(recipeToInfuse)))
+        if recipeToInfuse then
+            table.insert(ongoingInfusions, coroutine.create(makeInfuseFunction(recipeToInfuse)))
+            recipeToInfuse = nil
+            coroutine.yield('Starting infusion')
+        end
     end
 end)
 
