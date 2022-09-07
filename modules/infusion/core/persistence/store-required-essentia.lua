@@ -4,9 +4,9 @@ local serialization = require('serialization')
 ---@param pattern Pattern
 ---@param essentia Essentia
 local function storeRequiredEssentia(pattern, essentia)
-    local file = io.open("required-essentia.data", "w")
-    local knownRequiredEssentia = serialization.unserialize(file:read("*a")) or {}
-    knownRequiredEssentia[pattern.outputs[1]] = essentia
+    local file = io.open("data/required-essentia.data", "w")
+    local knownRequiredEssentia = serialization.unserialize(file:read("*a") or '') or {}
+    knownRequiredEssentia[pattern.outputs[1].name] = essentia
 
     file:write(serialization.serialize(knownRequiredEssentia))
     file:close()

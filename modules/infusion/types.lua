@@ -1,6 +1,10 @@
 ---@meta
 ---
 ---
+---@class StoredItem
+---@field size number
+---@field label string
+---
 ---@class PatternItem
 ---@field count number
 ---@field name string

@@ -18,7 +18,8 @@ function Matrix.new(address, location)
     ---Gets the essentia a matrix still requires for the ongoing infusion
     ---@return Essentia[]
     function self.read()
-        return Essentia.new(proxy.getAspects())
+        local aspects = proxy.getAspects().aspects
+        return Essentia.new(aspects)
     end
 
     return self
