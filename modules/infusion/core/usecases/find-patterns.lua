@@ -1,37 +1,38 @@
-local component = require('component')
+local event = require('event')
+
+local getKnownAltars = require('modules.infusion.core.persistence.get-known-altars')
+local knownAltars = getKnownAltars()
+event.listen("altars_update", function(_, updatedAltars)
+    knownAltars = updatedAltars
+end)
 
 ---comment
----@param knownAltars Altar[]
 ---@return Pattern
 ---@return Altar
-local function findPatterns(knownAltars)
-    if #knownAltars < 1 then
-        return
-    end
-
-    local allPatterns = {}
+local function findPatterns()
     for _, altar in ipairs(knownAltars) do
-        if altar.isBusy() then
-            break
-        end
-        local patterns = altar.getPatterns()
-        for _, pattern in ipairs(patterns) do
-            allPatterns[pattern] = altar
-        end
-    end
+        if not altar.getPedestalItem() then
+            local patterns = altar.getPatterns()
+            for _, pattern in ipairs(patterns) do
+                local allFulfilled = true
 
-    local allItems = component.me_interface.allItems
-    for item in allItems() do
-        for pattern, altar in pairs(allPatterns) do
-            local allFulfilled = true
-            for _, input in ipairs(pattern.inputs) do
-                if input.name == item.label and input.count <= item.size then
-                    input.fulfilled = true
+                for _, input in ipairs(pattern.inputs) do
+                    if input.name then
+                        local item = altar.getItem(input.name)
+                        if not item or (input.count and input.count > item.size) then
+                            print(
+                                'Requirement for "' .. pattern.outputs[1].name .. '" not met. Missing "' .. input.name ..
+                                    '"')
+                            allFulfilled = false
+                            break
+                        end
+                    end
                 end
-                allFulfilled = allFulfilled and input.fulfilled
-            end
-            if allFulfilled then
-                return pattern, altar
+
+                if allFulfilled then
+                    print('Found pattern for "' .. pattern.outputs[1].name .. '"')
+                    return pattern, altar
+                end
             end
         end
     end
