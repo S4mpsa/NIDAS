@@ -1,5 +1,5 @@
 local TileEntity = require("core.tile-entity")
-local inventory = require("core.tile-entity.inventory")
+local Inventory = require("core.tile-entity.inventory")
 
 ---@class Transposer: Inventory
 ---@field name string
@@ -13,7 +13,7 @@ local Transposer = { entityType = 'transposer' }
 ---@return Transposer
 function Transposer.new(address, location, transposerSide)
     ---@type Transposer
-    local self = inventory.new(address, location, transposerSide, Transposer.entityType)
+    local self = Inventory.new(address, location, transposerSide, Transposer.entityType)
     return self
 end
 

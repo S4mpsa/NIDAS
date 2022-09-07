@@ -6,7 +6,7 @@ local ON = 15
 ---@class Redstone: TileEntity
 local Redstone = { entityType = 'redstone' }
 
----Creates a new Matrix object
+---Creates a new Redstone object
 ---@param address string
 ---@param location Coordinates
 ---@return Redstone

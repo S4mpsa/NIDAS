@@ -65,11 +65,11 @@ function TileEntity.new(address, location, entityType, ...)
     return knownEntityClasses[entityType].new(address, location, ...)
 end
 
-event.listen("component_added", function(_, address, entityType)
-    if getEntityClass(entityType) then
-        knownEntities[address] = knownEntities[address] or knownEntityClasses[entityType].new(address)
-    end
-end)
+-- event.listen("component_added", function(_, address, entityType)
+--     if getEntityClass(entityType) then
+--         knownEntities[address] = knownEntities[address] or knownEntityClasses[entityType].new(address)
+--     end
+-- end)
 
 event.listen("component_removed", function(_, address)
     knownEntities[address] = nil

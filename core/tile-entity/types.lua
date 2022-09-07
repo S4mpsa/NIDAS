@@ -3,6 +3,7 @@
 ---
 ---@class ItemStack
 ---@field maxStackSize number
+---@field label string
 ---
 ---@class Coordinates
 ---@field x number
