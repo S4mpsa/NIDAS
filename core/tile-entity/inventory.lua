@@ -2,11 +2,6 @@ local component = require("component")
 local TileEntity = require("core.tile-entity")
 local sides = require('sides')
 
----@class Inventory: TileEntity
----@field name string
----@field size number
-local Inventory = { entityType = 'inventory_controller' }
-
 local relativeSidePositions = {
     [sides.down] = 'below',
     [sides.up] = 'above',
@@ -15,6 +10,11 @@ local relativeSidePositions = {
     [sides.west] = 'west of',
     [sides.east] = 'east of',
 }
+
+---@class Inventory: TileEntity
+---@field name string
+---@field size number
+local Inventory = { entityType = 'inventory_controller' }
 
 ---Creates a new Inventory object
 ---@param address string
@@ -30,9 +30,8 @@ function Inventory.new(address, location, controllerSide, overridingEntityType)
     function self.updateControllerSide(newSide)
         if not newSide then
             for i = 0, 5 do
-                self.name = proxy.getInventoryName(i)
-                if self.name then
-                    newSide = i
+                if proxy.getInventoryName(5 - i) then
+                    newSide = 5 - i
                     break
                 end
             end
@@ -51,7 +50,7 @@ function Inventory.new(address, location, controllerSide, overridingEntityType)
         return proxy.compareStacks(controllerSide, slot1, slot2)
     end
 
-    ---@param otherControllerSide side
+    ---@param otherControllerSide number index 0
     ---@param itemCount number
     ---@param slot number
     ---@param otherSlot number
@@ -73,16 +72,20 @@ function Inventory.new(address, location, controllerSide, overridingEntityType)
     function self.getStackInSlot(slot)
         ---@type ItemStack
         local stack = proxy.getStackInSlot(controllerSide, slot)
-        stack.maxStackSize = proxy.getSlotMaxStackSize(controllerSide, slot)
+        if stack then
+            stack.maxStackSize = proxy.getSlotMaxStackSize(controllerSide, slot)
+        end
         return stack
     end
 
-    local content = {}
+    ---@return ItemStack[]
     function self.getContent()
-        content = proxy.getAllStacks(controllerSide)
+        ---@type ItemStack
+        local content = proxy.getAllStacks(controllerSide) or {}
         for i in ipairs(content) do
             content[i].maxStackSize = proxy.getSlotMaxStackSize(controllerSide, i)
         end
+        return content
     end
 
     return self
