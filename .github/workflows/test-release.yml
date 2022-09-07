@@ -6,8 +6,8 @@ name: CI-test
 on:
   # Triggers the workflow on push events for every branch
   push:
-    branches:
-      - '*'
+    branches-ignore:
+      - master
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
         run: tar -cvf NIDAS.tar --exclude-from=tar-exclude.txt *
       - name: Build modules
         id: build_modules
-        run: find modules -maxdepth 1 -mindepth 1 -type d -exec tar -cvf {}.tar {} \; -exec sh -c 'echo "##[set-output name=modules_list;]"$(echo $@ | sed -e "s/\ /\.tar /g" | sed -e "s/$/\.tar/")' _ {} +
+        run: mkdir -p modules && find modules -maxdepth 1 -mindepth 1 -type d -exec tar -cvf {}.tar {} \; -exec sh -c 'echo "##[set-output name=modules_list;]"$(echo $@ | sed -e "s/\ /\.tar /g" | sed -e "s/$/\.tar/")' _ {} +
       - name: Echo out
         run: echo ${{ steps.build_modules.outputs }}
       - name: Extract branch name
