@@ -26,7 +26,7 @@ jobs:
         run: tar -cvf NIDAS.tar .shrc --exclude-from=tar-exclude.txt *
       - name: Build modules
         id: build_modules
-        run: find modules -maxdepth 1 -mindepth 1 -type d -exec tar -cvf {}.tar {} \; -exec sh -c 'echo "##[set-output name=modules_list;]"$(echo $@ | sed -e "s/\ /\.tar /g" | sed -e "s/$/\.tar/")' _ {} +
+        run: find modules -maxdepth 1 -mindepth 1 -type d -exec tar -cvf {}.tar --exclude-from=../tar-exclude.txt {} \; -exec sh -c 'echo "##[set-output name=modules_list;]"$(echo $@ | sed -e "s/\ /\.tar /g" | sed -e "s/$/\.tar/")' _ {} +
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
