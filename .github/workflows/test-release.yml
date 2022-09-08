@@ -28,7 +28,7 @@ jobs:
         run: tar -cvf NIDAS.tar --exclude-from=tar-exclude.txt *
       - name: Build modules
         id: build_modules
-        run: mkdir -p modules && find modules -maxdepth 1 -mindepth 1 -type d -exec tar -cvf {}.tar --exclude-from=../tar-exclude.txt {} \; -exec sh -c 'echo "##[set-output name=modules_list;]"$(echo $@ | sed -e "s/\ /\.tar /g" | sed -e "s/$/\.tar/")' _ {} +
+        run: mkdir -p modules && cd modules && find . -maxdepth 1 -mindepth 1 -type d -exec tar -cvf {}.tar --exclude-from=../tar-exclude.txt {} \; -exec sh -c 'echo "##[set-output name=modules_list;]"$(echo modules/$@ | sed -e "s/\.\///g" | sed -e "s/\ /\.tar /g" | sed -e "s/$/\.tar/")' _ {} + && cd ..
       - name: Echo out
         run: echo ${{ steps.build_modules.outputs }}
       - name: Extract branch name

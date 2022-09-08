@@ -10,3 +10,6 @@ modules
 test
 package*
 yarn.lock
+*.data
+**/*.__test__.lua
+**/.DS_Store
