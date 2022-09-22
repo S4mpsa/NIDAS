@@ -27,7 +27,7 @@ local function subtraction(t1, t2)
             end
         end
     end
-    return setmetatable(result, { __tostring = tostring })
+    return Essentia.new(result)
 end
 
 local mt = { __sub = subtraction, __tostring = tostring }
