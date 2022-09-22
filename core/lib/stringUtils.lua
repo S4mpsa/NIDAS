@@ -1,4 +1,4 @@
-stringUtils = {}
+local stringUtils = {}
 
 function stringUtils.split(string, separator)
     separator = separator or " "
