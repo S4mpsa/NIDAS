@@ -1,6 +1,6 @@
 local component = require("component")
 local TileEntity = require("core.tile-entity")
-local Essentia = require("modules.infusion.core.entities.essentia")
+local Essentia = require("modules.infusion.core.dtos.essentia")
 
 ---@class MeInterface: TileEntity
 local MeInterface = { entityType = 'me_interface' }

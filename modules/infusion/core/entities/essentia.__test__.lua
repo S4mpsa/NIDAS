@@ -1,4 +1,4 @@
-local Essentia = require 'modules.infusion.core.entities.essentia'
+local Essentia = require 'modules.infusion.core.dtos.essentia'
 describe('Essentia entity', function()
     local namedAspectsEssentia = Essentia.new({
         { name = 'Ordo', amount = 10 },
