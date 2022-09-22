@@ -8,17 +8,18 @@ local gpu = component.gpu
 
 local manager = {}
 
+---@class window
 local startWindow = {
     name = "Screen",
-    size = {x=160, y=50},
-    pos = {x=0, y=0},
+    size = { x = 160, y = 50 },
+    pos = { x = 0, y = 0 },
     depth = 0,
     buffer = 0,
     components = {},
     context = nil
 }
 
-local windows = {startWindow}
+local windows = { startWindow }
 
 --Internal function to change the active window.
 local function changeWindow(newWindow)
@@ -29,7 +30,7 @@ end
 function manager.addComponent(name, func, args)
     for i, window in ipairs(windows) do
         if window.name == name then
-            table.insert(windows[i].components, {func=func, args=args})
+            table.insert(windows[i].components, { func = func, args = args })
             gpu.setActiveBuffer(window.buffer)
             func(table.unpack(args))
             return
@@ -43,7 +44,7 @@ function manager.getWindow(name)
             return window
         end
     end
-    error("No window named "..name.." exists")
+    error("No window named " .. name .. " exists")
 end
 
 function manager.changeWindow(name)
@@ -53,7 +54,7 @@ function manager.changeWindow(name)
             return
         end
     end
-    error("No window named "..name.." exists")
+    error("No window named " .. name .. " exists")
 end
 
 ---Creates a new window and changes it to be active.
@@ -66,12 +67,15 @@ end
 ---
 ---`depth: number` Rendering layer of the window. Zero is always on top. Default 0.
 ---@param name string
----@param size xypair
----@param pos xypair
+---@param size { x: number, y: number }
+---@param pos { x: number, y: number }
 ---@param depth number
+---@param components any
+---@param context any
+---@param closeable boolean
 function manager.createWindow(name, size, pos, depth, components, context, closeable)
     local page = gpu.allocateBuffer(math.max(size.x, 2), math.max(size.y, 2))
-    pos = pos or {x=0, y=0}
+    pos = pos or { x = 0, y = 0 }
     components = components or {}
     context = context or {}
     depth = depth or 0
@@ -86,12 +90,16 @@ function manager.createWindow(name, size, pos, depth, components, context, close
         context = context
     })
     if closeable then
-        table.insert(windows[#windows].context, {name="Close window", func=renderer.closeWindow, args={name}})
+        table.insert(windows[#windows].context, {
+            name = "Close window",
+            func = renderer.closeWindow,
+            args = { name }
+        })
     end
     changeWindow(windows[#windows])
     if #components > 0 then
         gpu.setActiveBuffer(page)
-        for cname, c in pairs(components) do
+        for _, c in pairs(components) do
             c.func(table.unpack(c.args))
         end
     end
@@ -108,30 +116,53 @@ function manager.removeWindow(name)
     end
 end
 
+local function getResizingDirection(x, y, pos, size)
+    if (y == pos.y) and (x > pos.x and x < pos.x + size.x - 1) then
+        return 1 -- Up
+    elseif (y == pos.y) and (x == pos.x + size.x - 1) then
+        return 2 -- Up Right
+    elseif (y > pos.y and y < pos.y + size.y - 1) and (x == pos.x + size.x - 1) then
+        return 3 -- Right
+    elseif (y == pos.y + size.y - 1) and (x == pos.x + size.x - 1) then
+        return 4 -- Down Right
+    elseif (y == pos.y + size.y - 1) and (x > pos.x and x < pos.x + size.x - 1) then
+        return 5 -- Down
+    elseif (y == pos.y + size.y - 1) and (x == pos.x) then
+        return 6 -- Down Left
+    elseif (y > pos.y and y < pos.y + size.y - 1) and (x == pos.x) then
+        return 7 -- Left
+    elseif (y == pos.y) and (x == pos.x) then
+        return 8 -- Up Left
+    end
+end
+
 local movingWindow = nil
 local resizingWindow = nil
 local resizingDirection = nil
-local function attachWindow(eventName, address, x, y, button, name)
+local function attachWindow(_, _, x, y)
     local activeWindows = renderer.getActiveWindows()
     for i, _ in ipairs(activeWindows) do
-        window = activeWindows[#activeWindows-i + 1]
-        --if (x == window.pos.x + window.size.x - 2 and y == window.pos.y) then renderer.closeWindow(window.name)
-        if (y > window.pos.y and y < window.pos.y + window.size.y - 1) and (x > window.pos.x and x < window.pos.x + window.size.x - 1) then
-            movingWindow = {name = window.name, anchor = {x = x - window.pos.x, y = y - window.pos.y} }
+        local window = activeWindows[#activeWindows-i + 1]
+        local pos = window.pos
+        local size = window.size
+        --if (x == pos.x + size.x - 2 and y == pos.y) then renderer.closeWindow(window.name, manager)
+        if (y > pos.y and y < pos.y + size.y - 1)
+            and (x > pos.x and x < pos.x + size.x - 1) then
+            movingWindow = {
+                name = window.name,
+                anchor = { x = x - pos.x, y = y - pos.y}
+            }
             resizingWindow = nil
             resizingDirection = nil
             return
-        elseif (y >= window.pos.y and y < window.pos.y + window.size.y) and (x >= window.pos.x and x < window.pos.x + window.size.x) then --Check for resizing
+        elseif (y >= pos.y and y < pos.y + size.y)
+                and (x >= pos.x and x < pos.x + size.x) then --Check for resizing
             movingWindow = nil
-            resizingWindow = {name = window.name, anchor = {x = x, y = y} }
-            if     (y == window.pos.y) and (x > window.pos.x and x < window.pos.x + window.size.x - 1) then resizingDirection = 1 -- Up
-            elseif (y == window.pos.y) and (x == window.pos.x + window.size.x - 1) then resizingDirection = 2 -- Up Right
-            elseif (y > window.pos.y and y < window.pos.y + window.size.y - 1) and (x == window.pos.x + window.size.x - 1) then resizingDirection = 3 -- Right
-            elseif (y == window.pos.y + window.size.y - 1) and (x == window.pos.x + window.size.x - 1) then resizingDirection = 4 -- Down Right
-            elseif (y == window.pos.y + window.size.y - 1) and (x > window.pos.x and x < window.pos.x + window.size.x - 1) then resizingDirection = 5 -- Down
-            elseif (y == window.pos.y + window.size.y - 1) and (x == window.pos.x) then resizingDirection = 6 -- Down Left
-            elseif (y > window.pos.y and y < window.pos.y + window.size.y - 1) and (x == window.pos.x) then resizingDirection = 7 -- Left
-            elseif (y == window.pos.y) and (x == window.pos.x) then resizingDirection = 8 end -- Up Left 
+            resizingWindow = {
+                name = window.name,
+                anchor = {x = x, y = y}
+            }
+            resizingDirection = getResizingDirection()
             return
         end
     end
@@ -142,10 +173,11 @@ end
 
 local contextAnchor = {}
 local background = nil
-local clickHandler = nil
-local function contextHandler(eventName, address, x, y, button, name)
-    if (y > contextAnchor.pos.y and y < contextAnchor.pos.y + contextAnchor.size.y - 1) and (x > contextAnchor.pos.x and x < contextAnchor.pos.x + contextAnchor.size.x - 1) then
-        local selection = y - contextAnchor.pos.y
+local function contextHandler(_, _, x, y)
+    local pos = contextAnchor.pos
+    local size = contextAnchor.size
+    if (y > pos.y and y < pos.y + size.y - 1) and (x > pos.x and x < pos.x + size.x - 1) then
+        local selection = y - pos.y
         print(contextAnchor.contexts[selection].args[1])
         contextAnchor.contexts[selection].func(table.unpack(contextAnchor.contexts[selection].args))
         renderer.removeWindow("ContextMenu")
@@ -153,42 +185,56 @@ local function contextHandler(eventName, address, x, y, button, name)
     end
     renderer.removeWindow("ContextMenu")
     manager.removeWindow("ContextMenu")
-    gpu.bitblt(0, contextAnchor.pos.x, contextAnchor.pos.y, contextAnchor.size.x, contextAnchor.size.y, background.buffer, 1, 1)
+    gpu.bitblt(0, pos.x, pos.y, size.x, size.y, background.buffer, 1, 1)
     manager.removeWindow("ContextBackground")
-    attachWindow(eventName, address, x, y, button, name)
+    attachWindow(nil, nil, x, y)
     renderer.update()
     manager.enableWindowMovement()
     event.ignore("touch", contextHandler)
 end
 
-local function contextMenu(eventName, address, x, y, button, name)
+local function contextMenu(_, _, x, y)
     local activeWindows = renderer.getActiveWindows()
     for i, _ in ipairs(activeWindows) do
-        local window = activeWindows[#activeWindows-i + 1]
+        local window = activeWindows[#activeWindows - i + 1]
+        local pos = window.pos
+        local size = window.size
+        local contexts = window.context
+
         local longestEntry = 0
-        for _, v in ipairs(window.context) do
+        for _, v in ipairs(contexts) do
             if longestEntry < #v.name then
                 longestEntry = #v.name
             end
         end
-        if (y > window.pos.y and y < window.pos.y + window.size.y - 1) and (x > window.pos.x and x < window.pos.x + window.size.x - 1) then
-            local contextmenu = manager.createWindow("ContextMenu", {x=longestEntry+2, y=#window.context+2}, {x=x, y=y}, 0)
+        if (y > pos.y and y < pos.y + size.y - 1) and (x > pos.x and x < pos.x + size.x - 1) then
+            local contextmenu = manager.createWindow(
+                "ContextMenu",
+                { x = longestEntry + 2, y = #contexts + 2 },
+                { x = x, y = y },
+                0
+            )
             contextAnchor = {
-                pos = {x=x, y=y},
-                size = {x=longestEntry+2, y=#window.context+2},
-                contexts = window.context
+                pos = { x = x, y = y },
+                size = { x = longestEntry + 2, y = #contexts + 2 },
+                contexts = contexts
             }
             gpu.setActiveBuffer(contextmenu.buffer)
-            graphics.windowBorder(0xFF00FF, false, false)
+            graphics.windowBorder(0xFF00FF, false)
             gpu.setForeground(0xFF22BB)
             i = 2
-            for _, context in ipairs(window.context) do
+            for _, context in ipairs(contexts) do
                 gpu.set(2, i, context.name)
                 i = i + 1
             end
             renderer.addWindow(contextmenu)
-            background = manager.createWindow("ContextBackground", {x=longestEntry+2, y=#window.context+2}, {x=x, y=y}, 0)
-            gpu.bitblt(background.buffer, 1, 1, contextAnchor.size.x, contextAnchor.size.y, 0, contextAnchor.pos.x, contextAnchor.pos.y)
+            background = manager.createWindow(
+                "ContextBackground",
+                { x = longestEntry + 2, y = #contexts + 2 },
+                { x = x, y = y },
+                0
+            )
+            gpu.bitblt(background.buffer, 1, 1, size.x, size.y, 0, pos.x, pos.y)
             renderer.update()
             manager.disableWindowMovement()
             event.listen("touch", contextHandler)
@@ -197,22 +243,21 @@ local function contextMenu(eventName, address, x, y, button, name)
     end
 end
 
-local function moveWindow(eventName, address, x, y, button, name)
+local function moveWindow(_, _, x, y)
     if movingWindow then
-        renderer.moveWindow(movingWindow.name, x-movingWindow.anchor.x, y-movingWindow.anchor.y)
+        renderer.moveWindow(movingWindow.name, x - movingWindow.anchor.x, y - movingWindow.anchor.y)
     elseif resizingWindow then
-        renderer.resizeWindow(resizingWindow.name, resizingDirection, x, y)
+        renderer.resizeWindow(resizingWindow.name, resizingDirection, x, y, manager)
     end
 end
 
-local function handleClick(eventName, address, x, y, button, name)
+local function handleClick(_, _, x, y, button)
     if button == 0 then
-        attachWindow(eventName, address, x, y, button, name)
+        attachWindow(nil, nil, x, y)
     elseif button == 1 then
-        contextMenu(eventName, address, x, y, button, name)     
+        contextMenu(nil, nil, x, y)
     end
 end
-clickHandler = handleClick
 
 function manager.enableWindowMovement()
     event.listen("touch", handleClick)
