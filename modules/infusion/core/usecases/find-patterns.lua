@@ -2,7 +2,7 @@ local event = require('event')
 
 local getKnownAltars = require('modules.infusion.core.persistence.get-known-altars')
 local knownAltars = getKnownAltars()
-event.listen("altars_update", function(_, updatedAltars)
+event.listen('altars_update', function(_, updatedAltars)
     knownAltars = updatedAltars
 end)
 
@@ -21,12 +21,6 @@ local function findPatterns()
                         local item = altar.getItem(input.name)
                         if not item
                             or (input.count and input.count > item.size) then
-                            print('Requirement for "'
-                                .. pattern.outputs[1].name
-                                .. '" not met. Missing "'
-                                .. input.name
-                                .. '"'
-                            )
                             allFulfilled = false
                             break
                         end
@@ -34,10 +28,6 @@ local function findPatterns()
                 end
 
                 if allFulfilled then
-                    print('Found pattern for "'
-                        .. pattern.outputs[1].name
-                        .. '"'
-                    )
                     return pattern, altar
                 end
             end
