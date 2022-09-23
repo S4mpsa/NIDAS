@@ -3,7 +3,7 @@ local makeInfuseFunction = require('modules.infusion.core.usecases.make-infuse-f
 
 local function resumeOngoingInfusions(ongoingInfusions)
     for index, infusion in ipairs(ongoingInfusions) do
-        if coroutine.status(infusion) == "dead" then
+        if coroutine.status(infusion) == 'dead' then
             table.remove(ongoingInfusions, index)
             coroutine.yield('dead')
         else

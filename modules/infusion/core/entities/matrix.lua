@@ -1,6 +1,6 @@
-local component = require("component")
-local TileEntity = require("core.tile-entity")
-local Essentia = require("modules.infusion.core.dtos.essentia")
+local component = require('component')
+local TileEntity = require('core.tile-entity')
+local Essentia = require('modules.infusion.core.dtos.essentia')
 
 ---@class Matrix: TileEntity
 local Matrix = { entityType = 'blockstonedevice_2' }

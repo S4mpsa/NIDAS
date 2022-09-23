@@ -35,7 +35,7 @@ local mt = { __sub = subtraction, __tostring = tostring }
 ---@param aspects table
 ---@return Essentia[]
 function Essentia.new(aspects)
-    if type(aspects) ~= "table" then
+    if type(aspects) ~= 'table' then
         aspects = {}
     end
     local newAspects = {}
