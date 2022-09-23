@@ -50,8 +50,8 @@ local function waitForInfusion(altar, outputName, previousPedestalItem)
         )
         pedestalItemLabel = (altar.getPedestalItem() or {}).label
     end
-    if pedestalItemLabel.label ~= outputName then
-        print('Infused item "' 
+    if pedestalItemLabel ~= outputName then
+        print('Infused item "'
             .. tostring(pedestalItemLabel)
             .. 'does not match pattern output "'
             .. outputName
