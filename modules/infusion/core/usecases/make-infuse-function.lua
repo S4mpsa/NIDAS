@@ -21,7 +21,10 @@ local function waitForEssentia(altar, outputName, requiredEssentia)
     -- TODO: find a way to cancel dangling essentia crafts on the ME system CPUs
     -- altar.requestEssentia(missingEssentia)
     while #missingEssentia > 0 do
-        coroutine.yield('Missing essentia to craft "' .. outputName .. '": ', missingEssentia)
+        coroutine.yield(
+            'Missing essentia to craft "' .. outputName .. '": ',
+            missingEssentia
+        )
         missingEssentia = requiredEssentia - altar.getStoredEssentia()
     end
 end
@@ -41,11 +44,19 @@ end
 local function waitForInfusion(altar, outputName, previousPedestalItem)
     local pedestalItemLabel = (altar.getPedestalItem() or {}).label
     while previousPedestalItem.label == pedestalItemLabel do
-        coroutine.yield('Remaining essentia to infuse "' .. outputName .. '": ', altar.readMatrix())
+        coroutine.yield(
+            'Remaining essentia to infuse "' .. outputName .. '": ',
+            altar.readMatrix()
+        )
         pedestalItemLabel = (altar.getPedestalItem() or {}).label
     end
     if pedestalItemLabel.label ~= outputName then
-        print('Infused item "' .. tostring(pedestalItemLabel) .. 'does not match pattern output "' .. outputName .. '".')
+        print('Infused item "' 
+            .. tostring(pedestalItemLabel)
+            .. 'does not match pattern output "'
+            .. outputName
+            .. '".'
+        )
     end
 end
 

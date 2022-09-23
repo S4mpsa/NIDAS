@@ -19,10 +19,14 @@ local function findPatterns()
                 for _, input in ipairs(pattern.inputs) do
                     if input.name then
                         local item = altar.getItem(input.name)
-                        if not item or (input.count and input.count > item.size) then
-                            print(
-                                'Requirement for "' .. pattern.outputs[1].name .. '" not met. Missing "' .. input.name ..
-                                    '"')
+                        if not item
+                            or (input.count and input.count > item.size) then
+                            print('Requirement for "'
+                                .. pattern.outputs[1].name
+                                .. '" not met. Missing "'
+                                .. input.name
+                                .. '"'
+                            )
                             allFulfilled = false
                             break
                         end
@@ -30,7 +34,10 @@ local function findPatterns()
                 end
 
                 if allFulfilled then
-                    print('Found pattern for "' .. pattern.outputs[1].name .. '"')
+                    print('Found pattern for "'
+                        .. pattern.outputs[1].name
+                        .. '"'
+                    )
                     return pattern, altar
                 end
             end

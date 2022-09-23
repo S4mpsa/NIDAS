@@ -7,7 +7,10 @@ local knownRecipes = {}
 ---@return InfusionRecipe recipeToInfuse
 local function getRecipeToInfuse()
     local pattern, altar = findPatterns()
-    if not pattern or not pattern.outputs or not pattern.outputs[1] or not pattern.outputs[1].name then
+    if not pattern
+        or not pattern.outputs
+        or not pattern.outputs[1]
+        or not pattern.outputs[1].name then
         return nil
     end
 
