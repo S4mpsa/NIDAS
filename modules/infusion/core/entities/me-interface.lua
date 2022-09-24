@@ -36,7 +36,7 @@ function MeInterface.new(address, location)
         return craftable.request(patternItem.amount or patternItem.count or 1)
     end
 
-    ---Returns the first match for an item in the ME network with a given itmeName
+    ---Returns the first match for an item in the ME network with a given itemName
     ---@param itemName string
     ---@return StoredItem
     function self.getItem(itemName)
@@ -51,7 +51,13 @@ function MeInterface.new(address, location)
         for slot = 1, 36 do
             local proxyPattern = proxy.getInterfacePattern(slot)
             if proxyPattern then
-                table.insert(patterns, { inputs = proxyPattern.inputs, outputs = proxyPattern.outputs })
+                table.insert(
+                    patterns,
+                    {
+                        inputs = proxyPattern.inputs,
+                        outputs = proxyPattern.outputs
+                    }
+                )
             end
         end
         return patterns

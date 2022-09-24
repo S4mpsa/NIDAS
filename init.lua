@@ -1,5 +1,11 @@
 -- Adds NIDAS library folders to default package path
 package.path = package.path .. ";/home/NIDAS/?.lua;/home/NIDAS/lib/?.lua"
+local event = require('event')
+local computer = require('computer')
+
+event.listen('interrupted', function ()
+    computer.shutdown(true)
+end)
 
 -- local modules = { require("modules.infusion.init") }
 -- while true do
@@ -11,4 +17,4 @@ package.path = package.path .. ";/home/NIDAS/?.lua;/home/NIDAS/lib/?.lua"
 --     end
 -- end
 
-require("modules.infusion.init")
+require('modules.infusion.init')

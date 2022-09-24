@@ -27,7 +27,10 @@ local infusionCoroutine = coroutine.create(function()
         end
 
         if recipeToInfuse then
-            table.insert(ongoingInfusions, coroutine.create(makeInfuseFunction(recipeToInfuse)))
+            table.insert(
+                ongoingInfusions,
+                coroutine.create(makeInfuseFunction(recipeToInfuse))
+            )
             recipeToInfuse = nil
             coroutine.yield('Starting infusion')
         end

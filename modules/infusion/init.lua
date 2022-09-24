@@ -13,5 +13,6 @@ end
 
 while true do
     logger(coroutine.resume(coreCoroutine[2]))
+    ---@diagnostic disable-next-line: undefined-field
     os.sleep(0)
 end
