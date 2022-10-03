@@ -15,7 +15,12 @@ local function exec(address, name, location)
         multiblock.state = states.MISSING
         return multiblock
     end
-    local sensorInformation = multiblock:getSensorInformation()
+    local sensorInformation = {}
+    if multiblock.getSensorInformation then
+        sensorInformation = multiblock:getSensorInformation()
+    else
+        error("\n-----------------------------------------------------\nA GT TileEntity with no interface was detected!\nCheck for pipes and cables next to adapters!\n-----------------------------------------------------")
+    end
 
     local gtPlusPlus = string.match(sensorInformation[5] or "", "EU") and 7 or 5
     if gtPlusPlus == 7 then gtPlusPlus = string.match(sensorInformation[18] or "", "Problems") and 18 or 7 end

@@ -27,11 +27,14 @@ local function load()
     end
     if glassData == nil then glassData = {} end
     for address, data in pairs(glassData) do
-        ar.clear(component.proxy(address))
-        if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.fluidDisplay then table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.notifications then table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+        local glasses = component.proxy(address)
+        if glasses then
+            ar.clear(glasses)
+            if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+            if data.fluidDisplay then table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+            if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+            if data.notifications then table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+        end
     end
     file = io.open("/home/NIDAS/settings/fluidData", "r")
     if file ~= nil then
