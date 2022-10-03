@@ -146,16 +146,17 @@ function hud.configure(x, y, gui, graphics, renderer, page)
 end
 refresh = hud.configure
 
+local hysteresis = 0.02
 local function getMax(fluidAmount)
     local power = 0
     local max = 1000
     if fluidAmount < 1000000 then
-        while (max * 2^power) < fluidAmount do
+        while (max * 2^power) < fluidAmount * (1 - hysteresis) do
             power = power + 1
         end
     else
         max = 1000000
-        while (max * 2^power) < fluidAmount do
+        while (max * 2^power) < fluidAmount * (1 - hysteresis) do
             power = power + 1
         end
     end
