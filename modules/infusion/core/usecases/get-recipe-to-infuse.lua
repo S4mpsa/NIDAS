@@ -1,6 +1,5 @@
-local getRequiredEssentia = require('modules.infusion.core.persistence.get-required-essentia')
-local findPatterns = require('modules.infusion.core.usecases.find-patterns')
-
+local getRequiredEssentia = require('modules.infusion.core.repositories.get-required-essentia')
+local findPatterns = require('modules.infusion.core.repositories.find-patterns')
 
 local knownRecipes = {}
 ---Returns the next available recipe to be infused
@@ -17,13 +16,12 @@ local function getRecipeToInfuse()
     if not knownRecipes[altar.id .. pattern.outputs[1].name] then
         local requiredEssentia = getRequiredEssentia(pattern)
         knownRecipes[altar.id .. pattern.outputs[1].name] = {
-            altar = altar,
             pattern = pattern,
             requiredEssentia = requiredEssentia,
         }
     end
 
-    return knownRecipes[altar.id .. pattern.outputs[1].name]
+    return altar, knownRecipes[altar.id .. pattern.outputs[1].name]
 end
 
 return getRecipeToInfuse

@@ -14,7 +14,6 @@
 ---@field outputs PatternItem[]
 ---
 ---@class InfusionRecipe
----@field altar Altar
 ---@field pattern Pattern
 ---@field requiredEssentia Essentia[]
 ---

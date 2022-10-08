@@ -1,5 +1,9 @@
 local getRecipeToInfuse = require('modules.infusion.core.usecases.get-recipe-to-infuse')
 local makeInfuseFunction = require('modules.infusion.core.usecases.make-infuse-function')
+local coreStatuses = require('modules.infusion.constants').coreStatuses
+
+local event = require('event')
+event.onError = print
 
 local function resumeOngoingInfusions(ongoingInfusions)
     for index, infusion in ipairs(ongoingInfusions) do
@@ -16,23 +20,26 @@ end
 
 local infusionCoroutine = coroutine.create(function()
     ---@type InfusionRecipe
-    local recipeToInfuse
+    local altar, recipeToInfuse
     local ongoingInfusions = {}
     while true do
         if #ongoingInfusions > 0 then
             ongoingInfusions = resumeOngoingInfusions(ongoingInfusions)
         else
-            recipeToInfuse = getRecipeToInfuse()
-            coroutine.yield('No ongoing infusions')
+            altar, recipeToInfuse = getRecipeToInfuse()
+            coroutine.yield(coreStatuses.no_infusions)
         end
 
         if recipeToInfuse then
             table.insert(
                 ongoingInfusions,
-                coroutine.create(makeInfuseFunction(recipeToInfuse))
+                coroutine.create(makeInfuseFunction(altar, recipeToInfuse))
             )
-            recipeToInfuse = nil
-            coroutine.yield('Starting infusion')
+            coroutine.yield(
+                coreStatuses.infusion_start,
+                recipeToInfuse.pattern.outputs[1].name
+            )
+            altar, recipeToInfuse = nil, nil
         end
     end
 end)

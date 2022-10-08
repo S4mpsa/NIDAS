@@ -1,4 +1,5 @@
-local storeRequiredEssentia = require('modules.infusion.core.persistence.store-required-essentia')
+local storeRequiredEssentia = require('modules.infusion.core.repositories.store-required-essentia')
+local coreStatuses = require('modules.infusion.constants').coreStatuses
 
 ---Waits for a read from the `altar` and returns the read `essentia`
 ---@param altar Altar
@@ -7,7 +8,7 @@ local function waitForRead(altar)
     local essentia = altar.readMatrix()
     while #essentia == 0 do
         essentia = altar.readMatrix()
-        coroutine.yield('waiting_on_matrix')
+        coroutine.yield(coreStatuses.waiting_on_matrix)
     end
     return essentia
 end
@@ -22,7 +23,8 @@ local function waitForEssentia(altar, outputName, requiredEssentia)
     -- altar.requestEssentia(missingEssentia)
     while #missingEssentia > 0 do
         coroutine.yield(
-            'Missing essentia to craft "' .. outputName .. '": ',
+            coreStatuses.missing_essentia,
+            outputName,
             missingEssentia
         )
         missingEssentia = requiredEssentia - altar.getStoredEssentia()
@@ -45,7 +47,8 @@ local function waitForInfusion(altar, outputName, previousPedestalItem)
     local pedestalItemLabel = (altar.getPedestalItem() or {}).label
     while previousPedestalItem.label == pedestalItemLabel do
         coroutine.yield(
-            'Remaining essentia to infuse "' .. outputName .. '": ',
+            coreStatuses.waiting_on_essentia,
+            outputName,
             altar.readMatrix()
         )
         pedestalItemLabel = (altar.getPedestalItem() or {}).label
@@ -63,8 +66,7 @@ end
 ---Makes the function that controls the infusion of a particular `recipe`
 ---@param recipe InfusionRecipe
 ---@return function
-local function makeInfuseFunction(recipe)
-    local altar = recipe.altar
+local function makeInfuseFunction(altar, recipe)
     local firstPatternOutput = recipe.pattern.outputs[1]
     local requiredEssentia = recipe.requiredEssentia
 

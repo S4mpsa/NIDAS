@@ -1,6 +1,6 @@
 local event = require('event')
 
-local getKnownAltars = require('modules.infusion.core.persistence.get-known-altars')
+local getKnownAltars = require('modules.infusion.core.repositories.get-known-altars')
 local knownAltars = getKnownAltars()
 event.listen('altars_update', function(_, updatedAltars)
     knownAltars = updatedAltars
