@@ -50,7 +50,9 @@ local function exec(address, name, location)
         EUCapacity = parser.getInteger(sensorInformation[3]),
         problems = problems,
         passiveLoss = parser.getInteger(sensorInformation[4]),
-        location = location
+        location = location,
+        EUIn = parser.getInteger(sensorInformation[5]),
+        EUOut = parser.getInteger(sensorInformation[6])
     }
     return status
 end

@@ -28,17 +28,25 @@ local server = {}
 
 function namespace.save()
     local file = io.open("/home/NIDAS/settings/serverData", "w")
-    file:write(serialization.serialize(namespace.serverData))
-    file:close()
+    if file then
+        file:write(serialization.serialize(namespace.serverData))
+        file:close()
+    end
     file = io.open("/home/NIDAS/settings/machineData", "w")
-    file:write(serialization.serialize(namespace.statuses))
-    file:close()
+    if file then
+        file:write(serialization.serialize(namespace.statuses))
+        file:close()
+    end
     file = io.open("/home/NIDAS/settings/known-machines", "w")
-    file:write(serialization.serialize(namespace.knownMachines))
-    file:close()
+    if file then
+        file:write(serialization.serialize(namespace.knownMachines))
+        file:close()
+    end
     file = io.open("/home/NIDAS/settings/power-history", "w")
-    file:write(serialization.serialize(namespace.powerHistory))
-    file:close()
+    if file then
+        file:write(serialization.serialize(namespace.powerHistory))
+        file:close()
+    end
 end
 
 local function load()

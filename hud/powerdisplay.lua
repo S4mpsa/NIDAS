@@ -9,16 +9,39 @@ local states = require("server.entities.states")
 local powerDisplay = {}
 
 local hudObjects = {}
+
+local function getNewTable(size, value)
+    local array = {}
+    for i = 1, size, 1 do
+        array[i] = value
+    end
+    return array
+end
+
+local function getAverage(array)
+    local sum = 0
+    for i = 1, #array, 1 do
+        sum = sum + array[i]
+    end
+    return sum / #array
+end
+
+local updateInterval = 100
+
 local energyData = {
     intervalCounter = 1,
     readings = {},
     startTime = 0,
     endTime = 0,
-    updateInterval = 100,
+    updateInterval = updateInterval,
     energyPerTick = 0,
     offset = 0,
     highestInput = 1,
-    highestOutput= -1
+    highestOutput= -1,
+    energyIn = getNewTable(updateInterval, 0),
+    energyOut = getNewTable(updateInterval, 0),
+    input = 0,
+    output = 0
 }
 
 local energyUnit = "EU"
@@ -72,10 +95,15 @@ function powerDisplay.widget(glasses, data)
     end
     if energyData.intervalCounter < energyData.updateInterval then
         energyData.intervalCounter = energyData.intervalCounter + 1
+        energyData.energyIn[energyData.intervalCounter] = data.EUIn
+        energyData.energyOut[energyData.intervalCounter] = data.EUOut
     end
     if energyData.intervalCounter == energyData.updateInterval then
         energyData.endTime = computer.uptime()
         energyData.readings[2] = currentEU
+
+        energyData.input = getAverage(energyData.energyIn)
+        energyData.output = getAverage(energyData.energyOut)
 
         local ticks = math.ceil((energyData.endTime - energyData.startTime) * 20)
         energyData.energyPerTick = math.floor((energyData.readings[2] - energyData.readings[1])/ticks)
@@ -144,13 +172,15 @@ function powerDisplay.widget(glasses, data)
                 table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+hDivisor}, {x, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, borderColor))
                 table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-1-hProgress, y+hDivisor}, {x+w-1, y+hDivisor+hProgress}, {x+w, y+hDivisor+hProgress}, {x+w, y+hDivisor}, borderColor))
                 table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x, y+2*hDivisor+hProgress}, {x, y+2*hDivisor+hProgress+hIO}, {x+30+hIO, y+2*hDivisor+hProgress+hIO}, {x+30, y+2*hDivisor+hProgress}, borderColor))
-                table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-30-hIO, y+2*hDivisor+hProgress}, {x+w-30, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress}, borderColor))
+                table.insert(hudObjects[i].static, ar.quad(hudObjects[i].glasses, {x+w-40-hIO, y+2*hDivisor+hProgress}, {x+w-40, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress+hIO}, {x+w, y+2*hDivisor+hProgress}, borderColor))
                 hudObjects[i].dynamic.energyBar = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, primaryColor)
                 hudObjects[i].dynamic.currentEU = ar.text(hudObjects[i].glasses, "", {x+2, y-9}, primaryColor)
                 hudObjects[i].dynamic.maxEU = ar.text(hudObjects[i].glasses, "", {x+w-90, y-9}, accentColor)
                 hudObjects[i].dynamic.percentage = ar.text(hudObjects[i].glasses, "", {x+w/2-5, y-9}, accentColor)
                 hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
                 hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
+                hudObjects[i].dynamic.input = ar.text(hudObjects[i].glasses, "", {x+w - 46, y+2*hDivisor+hProgress - 1}, primaryColor, 0.55)
+                hudObjects[i].dynamic.output = ar.text(hudObjects[i].glasses, "", {x+w - 40, y+2*hDivisor+hProgress + 5}, accentColor, 0.55)
                 hudObjects[i].dynamic.state = ar.text(hudObjects[i].glasses, "", {x+w-95, y+2*hDivisor+hProgress+2}, colors.red)
                 hudObjects[i].dynamic.fillIndicator = ar.quad(hudObjects[i].glasses, {x+3, y+hDivisor}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3+hProgress, y+hDivisor+hProgress}, {x+3, y+hDivisor}, colors.golden, 0.7)
                 if compact then
@@ -194,6 +224,10 @@ function powerDisplay.widget(glasses, data)
                 hudObjects[i].dynamic.fillrate.setText(hIOString.." "..energyUnit.."/t")
                 hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
             end
+
+            hudObjects[i].dynamic.input.setText("+" .. parser.metricNumber(energyData.input) .. " " .. energyUnit.."/t")
+            hudObjects[i].dynamic.output.setText("-" .. parser.metricNumber(energyData.output) .. " " .. energyUnit.."/t")
+
             local fillTimeString = ""
             local fillTime = 0
             if energyData.energyPerTick > 0 then
