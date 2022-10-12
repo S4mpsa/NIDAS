@@ -30,6 +30,7 @@ local updateInterval = 100
 
 local energyData = {
     intervalCounter = 1,
+    animationCounter = 1,
     readings = {},
     startTime = 0,
     endTime = 0,
@@ -41,7 +42,8 @@ local energyData = {
     energyIn = getNewTable(updateInterval, 0),
     energyOut = getNewTable(updateInterval, 0),
     input = 0,
-    output = 0
+    output = 0,
+    wirelessMode = false
 }
 
 local energyUnit = "EU"
@@ -78,6 +80,7 @@ end
 function powerDisplay.widget(glasses, data)
     if data ~= nil then
     if data.state ~= states.MISSING then
+    
     local currentEU = math.abs(math.floor(data.storedEU))
     local maxEU = math.abs(math.floor(data.EUCapacity))
 
@@ -123,6 +126,23 @@ function powerDisplay.widget(glasses, data)
         energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestInput)
     else
         energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestOutput)
+    end
+    --Wireless EU addition
+    if data.wirelessEU > 0 then
+        currentEU = data.wirelessEU
+        maxEU = 2^1023
+        data.wirelessMode = true
+        percentage = energyData.animationCounter / 500
+        if energyData.energyPerTick > 0 then
+            energyData.animationCounter = energyData.animationCounter + 1
+        else
+            energyData.animationCounter = energyData.animationCounter - 1
+        end
+        if energyData.animationCounter > 500 then
+            energyData.animationCounter = 1
+        elseif energyData.animationCounter < 0 then
+            energyData.animationCounter = 500
+        end
     end
 
     if #hudObjects < #glasses then
@@ -197,6 +217,7 @@ function powerDisplay.widget(glasses, data)
             else
                 hudObjects[i].dynamic.currentEU.setText(parser.splitNumber(currentEU).." "..energyUnit)
             end
+
             if maxEU > 9000000000000000000 then
                 hudObjects[i].dynamic.maxEU.setText("∞ "..energyUnit)
                 hudObjects[i].dynamic.maxEU.setPosition(x+w-25, y-9)
@@ -230,22 +251,27 @@ function powerDisplay.widget(glasses, data)
 
             local fillTimeString = ""
             local fillTime = 0
-            if energyData.energyPerTick > 0 then
-                fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
-                fillTimeString = "Full: " .. time.format(math.abs(fillTime))
-            elseif energyData.energyPerTick < 0 then
-                fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
-                fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
+            if data.wirelessMode then
+                hudObjects[i].dynamic.percentage.setText("")
             else
-                fillTimeString = ""
+                if energyData.energyPerTick > 0 then
+                    fillTime = math.floor((maxEU-currentEU)/(energyData.energyPerTick*20))
+                    fillTimeString = "Full: " .. time.format(math.abs(fillTime))
+                elseif energyData.energyPerTick < 0 then
+                    fillTime = math.floor((currentEU)/(energyData.energyPerTick*20))
+                    fillTimeString = "Empty: " .. time.format(math.abs(fillTime))
+                else
+                    fillTimeString = ""
+                end
+                if math.abs(fillTime) > 500000 or percentage < 0.05 then
+                    hudObjects[i].dynamic.percentage.setPosition(x+w/2-20, y-9)
+                    hudObjects[i].dynamic.percentage.setText(tostring(math.floor(percentage*10000000)/100000).."%")
+                else
+                    hudObjects[i].dynamic.percentage.setPosition(x+w/2-5, y-9)
+                    hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
+                end
             end
-            if math.abs(fillTime) > 500000 or percentage < 0.05 then
-                hudObjects[i].dynamic.percentage.setPosition(x+w/2-20, y-9)
-                hudObjects[i].dynamic.percentage.setText(tostring(math.floor(percentage*10000000)/100000).."%")
-            else
-                hudObjects[i].dynamic.percentage.setPosition(x+w/2-5, y-9)
-                hudObjects[i].dynamic.percentage.setText(parser.percentage(percentage))
-            end
+
             if data.state == states.OFF then
                 hudObjects[i].dynamic.state.setText("Disabled")
             else
@@ -255,7 +281,11 @@ function powerDisplay.widget(glasses, data)
                     hudObjects[i].dynamic.state.setText("")
                 end
             end
-            hudObjects[i].dynamic.filltime.setText(fillTimeString)
+            if data.wirelessMode then
+                hudObjects[i].dynamic.filltime.setText("")
+            else
+                hudObjects[i].dynamic.filltime.setText(fillTimeString)
+            end
             local function moveForward(quad)
                 if energyData.energyPerTick > 0 then
                     local remaining = math.min((x+w-hIO-6) - (x+3+energyBarLength*percentage), ((x+w-hIO-6 - x+3) / 8))
