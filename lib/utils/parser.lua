@@ -28,11 +28,15 @@ function parser.metricNumber(number, format)
 end
 
 function parser.getInteger(string)
-    local numberString = string.gsub(string, "([^0-9]+)", "")
-    if tonumber(numberString) then
-        return math.floor(tonumber(numberString) + 0)
+    if type(string) == "string" then
+        local numberString = string.gsub(string, "([^0-9]+)", "")
+        if tonumber(numberString) then
+            return math.floor(tonumber(numberString) + 0)
+        end
+        return 0
+    else
+        return 0
     end
-    return nil
 end
 
 function parser.split(string, sep)
