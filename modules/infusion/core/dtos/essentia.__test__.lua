@@ -1,5 +1,9 @@
+local describe = _ENV.describe
+local it = _ENV.it
+
 local Essentia = require 'modules.infusion.core.dtos.essentia'
-describe('Essentia entity', function()
+
+describe('Essentia data object', function()
     local namedAspectsEssentia = Essentia.new({
         { name = 'Ordo', amount = 10 },
         { name = 'Perditio', amount = 32 }
@@ -11,15 +15,15 @@ describe('Essentia entity', function()
 
     describe('creation', function()
 
-        it('should create a new essentia from a of named aspects', function()
+        it('should create a new essentia object from a list of named aspects', function()
             assert.is_not_nil(namedAspectsEssentia)
         end)
 
-        it('should create a new essentia from a list of labeled aspects', function()
+        it('should create a new essentia object from a list of labeled aspects', function()
             assert.is_not_nil(labeledAspectsEssentia)
         end)
 
-        it('should create the same essentia from a list of labeled aspects as created from a list of named aspects',
+        it('should create the same essentia object from a list of labeled aspects as created from a list of named aspects',
            function()
             assert.is_same(namedAspectsEssentia, labeledAspectsEssentia)
         end)
@@ -37,8 +41,8 @@ describe('Essentia entity', function()
 
     describe('subtraction', function()
         it('should subtract essentia by name', function()
-            local oneOrdoEssentia = Essentia.new({ { name = 'Ordo', amount = 1 } })
-            local onePerditioEssentia = Essentia.new({ { name = 'Perditio', amount = 1 } })
+            local oneOrdoEssentia = Essentia.new({{ name = 'Ordo', amount = 1 }})
+            local onePerditioEssentia = Essentia.new({{ name = 'Perditio', amount = 1 }})
 
             assert.is_same(
                 namedAspectsEssentia - oneOrdoEssentia, {
