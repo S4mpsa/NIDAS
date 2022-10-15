@@ -2,17 +2,18 @@ local getRecipeToInfuse = require('modules.infusion.core.usecases.get-recipe-to-
 local makeInfuseFunction = require('modules.infusion.core.usecases.make-infuse-function')
 local coreStatuses = require('modules.infusion.constants').coreStatuses
 
-local event = require('event')
-event.onError = print
-
 local function resumeOngoingInfusions(ongoingInfusions)
     for index, infusion in ipairs(ongoingInfusions) do
         if coroutine.status(infusion) == 'dead' then
             table.remove(ongoingInfusions, index)
             coroutine.yield('dead')
         else
-            local _, message, complement = coroutine.resume(infusion)
-            coroutine.yield(message, complement)
+            local _,
+                message,
+                complement1,
+                complement2,
+                complement3 = coroutine.resume(infusion)
+            coroutine.yield(message, complement1, complement2, complement3)
         end
     end
     return ongoingInfusions

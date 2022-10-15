@@ -1,19 +1,24 @@
-local storeRequiredEssentia = require('modules.infusion.core.repositories.store-required-essentia')
+local storeRequiredEssentia = require('modules.infusion.core.repositories.required-essentia').storeRequiredEssentia
 local coreStatuses = require('modules.infusion.constants').coreStatuses
 
 ---Waits for a read from the `altar` and returns the read `essentia`
 ---@param altar Altar
 ---@return Essentia[] essentia
-local function waitForRead(altar)
+local function waitForRead(altar, requiredEssentia)
     local essentia = altar.readMatrix()
     while #essentia == 0 do
         essentia = altar.readMatrix()
-        coroutine.yield(coreStatuses.waiting_on_matrix)
+        coroutine.yield(
+            coreStatuses.waiting_on_matrix,
+            nil,
+            requiredEssentia,
+            requiredEssentia
+        )
     end
     return essentia
 end
 
----Waits for the `altar` to have at least the same essentia as the `requiredEssentia`
+---Waits for the `altar` to have at least as much essentia as the `requiredEssentia`
 ---@param altar Altar
 ---@param outputName string
 ---@param requiredEssentia Essentia[] essentia required for the infusion
@@ -25,7 +30,8 @@ local function waitForEssentia(altar, outputName, requiredEssentia)
         coroutine.yield(
             coreStatuses.missing_essentia,
             outputName,
-            missingEssentia
+            requiredEssentia,
+            requiredEssentia - missingEssentia
         )
         missingEssentia = requiredEssentia - altar.getStoredEssentia()
     end
@@ -43,17 +49,23 @@ end
 ---@param altar Altar
 ---@param outputName string
 ---@param previousPedestalItem ItemStack
-local function waitForInfusion(altar, outputName, previousPedestalItem)
+local function waitForInfusion(
+        altar,
+        outputName,
+        previousPedestalItem,
+        requiredEssentia
+    )
     local pedestalItemLabel = (altar.getPedestalItem() or {}).label
     while previousPedestalItem.label == pedestalItemLabel do
         coroutine.yield(
             coreStatuses.waiting_on_essentia,
             outputName,
+            requiredEssentia,
             altar.readMatrix()
         )
         pedestalItemLabel = (altar.getPedestalItem() or {}).label
     end
-    if pedestalItemLabel ~= outputName then
+    if outputName and pedestalItemLabel ~= outputName then
         print('Infused item "'
             .. tostring(pedestalItemLabel)
             .. 'does not match pattern output "'
@@ -80,7 +92,7 @@ local function makeInfuseFunction(altar, recipe)
             altar.requestCraft(firstPatternOutput)
             altar.activateMatrix()
             previousPedestalItem = waitForPedestalItem(altar)
-            waitForRead(altar)
+            waitForRead(altar, requiredEssentia)
         else
             altar.blockEssentiaProvider()
 
@@ -93,7 +105,12 @@ local function makeInfuseFunction(altar, recipe)
             altar.unblockEssentiaProvider()
         end
 
-        waitForInfusion(altar, firstPatternOutput.name, previousPedestalItem)
+        waitForInfusion(
+            altar,
+            firstPatternOutput.name,
+            previousPedestalItem,
+            requiredEssentia
+        )
         altar.retrieveCraftedItem(firstPatternOutput.count)
     end
 end

@@ -1,3 +1,4 @@
+---@class AltarStatus
 local coreStatuses = {
     no_infusions = 'no_infusions',
     infusion_start = 'infusion_start',

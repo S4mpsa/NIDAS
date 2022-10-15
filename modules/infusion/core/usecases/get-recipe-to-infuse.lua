@@ -1,4 +1,4 @@
-local getRequiredEssentia = require('modules.infusion.core.repositories.get-required-essentia')
+local getRequiredEssentia = require('modules.infusion.core.repositories.required-essentia').getRequiredEssentia
 local findPatterns = require('modules.infusion.core.repositories.find-patterns')
 
 local knownRecipes = {}
