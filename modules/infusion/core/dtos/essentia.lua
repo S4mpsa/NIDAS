@@ -3,7 +3,7 @@
 ---@field label string
 local Essentia = {}
 
-local function tostring(essentiaListTable)
+local function toString(essentiaListTable)
     local essentiaString = ''
     for _, essentia in ipairs(essentiaListTable) do
         essentiaString = essentiaString
@@ -37,7 +37,7 @@ local function subtraction(t1, t2)
     return Essentia.new(result)
 end
 
-local mt = { __sub = subtraction, __tostring = tostring }
+local mt = { __sub = subtraction, __tostring = toString }
 
 ---@param aspects table
 ---@return Essentia[]
