@@ -1,7 +1,7 @@
 local sides = require('sides')
 local Matrix = require('modules.infusion.core.entities.matrix')
 local MeInterface = require('modules.infusion.core.entities.me-interface')
-local Redstone = require('core.tile-entity.redstone')
+local RedstoneIO = require('core.tile-entity.redstone-io')
 local Transposer = require('core.tile-entity.transposer')
 
 ---@class Altar
@@ -15,19 +15,29 @@ local Altar = {}
 ---@param transposerAddress string
 ---@param location Coordinates
 ---@return Altar
-function Altar.new(clawAddress,
-                   essentiaProviderAddress,
-                   matrixAddress,
-                   meInterfaceAddress,
-                   transposerAddress,
-                   location)
-
+function Altar.new(
+    clawAddress,
+    essentiaProviderAddress,
+    matrixAddress,
+    meInterfaceAddress,
+    transposerAddress,
+    location
+)
     ---@type Altar
     local self = {}
     self.id = matrixAddress
 
-    local claw = Redstone.new(clawAddress, location, nil, { sides.bottom, sides.top })
-    local essentiaProvider = Redstone.new(essentiaProviderAddress, location, { sides.top })
+    local claw = RedstoneIO.new(
+        clawAddress,
+        location,
+        nil,
+        { sides.bottom, sides.top }
+    )
+    local essentiaProvider = RedstoneIO.new(
+        essentiaProviderAddress,
+        location,
+        { sides.top }
+    )
     local matrix = Matrix.new(matrixAddress, location)
     local meInterface = MeInterface.new(meInterfaceAddress, location)
     local transposer = Transposer.new(transposerAddress, location)
