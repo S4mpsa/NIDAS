@@ -1,7 +1,5 @@
 local gpu = require('component').gpu
 
-local coreStatuses = require('modules.infusion.constants').coreStatuses
-
 local windowBorder = require('core.lib.graphics.atoms.window-border')
 
 ---@param label string
@@ -52,7 +50,7 @@ local function smallMatrixIcon()
     ---@type Component
     local component = {
         id = 'matrix-icon',
-        pos = { x = 7, y = 4 },
+        pos = { x = 7, y = 5 },
         size = { x = 7, y = 4 },
         onRender = function (pos)
             gpu.setForeground(0xDD00DD)
@@ -136,31 +134,18 @@ local function essentiaBar(essentiaName, essentiaProgress)
     return component
 end
 
-local smallIcon = smallMatrixIcon()
-
-local resolution = {}
-resolution.x, resolution.y = gpu.getResolution()
-
----@param status AltarStatus
+---@param message any
 ---@param requiredEssentiaList Essentia[]
 ---@param essentiaList Essentia[]
+---@param inactive boolean
 ---@return Component
-local function altarWidget(status, item, requiredEssentiaList, essentiaList)
-    local icon = smallIcon --largeMatrixIcon()
-    local message = ''
-    if status == coreStatuses.no_infusions then
-        message = 'Altar is idle'
-        icon = largeMatrixIcon()
-    elseif status == coreStatuses.infusion_start then
-        message = 'Placing items for "' .. item .. '" on the pedestals'
-    elseif status == coreStatuses.waiting_on_matrix then
-        message = 'Waiting for matrix activation'
-    elseif status == coreStatuses.missing_essentia then
-        message = 'Missing essentia to infuse "' .. item .. '"'
-    elseif status == coreStatuses.waiting_on_essentia then
-        message = 'Infusing "' .. item .. '"'
-    end
-
+local function altarWidget(
+    message,
+    requiredEssentiaList,
+    essentiaList,
+    inactive
+)
+    local icon = inactive == false and smallMatrixIcon() or largeMatrixIcon()
     local label = altarLabel(message)
 
     local essentiaComponents = {}
@@ -187,30 +172,12 @@ local function altarWidget(status, item, requiredEssentiaList, essentiaList)
 
     ---@type Component
     local component = {
-        id = 'root',
-        pos = { x = 0, y = 0 },
-        size = resolution,
+        id = 'altar-widget',
+        size = { x = 58, y = 15 },
         children = {
-            {
-                id = 'altar-widget',
-                pos = { x = 2, y = 2 },
-                size = { x = 58, y = 14 },
-                children = {
-                    label,
-                    icon,
-                    table.unpack(essentiaComponents)
-                }
-            },
-            -- {
-            --     id = 'altar-widget2',
-            --     pos = { x = 60, y = 2 },
-            --     size = { x = 58, y = 14 },
-            --     children = {
-            --         label,
-            --         icon,
-            --         table.unpack(essentiaComponents)
-            --     }
-            -- }
+            label,
+            icon,
+            table.unpack(essentiaComponents)
         }
     }
 

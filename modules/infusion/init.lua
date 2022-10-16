@@ -10,7 +10,7 @@ end)
 
 while true do
     local coreReturn = { coroutine.resume(coreCoroutine[2]) }
-    coroutine.resume(guiCoroutine[2], coreReturn)
+    coroutine.resume(guiCoroutine[2], table.unpack(coreReturn))
     ---@diagnostic disable-next-line: undefined-field
     os.sleep(0)
 end

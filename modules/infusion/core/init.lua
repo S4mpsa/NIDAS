@@ -2,41 +2,48 @@ local getRecipeToInfuse = require('modules.infusion.core.usecases.get-recipe-to-
 local makeInfuseFunction = require('modules.infusion.core.usecases.make-infuse-function')
 local coreStatuses = require('modules.infusion.constants').coreStatuses
 
-local function resumeOngoingInfusions(ongoingInfusions)
-    for index, infusion in ipairs(ongoingInfusions) do
+local function resumeOngoingInfusions(ongoingInfusions, nOngoingInfusions)
+    for altarId, infusion in pairs(ongoingInfusions) do
         if coroutine.status(infusion) == 'dead' then
-            table.remove(ongoingInfusions, index)
-            coroutine.yield('dead')
+            ongoingInfusions[altarId] = nil
+            nOngoingInfusions = nOngoingInfusions - 1
+            coroutine.yield(altarId, 'dead')
         else
-            local _,
-                message,
-                complement1,
-                complement2,
-                complement3 = coroutine.resume(infusion)
-            coroutine.yield(message, complement1, complement2, complement3)
+            local args = { coroutine.resume(infusion) }
+            args[1] = altarId
+            coroutine.yield(table.unpack(args))
         end
     end
-    return ongoingInfusions
+
+    return ongoingInfusions, nOngoingInfusions
 end
 
 local infusionCoroutine = coroutine.create(function()
+    ---@type Altar
+    local altar
     ---@type InfusionRecipe
-    local altar, recipeToInfuse
+    local recipeToInfuse
     local ongoingInfusions = {}
+    local nOngoingInfusions = 0
     while true do
-        if #ongoingInfusions > 0 then
-            ongoingInfusions = resumeOngoingInfusions(ongoingInfusions)
+        if nOngoingInfusions > 0 then
+            ongoingInfusions, nOngoingInfusions = resumeOngoingInfusions(
+                ongoingInfusions,
+                nOngoingInfusions
+            )
         else
             altar, recipeToInfuse = getRecipeToInfuse()
-            coroutine.yield(coreStatuses.no_infusions)
+            coroutine.yield((altar or {}).id, coreStatuses.no_infusions)
         end
 
-        if recipeToInfuse then
-            table.insert(
-                ongoingInfusions,
-                coroutine.create(makeInfuseFunction(altar, recipeToInfuse))
+        if altar and recipeToInfuse then
+            ongoingInfusions[altar.id] = coroutine.create(
+                makeInfuseFunction(altar, recipeToInfuse)
             )
+            nOngoingInfusions = nOngoingInfusions + 1
+
             coroutine.yield(
+                altar.id,
                 coreStatuses.infusion_start,
                 recipeToInfuse.pattern.outputs[1].name
             )
