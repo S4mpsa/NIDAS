@@ -10,7 +10,7 @@ local function waitForRead(altar, requiredEssentia)
         essentia = altar.readMatrix()
         coroutine.yield(
             coreStatuses.waiting_on_matrix,
-            nil,
+            '',
             requiredEssentia,
             requiredEssentia
         )
@@ -68,7 +68,7 @@ local function waitForInfusion(
     if outputName and pedestalItemLabel ~= outputName then
         print('Infused item "'
             .. tostring(pedestalItemLabel)
-            .. 'does not match pattern output "'
+            .. '" does not match pattern output "'
             .. outputName
             .. '".'
         )
