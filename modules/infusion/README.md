@@ -6,7 +6,7 @@ Currently, there are a few things yet to be implemented and a few other to be fi
 * Waits for the essentia to be available before starting the craft
 * Nice graphical Interface shows you the progress of the ongoing infusion even if you are not well versed in the magical arts
 
-<img src="screen.png" alt="screen" width="720"/>
+<img src="screen.png" alt="screen" width="1080"/>
 
 ___
 ___
@@ -23,7 +23,7 @@ First of all, you're gonna make an ME subnetwork. I'm not going to explain this 
 * On the chest, place a storage bus configured to "Extract Only".
 * On the Interface, place two more storage busses. One for items, set to "Insert Only", and one for essentia.
 
-<img src="subnet.png" alt="subnet setup" width="720"/>
+<img src="subnet.png" alt="subnet setup" width="1080"/>
 
 ___
 
@@ -59,4 +59,9 @@ Then place all the other stuff:
 
 You can use an MFU to connect the Adapter wirelessly to the ME Interface that outputs the items to the altar or you can use another Adapter adjacent to it.
 
-<img src="altar.png" alt="altar setup" width="720"/>
+<img src="altar.png" alt="altar setup" width="1080"/>
+
+___
+Anyway, here's the whole thing:
+
+<img src="big-picture.png" alt="altar setup" width="1080"/>
