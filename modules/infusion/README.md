@@ -4,7 +4,7 @@ Currently, there are a few things yet to be implemented and a few other to be fi
 
 * Allows up to ONE altar per OC currently
 * Waits for the essentia to be available before starting the craft
-* Nice graphical interface shows you the progress of the ongoing infusion even if you are not well versed in the magical arts
+* Nice graphical Interface shows you the progress of the ongoing infusion even if you are not well versed in the magical arts
 
 <img src="screen.png" alt="screen" width="720"/>
 
@@ -21,7 +21,7 @@ Let's get right to it.
 First of all, you're gonna make an ME subnetwork. I'm not going to explain this here as there's plenty of material on it online:
 * Place an ME Interface with the recipes you want to autocraft pointing to a chest. 
 * On the chest, place a storage bus configured to "Extract Only".
-* On the interface, place two more storage busses. One for items, set to "Insert Only", and one for essentia.
+* On the Interface, place two more storage busses. One for items, set to "Insert Only", and one for essentia.
 
 <img src="subnet.png" alt="subnet setup" width="720"/>
 
@@ -39,21 +39,24 @@ Some OC parts:
 * An Adapter
 
 And some AE2 parts as well: 
-* An ME Toggle Bus
-* An ME Interface, of course
+* An ME Toggle Bus for controlling the flow of essentia
+* An ME Interface for outputting the items to the altar
+* Some inventory for receiving the items from the altar
+  * An ME Interface works well
 * Some sort of Infusion Provider (recommended)
-  * GTNH has the amazing Infusion Intercepter, which allows for instant essentia transfer between your drives and your matrix.
+  * GTNH has the amazing Infusion Intercepter, which allows for instant essentia transfer between your drives and your Matrix.
+  * But you could use jars if you really wanted to...
 
 Place the Thaumcraft altar as usual.
 Then place all the other stuff:
 
-* Place the Claw above the runic matrix, so that it will start the infusion on activation. 
-  On the **side** of the claw, place the Redstone I/O block. 
-  **Above** that I/O block, place the ME Toggle Bus in a way it can toggle the essentia flow to the matrix.
-* On the side of the matrix, put the adapter.
+* Place the Claw above the Runic Matrix, so that it will start the infusion on activation. 
+  On the **side** of the Claw, place the Redstone I/O block. 
+  **Above** that I/O block, place the ME Toggle Bus in a way it can toggle the essentia flow to the Matrix.
+* On the side of the Matrix, put the Adapter.
 * Put the Transposer adjacent to the altar's center pedestal
-  And the ME Interface with the desired crafts for the altar just **underneath** the Transposer.
+  And the ME Interface that receives the items from the altar just **underneath** the Transposer.
 
-You can use an MFU to connect the adapter wirelessly to the ME Interface or you can use another adapter.
+You can use an MFU to connect the Adapter wirelessly to the ME Interface that outputs the items to the altar or you can use another Adapter adjacent to it.
 
 <img src="altar.png" alt="altar setup" width="720"/>
