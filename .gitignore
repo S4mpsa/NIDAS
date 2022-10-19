@@ -1,4 +1,5 @@
 *.tar
 .vscode
-*.png
 node_modules
+*.data
+**/.DS_Store

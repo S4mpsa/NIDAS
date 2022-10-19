@@ -24,6 +24,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: tar -cvf NIDAS.tar .shrc --exclude-from=tar-exclude.txt *
+      - name: Build modules
+        id: build_modules
+        run: mkdir -p modules && cd modules && find . -maxdepth 1 -mindepth 1 -type d -exec tar -cvf {}.tar --exclude-from=../tar-exclude.txt {} \; -exec sh -c 'echo "##[set-output name=modules_list;]"$(echo modules/$@ | sed -e "s/\.\///g" | sed -e "s/\ /\.tar /g" | sed -e "s/$/\.tar/")' _ {} + && cd ..
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
@@ -33,5 +36,5 @@ jobs:
           token: ${{ secrets.RELEASE_SECRET }}
           prerelease: false
           gzip: false
-          files: NIDAS.tar
+          files: NIDAS.tar ${{ steps.build_modules.outputs.modules_list }}
           allow_override: true
