@@ -1,5 +1,5 @@
-local getRecipeToInfuse = require('modules.infusion.core.usecases.get-recipe-to-infuse')
-local makeInfuseFunction = require('modules.infusion.core.usecases.make-infuse-function')
+local getRecipeToInfuse = require('modules.infusion.core.services.get-recipe-to-infuse')
+local infuse = require('modules.infusion.core.services.infuse')
 local coreStatuses = require('modules.infusion.constants').coreStatuses
 
 local function resumeOngoingInfusions(ongoingInfusions, nOngoingInfusions)
@@ -18,9 +18,7 @@ local function resumeOngoingInfusions(ongoingInfusions, nOngoingInfusions)
     return ongoingInfusions, nOngoingInfusions
 end
 
-local infusionCoroutine = coroutine.create(function()
-    ---@type Altar
-    local altar
+local infusionAutomationCoroutine = coroutine.create(function()
     ---@type InfusionRecipe
     local recipeToInfuse
     local ongoingInfusions = {}
@@ -32,24 +30,24 @@ local infusionCoroutine = coroutine.create(function()
                 nOngoingInfusions
             )
         else
-            altar, recipeToInfuse = getRecipeToInfuse()
-            coroutine.yield((altar or {}).id, coreStatuses.no_infusions)
+            recipeToInfuse = getRecipeToInfuse()
+            coroutine.yield('', coreStatuses.no_infusions)
         end
 
-        if altar and recipeToInfuse then
-            ongoingInfusions[altar.id] = coroutine.create(
-                makeInfuseFunction(altar, recipeToInfuse)
-            )
+        if recipeToInfuse then
+            ongoingInfusions[recipeToInfuse.altar.id] = coroutine.create(function()
+                infuse(recipeToInfuse)
+            end)
             nOngoingInfusions = nOngoingInfusions + 1
 
             coroutine.yield(
-                altar.id,
+                recipeToInfuse.altar.id,
                 coreStatuses.infusion_start,
                 recipeToInfuse.pattern.outputs[1].name
             )
-            altar, recipeToInfuse = nil, nil
+            recipeToInfuse = nil
         end
     end
 end)
 
-return { 'Infusion automation', infusionCoroutine }
+return { 'Infusion automation', infusionAutomationCoroutine }
