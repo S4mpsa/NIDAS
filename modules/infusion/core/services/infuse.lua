@@ -21,7 +21,7 @@ local function readAltar(recipe)
     return essentia
 end
 
----Waits for the `recipe`'s `altar` 
+---Waits for the `recipe`'s `altar`
 ---to have at least as much essentia as the `recipe`'s `requiredEssentia`
 ---@param recipe InfusionRecipe
 local function waitForEssentia(recipe)

@@ -35,9 +35,12 @@ local infusionAutomationCoroutine = coroutine.create(function()
         end
 
         if recipeToInfuse then
-            ongoingInfusions[recipeToInfuse.altar.id] = coroutine.create(function()
-                infuse(recipeToInfuse)
-            end)
+            local recipeCopy = table.unpack({ recipeToInfuse })
+            ongoingInfusions[recipeToInfuse.altar.id] = coroutine.create(
+                function ()
+                    infuse(recipeCopy)
+                end
+            )
             nOngoingInfusions = nOngoingInfusions + 1
 
             coroutine.yield(
