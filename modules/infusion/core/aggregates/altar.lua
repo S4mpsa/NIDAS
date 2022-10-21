@@ -1,6 +1,6 @@
 local sides = require('sides')
 local Matrix = require('modules.infusion.core.entities.matrix')
-local MeInterface = require('modules.infusion.core.entities.me-interface')
+local MeInterface = require('core.tile-entities.me-interface')
 local RedstoneIO = require('core.tile-entity.redstone-io')
 local Transposer = require('core.tile-entity.transposer')
 
@@ -63,8 +63,9 @@ function Altar.new(
         essentiaProvider.activate()
     end
 
-    function self.retrieveCraftedItem(count)
-        for _ = 1, (count or 1) do
+    ---@param output PatternItem
+    function self.retrieveCraftedItem(output)
+        for _ = 1, output.count do
             transposer.transferItem()
         end
     end
@@ -100,7 +101,6 @@ function Altar.new(
         return meInterface.getItem(itemName)
     end
 
-    ---comment
     ---@return ItemStack
     function self.getPedestalItem()
         return transposer.getStackInSlot(1)
