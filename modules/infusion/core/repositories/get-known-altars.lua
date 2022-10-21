@@ -1,5 +1,5 @@
 local component = require('component')
-local Altar = require('modules.infusion.core.entities.altar')
+local Altar = require('modules.infusion.core.aggregates.altar')
 local Matrix = require('modules.infusion.core.entities.matrix')
 local MeInterface = require('modules.infusion.core.entities.me-interface')
 local RedstoneIO = require('core.tile-entity.redstone-io')
