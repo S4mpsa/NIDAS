@@ -1,9 +1,8 @@
 local TileEntity = require("core.tile-entity")
 local Inventory = require("core.tile-entity.inventory")
 
----@class Transposer: Inventory
----@field name string
----@field size number
+
+---@type Transposer
 local Transposer = { entityType = 'transposer' }
 
 ---Creates a new Inventory object
@@ -12,7 +11,7 @@ local Transposer = { entityType = 'transposer' }
 ---@param transposerSide number index 0
 ---@return Transposer
 function Transposer.new(address, location, transposerSide)
-    ---@type Transposer
+    ---@class Transposer: Inventory
     local self = Inventory.new(address, location, transposerSide, Transposer.entityType)
     return self
 end

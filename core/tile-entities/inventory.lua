@@ -11,9 +11,7 @@ local relativeSidePositions = {
     [sides.east] = 'east of',
 }
 
----@class Inventory: TileEntity
----@field name string
----@field size number
+---@type Inventory
 local Inventory = { entityType = 'inventory_controller' }
 
 ---Creates a new Inventory object
@@ -22,7 +20,9 @@ local Inventory = { entityType = 'inventory_controller' }
 ---@param controllerSide number index 0
 ---@return Inventory
 function Inventory.new(address, location, controllerSide, overridingEntityType)
-    ---@type Inventory
+    ---@class Inventory: TileEntity
+    ---@field name string
+    ---@field size number
     local self = TileEntity.bind(address, location, overridingEntityType or Inventory.entityType)
 
     local proxy = component.proxy(address)
