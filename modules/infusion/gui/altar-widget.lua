@@ -134,10 +134,10 @@ local function essentiaBar(essentiaName, essentiaProgress)
     return component
 end
 
----@param message any
----@param requiredEssentiaList Essentia[]
----@param essentiaList Essentia[]
----@param inactive boolean
+---@param message string
+---@param requiredEssentiaList? Essentia[]
+---@param essentiaList? Essentia[]
+---@param inactive? boolean
 ---@return Component
 local function altarWidget(
     message,

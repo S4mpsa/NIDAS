@@ -1,3 +1,5 @@
+---@meta
+
 ---@class Coordinates
 ---@field x number
 ---@field y number
@@ -8,11 +10,11 @@
 ---@field absoluteSize Coordinates
 ---@field pos Coordinates
 ---@field size Coordinates
----@field callBack fun()
----@field onClick fun(pos: Coordinates, size: Coordinates)
----@field onDrag fun(pos: Coordinates, size: Coordinates)
----@field onRender fun(pos: Coordinates, size: Coordinates)
----@field onScroll fun(pos: Coordinates, size: Coordinates)
+---@field callBack fun(...)
+---@field onClick fun(pos: Coordinates, size: Coordinates, ...)
+---@field onDrag fun(pos: Coordinates, size: Coordinates, ...)
+---@field onRender fun(pos: Coordinates, size: Coordinates, ...)
+---@field onScroll fun(pos: Coordinates, size: Coordinates, ...)
 ---@field visible boolean
 ---@field children Component[]
 ---@field parent Component

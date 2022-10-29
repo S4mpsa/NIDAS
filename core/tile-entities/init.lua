@@ -1,9 +1,7 @@
 local component = require("component")
 local event = require("event")
 
----@class TileEntity
----@field address string
----@field location Coordinates
+---@type TileEntity
 local TileEntity = {}
 
 local knownEntities = {}
@@ -42,7 +40,8 @@ function TileEntity.bind(address, location, entityType)
         " .. 'Expected "' .. entityType .. '" and got "' .. component.type(address) .. '".')
     end
 
-    ---@type TileEntity
+    ---@class TileEntity
+    ---@field entityType string
     local self = {}
     self.address = address
     self.location = location

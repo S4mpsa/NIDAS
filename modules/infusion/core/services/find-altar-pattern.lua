@@ -1,6 +1,6 @@
 ---Returns an `altar`'s pattern if there are enough items to craft it
 ---@param altar Altar
----@return Pattern
+---@return Pattern | nil
 local function findAltarPattern(altar)
     local patterns = altar.getPatterns()
     for _, pattern in ipairs(patterns) do
@@ -21,6 +21,7 @@ local function findAltarPattern(altar)
             return pattern
         end
     end
+    return nil
 end
 
 return findAltarPattern

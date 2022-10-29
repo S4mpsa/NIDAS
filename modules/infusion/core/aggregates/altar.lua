@@ -4,7 +4,7 @@ local MeInterface = require('core.tile-entities.me-interface')
 local RedstoneIO = require('core.tile-entity.redstone-io')
 local Transposer = require('core.tile-entity.transposer')
 
----@class Altar
+---@type Altar
 local Altar = {}
 
 ---Creates a new Altar object
@@ -23,7 +23,7 @@ function Altar.new(
     transposerAddress,
     location
 )
-    ---@type Altar
+    ---@class Altar
     local self = {}
     self.id = matrixAddress
 

@@ -3,7 +3,7 @@ local TileEntity = require("core.tile-entity")
 
 local ON = 15
 
----@class RedstoneIO: TileEntity
+---@type RedstoneIO
 local RedstoneIO = { entityType = 'redstone' }
 
 ---Creates a new RedstoneIO object
@@ -11,7 +11,7 @@ local RedstoneIO = { entityType = 'redstone' }
 ---@param location Coordinates
 ---@return RedstoneIO
 function RedstoneIO.new(address, location, connectedSides, disconnectedSides)
-    ---@type RedstoneIO
+    ---@class RedstoneIO: TileEntity
     local self = TileEntity.bind(address, location)
 
     local sidesEnable = {}

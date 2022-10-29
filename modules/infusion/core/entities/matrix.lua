@@ -2,7 +2,7 @@ local component = require('component')
 local TileEntity = require('core.tile-entity')
 local Essentia = require('modules.infusion.core.dtos.essentia')
 
----@class Matrix: TileEntity
+---@type Matrix
 local Matrix = { entityType = 'blockstonedevice_2' }
 
 ---Creates a new Matrix object
@@ -10,7 +10,7 @@ local Matrix = { entityType = 'blockstonedevice_2' }
 ---@param location Coordinates
 ---@return Matrix
 function Matrix.new(address, location)
-    ---@type Matrix
+    ---@class Matrix: TileEntity
     local self = TileEntity.bind(address, location)
 
     local proxy = component.proxy(address)

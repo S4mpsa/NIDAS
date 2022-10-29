@@ -2,7 +2,7 @@ local component = require('component')
 local TileEntity = require('core.tile-entity')
 local Essentia = require('modules.infusion.core.dtos.essentia')
 
----@class MeInterface: TileEntity
+---@type MeInterface
 local MeInterface = { entityType = 'me_interface' }
 
 ---Creates a new MeInterface object
@@ -10,7 +10,7 @@ local MeInterface = { entityType = 'me_interface' }
 ---@param location Coordinates
 ---@return MeInterface
 function MeInterface.new(address, location)
-    ---@type MeInterface
+    ---@class MeInterface: TileEntity
     local self = TileEntity.bind(address, location)
 
     local proxy = component.proxy(address)
