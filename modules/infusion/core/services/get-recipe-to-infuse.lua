@@ -3,13 +3,12 @@ local getKnownAltars = require('modules.infusion.core.repositories.get-known-alt
 local findAltarPattern = require('modules.infusion.core.services.find-altar-pattern')
 
 ---Returns an eligible recipe to be infused
----@return InfusionRecipe recipe
+---@return InfusionRecipe | nil recipe
 local function getRecipeToInfuse()
     ---@type Altar
     for _, altar in ipairs(getKnownAltars()) do
-        ---@type Pattern
+        ---@type Pattern | false | nil
         local pattern = not altar.getPedestalItem() and findAltarPattern(altar)
-
         if pattern
             and pattern.outputs
             and pattern.outputs[1]
@@ -25,6 +24,7 @@ local function getRecipeToInfuse()
             }
         end
     end
+    return nil
 end
 
 return getRecipeToInfuse

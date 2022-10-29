@@ -19,7 +19,7 @@ local function resumeOngoingInfusions(ongoingInfusions, nOngoingInfusions)
 end
 
 local infusionAutomationCoroutine = coroutine.create(function()
-    ---@type InfusionRecipe
+    ---@type InfusionRecipe | nil
     local recipeToInfuse
     local ongoingInfusions = {}
     local nOngoingInfusions = 0
