@@ -76,7 +76,7 @@ There are many things that can be configured.
     * Each T3 Component bus gives the server 16 more components, with a maximum of around 50 free slots after the required hardware.
     * Aim for the highest tier available.
 * HardDisk
-    * NIDAS itself uses around 300Kb, so even a T1 Disk should work. We suggest using a T3 disk, however.
+    * NIDAS itself uses a bit over 300Kb, so it will fit on a T2 disk. We suggest using a T3 disk, however.
 * Tier 3 graphics card and screen
     * The configuration menu is very cramped and looks washed out with a T2 screen and GPU.
 
