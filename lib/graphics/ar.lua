@@ -50,11 +50,13 @@ function arGraphics.rectangle(glasses, v1, width, heigth, color, alpha)
     return rect
 end
 
-function arGraphics.text(glasses, string, v1, color, scale)
+function arGraphics.text(glasses, string, v1, color, scale, alpha)
     scale = scale or 1
     color = color or 0xFFFFFF
+    alpha = alpha or 1
     local text = glasses.addTextLabel()
     text.setText(string)
+    text.setAlpha(alpha)
     text.setPosition(v1[1], v1[2])
     text.setColor(RGB(color))
     if legacyScaling then

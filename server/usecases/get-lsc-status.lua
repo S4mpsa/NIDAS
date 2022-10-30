@@ -49,8 +49,11 @@ local function exec(address, name, location)
         storedEU = parser.getInteger(sensorInformation[2]),
         EUCapacity = parser.getInteger(sensorInformation[3]),
         problems = problems,
-        passiveLoss = parser.getInteger(sensorInformation[4]),
-        location = location
+        passiveLoss = parser.getInteger(sensorInformation[4] or 0),
+        location = location,
+        EUIn = parser.getInteger(sensorInformation[5] or 0),
+        EUOut = parser.getInteger(sensorInformation[6] or 0),
+        wirelessEU = parser.getInteger(sensorInformation[12] or 0)
     }
     return status
 end

@@ -5,6 +5,7 @@ package.loaded.powerdisplay = nil
 local powerDisplay = require("hud.powerdisplay")
 local toolbar = require("hud.toolbar")
 local notifications = require("hud.notifications")
+local fluidDisplay = require("hud.fluiddisplay")
 local component = require("component")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
@@ -12,8 +13,12 @@ local colors = require("lib.graphics.colors")
 
 local glassData = {}
 local powerDisplayUsers = {}
+local fluidDisplayUsers = {}
 local toolbarUsers = {}
 local notificationsUsers = {}
+local fluidMaximums = {}
+local fluidData = {}
+fluidConfiguration = {}
 local function load()
     local file = io.open("/home/NIDAS/settings/hudConfig", "r")
     if file ~= nil then
@@ -22,36 +27,66 @@ local function load()
     end
     if glassData == nil then glassData = {} end
     for address, data in pairs(glassData) do
-        ar.clear(component.proxy(address))
-        if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
-        if data.notifications then table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+        local glasses = component.proxy(address)
+        if glasses then
+            ar.clear(glasses)
+            if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+            if data.fluidDisplay then table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+            if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+            if data.notifications then table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+        end
     end
-    
+    file = io.open("/home/NIDAS/settings/fluidData", "r")
+    if file ~= nil then
+        fluidMaximums = serialization.unserialize(file:read("*a"))
+        for k, v in pairs(fluidMaximums) do
+            fluidData[k] = {max=v.max, amount=0, name=v.name, id=k}
+        end
+        file:close()
+    end
+    file = io.open("/home/NIDAS/settings/userFluids", "r")
+    if file ~= nil then
+        fluidConfiguration = serialization.unserialize(file:read("*a"))
+        file:close()
+    end
 end
 local function save()
     local file = io.open("/home/NIDAS/settings/hudConfig", "w")
     file:write(serialization.serialize(glassData))
     file:close()
+    local file = io.open("/home/NIDAS/settings/fluidData", "w")
+    file:write(serialization.serialize(fluidMaximums))
+    file:close()
     powerDisplayUsers = {}
     toolbarUsers = {}
     notificationsUsers = {}
+    fluidDisplayUsers = {}
+
     for address, data in pairs(glassData) do
         if data.energyDisplay then
             table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
             powerDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+            powerDisplay.remove(address)
+        end
+        if data.fluidDisplay then
+            table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+            fluidDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+            fluidDisplay.remove(address)
         end
         if data.toolbar then
             table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
             toolbar.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+            toolbar.remove(address)
         end
         if data.notifications then
             table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
-            notifications.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+            --notifications.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
         end
     end
     package.loaded.powerdisplay = nil
     powerDisplay = require("hud.powerdisplay")
+    package.loaded.fluiddisplay = nil
+    fluidDisplay = require("hud.fluiddisplay")
 end
 
 local hud = {}
@@ -101,6 +136,7 @@ function hud.configure(x, y, gui, graphics, renderer, page)
             {name = "  Energy Display", attribute = "energyDisplay",    type = "boolean",   defaultValue = true},
             {name = "  Toolbar Overlay",attribute = "toolbar",          type = "boolean",   defaultValue = true},
             {name = "  Notifications",  attribute = "notifications",    type = "boolean",   defaultValue = true},
+            {name = "  Fluid Display",  attribute = "fluidDisplay",     type = "boolean",   defaultValue = true},
         }
         gui.multiAttributeList(x+3, y+3, page, currentConfigWindow, attributeChangeList, glassData, selectedGlasses)
     end
@@ -109,12 +145,95 @@ function hud.configure(x, y, gui, graphics, renderer, page)
     return currentConfigWindow
 end
 refresh = hud.configure
+
+local hysteresis = 0.02
+local function getMax(fluidAmount)
+    local power = 0
+    local max = 1000
+    if fluidAmount < 1000000 then
+        while (max * 2^power) < fluidAmount * (1 - hysteresis) do
+            power = power + 1
+        end
+    else
+        max = 1000000
+        while (max * 2^power) < fluidAmount * (1 - hysteresis) do
+            power = power + 1
+        end
+    end
+    return max * 2 ^ power
+end
+
+local function saveFluidData()
+    local file = io.open("/home/NIDAS/settings/fluidData", "w")
+    file:write(serialization.serialize(fluidMaximums))
+    file:close()
+end
+
+local function updateFluidData()
+    local doSave = false
+    local I = 0
+    for _, _ in pairs(component.list"me_interface") do I = I + 1 end
+    if I > 0 then
+        local fluids = component.me_interface.getFluidsInNetwork()
+        local iter = 0
+        for _, f in pairs(fluids) do
+            if type(f) == "table" then 
+                local amount = f.amount
+                local name = f.label
+                local id = f.name
+                local data = fluidMaximums[id]
+                local maximum = 0
+                if not data then
+                    maxium = getMax(amount)
+                    fluidMaximums[id] = {max=maxium, name=name}
+                    doSave = true
+                else
+                    maximum = data.max
+                    if data.max < amount then
+                        maxium = getMax(amount)
+                        fluidMaximums[id] = {max=maxium, name=name}
+                        doSave = true
+                    end
+                end
+                fluidData[id] = {amount=amount, name=name, max=maximum, id=id}
+            end
+            iter = iter + 1
+            if iter == 20 then
+                os.sleep()
+            end
+        end
+        if doSave then
+            saveFluidData()
+        end
+    end
+end
+
+function hud.updateFluidSettings()
+    file = io.open("/home/NIDAS/settings/userFluids", "r")
+    if file ~= nil then
+        fluidConfiguration = serialization.unserialize(file:read("*a"))
+        file:close()
+    end
+    for address, data in pairs(glassData) do
+        fluidDisplay.remove(address)
+        table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+        fluidDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
+    end
+end
+
+local loop = 20
 function hud.update(serverInfo)
     if serverInfo then
         powerDisplay.widget(powerDisplayUsers, serverInfo.power)
         toolbar.widget(toolbarUsers)
         notifications.widget(notificationsUsers)
+        if loop == 20 then
+            updateFluidData()
+            fluidDisplay.widget(fluidDisplayUsers, fluidData, fluidConfiguration)
+            loop = 0
+        end
     end
+    loop = loop + 1
 end
 load()
 return hud

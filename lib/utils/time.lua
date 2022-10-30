@@ -1,3 +1,5 @@
+local filesystem = require("filesystem")
+
 local time = {}
 
 local function split(string, separator)
@@ -9,22 +11,27 @@ local function split(string, separator)
     return t
 end
 
-function time.offset(offset, timeJSON)
-    offset = offset or 0
-    local data = timeJSON
-    if #data < 3 then return "-" end
-    data = split(data, ",")[2]
-    data = split(data, "-")[3]
-    data = data:sub(data:find("T") + 1, data:find("Z") - 1)
-    local hours = data:sub(1, 2)
-    local minutes = data:sub(4, 5)
-    if math.floor(minutes) <= 9 then
-        minutes = "0" .. math.floor(minutes)
+function time.realtime()
+    local filename = "/home/NIDAS/settings/timefile"
+    local file = filesystem.open("/home/NIDAS/settings/timefile", "a") -- touch file
+    if file then
+        file:close()
+        local timestamp = filesystem.lastModified(filename) / 1000
+        filesystem.remove(filename)
+        return timestamp
     else
-        minutes = math.floor(minutes)
+        return 0
     end
-    if offset ~= 0 then hours = (hours + offset) % 24 end
-    return math.floor(hours) .. ":" .. minutes
+end
+
+function time.offset(offset, UNIXTime)
+    offset = offset or 0
+    local offsetTime = UNIXTime + (3600 * offset)
+    local timetable = os.date("*t", offsetTime)
+    if timetable.min < 10 then
+        timetable.min = "0"..timetable.min
+    end
+    return timetable.hour .. ":" .. timetable.min
 end
 
 -- Returns a given number in seconds formatted as Hours Minutes Seconds
