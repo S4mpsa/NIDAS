@@ -1,4 +1,6 @@
-local windowBorder = require('core.lib.graphics.atoms.window-border')
+local horizontalSeparator = require('core.lib.graphics.atoms.horizontal-separator')
+local verticalSeparator = require('core.lib.graphics.atoms.vertical-separator')
+local textBox = require('core.lib.graphics.atoms.text-box')
 local altarWidget = require('modules.infusion.gui.altar-widget')
 local coreStatuses = require('modules.infusion.constants').coreStatuses
 
@@ -8,15 +10,30 @@ local altarWidgets = {}
 
 local label = {
     id = 'dashboard-border',
+    pos = { x = 1 },
+    size = { x = -2 },
     onRender = function(pos, size)
-        windowBorder(pos, size, 'Infusion automation')
+        horizontalSeparator(pos, size, 'Infusion automation')
     end
+}
+
+local separator = {
+    id = 'separator',
+    pos = { y = 1 },
+    size = { y = -2 },
+    onRender = verticalSeparator,
+}
+
+local footer = {
+    id = 'footer',
+    pos = { y = -2 },
+    onRender = horizontalSeparator,
 }
 
 local function newPosition(widget, index)
     return {
         x = widget.size.x * ((index - 1) % 2) + 2,
-        y = widget.size.y * (math.ceil(index / 2) - 1) + 4
+        y = widget.size.y * (math.ceil(index / 2) - 1)
     }
 end
 
@@ -83,11 +100,20 @@ local function altarDashboard(
     ---@type Component
     local component = {
         id = 'altar-dashboard',
-        pos = { x = 40, y = 1 },
-        size = { x = 120, y = 50 },
+        pos = { x = 0, y = 2 },
+        size = { x = 160, y = 49 },
         children = {
             label,
-            table.unpack(altarWidgets)
+            {
+                id = 'widgets',
+                pos = { x = 41, y = 2 },
+                size = { y = -4 },
+                children = {
+                    separator,
+                    table.unpack(altarWidgets),
+                },
+            },
+            footer
         }
     }
 
