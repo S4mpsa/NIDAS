@@ -1,8 +1,8 @@
 local sides = require('sides')
 local Matrix = require('modules.infusion.core.entities.matrix')
 local MeInterface = require('core.tile-entities.me-interface')
-local RedstoneIO = require('core.tile-entity.redstone-io')
-local Transposer = require('core.tile-entity.transposer')
+local RedstoneIO = require('core.tile-entities.redstone-io')
+local Transposer = require('core.tile-entities.transposer')
 
 ---@type Altar
 local Altar = {}
@@ -26,24 +26,31 @@ function Altar.new(
     ---@class Altar
     local self = {}
     self.id = matrixAddress
+    ---@type InfusionRecipe | nil
+    self.currentRecipe = nil
 
+    ---@type RedstoneIO
     local claw = RedstoneIO.new(
         clawAddress,
         location,
         nil,
         { sides.bottom, sides.top }
     )
+    ---@type RedstoneIO
     local essentiaProvider = RedstoneIO.new(
         essentiaProviderAddress,
         location,
         { sides.top }
     )
+    ---@type Matrix
     local matrix = Matrix.new(matrixAddress, location)
+    ---@type MeInterface
     local meInterface = MeInterface.new(meInterfaceAddress, location)
+    ---@type Transposer
     local transposer = Transposer.new(transposerAddress, location)
 
     ---Gets the essentia a matrix still requires for the ongoing infusion
-    ---@return Essentia[]
+    ---@return Essentia[] | nil
     function self.readMatrix()
         return matrix.read()
     end
@@ -63,9 +70,9 @@ function Altar.new(
         essentiaProvider.activate()
     end
 
-    ---@param output PatternItem
-    function self.retrieveCraftedItem(output)
-        for _ = 1, output.count do
+    function self.retrieveCraftedItem()
+        local output = self.getPedestalItem() or { size = 0 }
+        for _ = 1, output.size do
             transposer.transferItem()
         end
     end
@@ -101,7 +108,7 @@ function Altar.new(
         return meInterface.getItem(itemName)
     end
 
-    ---@return ItemStack
+    ---@return ItemStack | nil
     function self.getPedestalItem()
         return transposer.getStackInSlot(1)
     end
