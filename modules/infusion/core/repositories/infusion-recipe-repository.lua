@@ -4,12 +4,14 @@ local Essentia = require('modules.infusion.core.dtos.essentia')
 
 local dataDir = '/home/NIDAS/data/'
 filesystem.makeDirectory(dataDir)
+local filePath = dataDir .. 'required-essentia.data'
+
+local InfusionRecipeRepository = {}
 
 ---Gets the persisted required essentia for a given pattern
 ---@param pattern Pattern
 ---@return Essentia[]
-local function getRequiredEssentia(pattern)
-    local filePath = dataDir .. 'required-essentia.data'
+function InfusionRecipeRepository.findByPattern(pattern)
     local file
     if filesystem.exists(filePath) then
         file = io.open(filePath, 'r')
@@ -22,24 +24,22 @@ local function getRequiredEssentia(pattern)
     ) or {}
     file:close()
 
+    ---@diagnostic disable-next-line: return-type-mismatch
     return Essentia.new(knownRequiredEssentia[pattern.outputs[1].name])
 end
 
 ---Persists the required essentia for a given pattern
----@param pattern Pattern
----@param essentia Essentia
-local function storeRequiredEssentia(pattern, essentia)
-    local file = io.open(dataDir .. 'required-essentia.data', 'w')
+---@param recipe InfusionRecipe
+function InfusionRecipeRepository.upsert(recipe)
+    local file = io.open(filePath, 'w')
     local knownRequiredEssentia = serialization.unserialize(
         file:read('*a') or '{}'
     ) or {}
-    knownRequiredEssentia[pattern.outputs[1].name] = essentia
+    knownRequiredEssentia[recipe.pattern.outputs[1].name]
+        = recipe.requiredEssentia
 
     file:write(serialization.serialize(knownRequiredEssentia))
     file:close()
 end
 
-return {
-    getRequiredEssentia = getRequiredEssentia,
-    storeRequiredEssentia = storeRequiredEssentia,
-}
+return InfusionRecipeRepository
