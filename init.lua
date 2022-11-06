@@ -1,20 +1,46 @@
--- Adds NIDAS library folders to default package path
-package.path = package.path .. ";/home/NIDAS/?.lua;/home/NIDAS/lib/?.lua"
 local event = require('event')
 local computer = require('computer')
-
-event.listen('interrupted', function ()
+event.listen('interrupted', function()
     computer.shutdown(true)
 end)
 
--- local modules = { require("modules.infusion.init") }
--- while true do
---     for name, coro in pairs(modules) do
---         local status, result = coroutine.resume(coro)
---         if not status then
---             print("Error on module " .. name .. ": " .. result)
---         end
---     end
--- end
+local shell = require('shell')
+shell.execute('clear')
 
-require('modules.infusion.init')
+local component = require('component')
+if component.redstone then
+    component.redstone.setWakeThreshold(1)
+end
+
+local gui = require('gui')
+local guiCoroutine = coroutine.create(gui)
+
+local infusionModule = require('modules.infusion')
+local activeModules = { infusionModule }
+
+local modules = {}
+for i, activeModule in pairs(activeModules) do
+    modules[i] = {
+        name = activeModule.name,
+        coreCoroutine = coroutine.create(activeModule.core),
+        gui = activeModule.gui,
+        guiReturnValue = {}
+    }
+end
+
+while true do
+    for _, module in ipairs(modules) do
+        local coreReturn = { coroutine.resume(
+            module.coreCoroutine,
+            table.unpack(module.guiReturnValue)
+        ), }
+        table.remove(coreReturn, 1)
+        module.guiReturnValue = { coroutine.resume(
+            guiCoroutine,
+            module.name,
+            module.gui(table.unpack(coreReturn))
+        ) }
+    end
+    ---@diagnostic disable-next-line: undefined-field
+    os.sleep(0)
+end
