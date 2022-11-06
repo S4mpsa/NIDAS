@@ -1,8 +1,9 @@
 ---@meta
 
 ---@class ItemStack
----@field maxStackSize number
 ---@field label string
+---@field maxStackSize number
+---@field size number
 
 ---@class Coordinates
 ---@field x number

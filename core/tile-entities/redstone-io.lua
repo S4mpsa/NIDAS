@@ -1,5 +1,5 @@
 local component = require("component")
-local TileEntity = require("core.tile-entity")
+local TileEntity = require("core.tile-entities.tile-entity")
 
 local ON = 15
 
