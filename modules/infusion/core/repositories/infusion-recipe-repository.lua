@@ -6,12 +6,12 @@ local dataDir = '/home/NIDAS/data/'
 filesystem.makeDirectory(dataDir)
 local filePath = dataDir .. 'required-essentia.data'
 
-local InfusionRecipeRepository = {}
+local RecipeRepository = {}
 
 ---Gets the persisted required essentia for a given pattern
 ---@param pattern Pattern
 ---@return Essentia[]
-function InfusionRecipeRepository.findByPattern(pattern)
+function RecipeRepository.findByPattern(pattern)
     local file
     if filesystem.exists(filePath) then
         file = io.open(filePath, 'r')
@@ -30,7 +30,7 @@ end
 
 ---Persists the required essentia for a given pattern
 ---@param recipe InfusionRecipe
-function InfusionRecipeRepository.upsert(recipe)
+function RecipeRepository.upsert(recipe)
     local file = io.open(filePath, 'w')
     local knownRequiredEssentia = serialization.unserialize(
         file:read('*a') or '{}'
@@ -42,4 +42,4 @@ function InfusionRecipeRepository.upsert(recipe)
     file:close()
 end
 
-return InfusionRecipeRepository
+return RecipeRepository
