@@ -4,7 +4,7 @@ local resumeInfusion = require('modules.infusion.core.usecases.resume-infusion')
 local startInfusion = require('modules.infusion.core.usecases.start-infusion')
 local coreStatuses = require('modules.infusion.constants').coreStatuses
 
-local infusionAutomationCoroutine = coroutine.create(function()
+local infusionAutomation = function()
     while true do
         for _, altar in ipairs(AltarRepository.getAll()) do
             local recipe = getRecipeToInfuse(altar)
@@ -23,6 +23,6 @@ local infusionAutomationCoroutine = coroutine.create(function()
             end
         end
     end
-end)
+end
 
-return { 'Infusion automation', infusionAutomationCoroutine }
+return infusionAutomation
