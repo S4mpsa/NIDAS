@@ -8,7 +8,7 @@ local altarWidgets = {}
 
 local label = {
     id = 'dashboard-border',
-    onRender = function (pos, size)
+    onRender = function(pos, size)
         windowBorder(pos, size, 'Infusion automation')
     end
 }
@@ -27,9 +27,9 @@ end
 
 ---@param altarId string
 ---@param status AltarStatus
----@param itemName string
----@param requiredEssentiaList Essentia[]
----@param essentiaList Essentia[]
+---@param itemName? string
+---@param requiredEssentiaList? Essentia[]
+---@param essentiaList? Essentia[]
 ---@return Component
 local function altarDashboard(
     altarId,
@@ -38,19 +38,23 @@ local function altarDashboard(
     requiredEssentiaList,
     essentiaList
 )
-    local active = false
-    local message
+    local inactive = false
+    local message = ''
     if status == coreStatuses.no_infusions or status == 'dead' then
-        message = 'Altar ' .. string.sub(altarId or '', 1, 4) .. ' is idle'
-        active = true
+        message = 'Altar ' .. string.sub(altarId, 1, 4) .. ' is idle'
+        inactive = true
     elseif status == coreStatuses.infusion_start then
-        message = 'Placing items for "' .. itemName .. '" on the pedestals'
+        message = (itemName and itemName ~= '')
+            and 'Placing items for "' .. itemName .. '" on the pedestals'
+            or 'Placing items on the pedestals'
     elseif status == coreStatuses.waiting_on_matrix then
         message = 'Waiting for matrix activation'
     elseif status == coreStatuses.missing_essentia then
         message = 'Missing essentia to infuse "' .. itemName .. '"'
-    elseif status == coreStatuses.waiting_on_essentia then
-        message = 'Infusing "' .. itemName .. '"'
+    elseif status == coreStatuses.waiting_on_infusion then
+        message = (itemName and itemName ~= '')
+            and 'Infusing "' .. itemName .. '"'
+            or 'Infusing'
     end
 
     local altarIndex = altarIndexes[altarId]
@@ -68,7 +72,7 @@ local function altarDashboard(
             message,
             requiredEssentiaList,
             essentiaList,
-            active
+            inactive
         )
         altarWidgets[altarIndex].pos = newPosition(
             altarWidgets[altarIndex],

@@ -39,11 +39,11 @@ end
 
 local mt = { __sub = subtraction, __tostring = toString }
 
----@param aspects table
----@return Essentia[]
+---@param aspects table?
+---@return Essentia[] | nil
 function Essentia.new(aspects)
     if type(aspects) ~= 'table' then
-        aspects = {}
+        return nil
     end
     local newAspects = {}
     for i, aspect in ipairs(aspects) do
