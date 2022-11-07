@@ -1,4 +1,3 @@
-
 local event = require('event')
 event.onError = print
 
@@ -8,19 +7,18 @@ local clamp = require('core.lib.numUtils').clamp
 
 local windowBorder = require('core.lib.graphics.atoms.window-border')
 local textBox = require('core.lib.graphics.atoms.text-box')
-local separator = require('core.lib.graphics.atoms.separator')
+local separator = require('core.lib.graphics.atoms.horizontal-separator')
 
-local gui = {}
-
+--[[☰]]
 --------------------------------- Components -----------------------------------
 
 local wheelPos = { y = 0 }
----@type Coordinates
+---@type Coordinate2D
 local resolution = {}
 resolution.x, resolution.y = gpu.getResolution()
 
 local function getMaxYPos(numberOfPackages)
-    return math.min(7 * (numberOfPackages + 1), (resolution.y + 7) / 2 ) + 7
+    return math.min(7 * (numberOfPackages + 1), (resolution.y + 7) / 2) + 7
 end
 
 ---@param packages Package[]
@@ -28,9 +26,10 @@ end
 local function scrollBarComponent(packages, callBack)
     local maxYPos = getMaxYPos(#packages)
     local previousClickPosition = { y = wheelPos.y }
-    local function onClick(clickPosition,  _, _, _)
+    local function onClick(clickPosition, _, _, _)
         previousClickPosition = clickPosition
     end
+
     local function onDrag(dragPosition, _, reRender, onDragCallBack)
         onDragCallBack(
             (previousClickPosition.y - dragPosition.y) / getMaxYPos(#packages),
@@ -60,7 +59,7 @@ local function scrollBarComponent(packages, callBack)
             }
         }
     }
-    return  scrollBar
+    return scrollBar
 end
 
 ---@param packages Package[]
@@ -70,6 +69,7 @@ local function modulesComponent(packages, callBack)
     local function onClick(clickPosition, _, _, _)
         previousClickPosition = clickPosition
     end
+
     local function onDrag(dragPosition, _, reRender, onDragCallBack)
         onDragCallBack(
             (dragPosition.y - previousClickPosition.y) / getMaxYPos(#packages),
@@ -103,7 +103,7 @@ local function modulesComponent(packages, callBack)
             children = {
                 {
                     id = 'border',
-                    onRender = function (pos, size)
+                    onRender = function(pos, size)
                         windowBorder(
                             pos,
                             size,
@@ -114,27 +114,27 @@ local function modulesComponent(packages, callBack)
                 {
                     id = 'author',
                     pos = { x = 5, y = 2 },
-                    onRender = function (pos, size)
+                    onRender = function(pos, size)
                         textBox(pos, size, 'By ' .. package.author)
                     end,
                 },
                 {
                     id = 'file-size',
-                    pos = { x = -#sizeInKB - 3, y = 2 },
-                    onRender = function (pos, size)
+                    pos = { x = - #sizeInKB - 3, y = 2 },
+                    onRender = function(pos, size)
                         textBox(pos, size, sizeInKB)
                     end,
                     children = {
                         {
                             id = 'select-icon',
                             pos = { x = -2 },
-                            onRender = function (pos)
+                            onRender = function(pos)
                                 local selectIcon = package.selected
                                     and '➖'
                                     or '➕'
                                 gpu.set(pos.x, pos.y, selectIcon)
                             end,
-                            onClick = function (_, _, _, _)
+                            onClick = function(_, _, _, _)
                                 package.selected = not package.selected
                             end
                         }
@@ -142,16 +142,16 @@ local function modulesComponent(packages, callBack)
                 },
                 {
                     id = 'publication-date',
-                    pos = { x = -#publishDate - 1, y = 4 },
-                    onRender = function (pos, size)
+                    pos = { x = - #publishDate - 1, y = 4 },
+                    onRender = function(pos, size)
                         textBox(pos, size, publishDate)
                     end,
                 },
                 {
                     id = 'description',
                     pos = { x = 5, y = 4 },
-                    size = { x = -#publishDate - 5 },
-                    onRender = function (pos, size)
+                    size = { x = - #publishDate - 5 },
+                    onRender = function(pos, size)
                         textBox(pos, size, package.description)
                     end,
                 },
@@ -172,14 +172,14 @@ local function welcomeBoxComponent(packages, download, install)
         id = 'welcome',
         pos = { x = 5, y = 3 },
         size = { x = -4 },
-        onRender = function (pos, size)
+        onRender = function(pos, size)
             textBox(
                 pos,
                 size,
                 'Welcome to NIDAS\'s package manager, The Hand!'
             )
             textBox(
-                { x = pos.x, y = pos.y + 2},
+                { x = pos.x, y = pos.y + 2 },
                 size,
                 'Here\'s a list of curated packages. Enjoy :)'
             )
@@ -193,9 +193,9 @@ local function welcomeBoxComponent(packages, download, install)
             },
             {
                 id = 'download',
-                pos = { x = -#downloadText - 8 },
-                size = {x = #downloadText + 2,  y = 1 },
-                onRender = function (pos, size)
+                pos = { x = - #downloadText - 8 },
+                size = { x = #downloadText + 2, y = 1 },
+                onRender = function(pos, size)
                     textBox(
                         pos,
                         size,
@@ -207,10 +207,10 @@ local function welcomeBoxComponent(packages, download, install)
                     {
                         id = 'download-icon',
                         pos = { x = -1 },
-                        onRender = function (pos)
+                        onRender = function(pos)
                             gpu.set(pos.x, pos.y, downloadIcon)
                         end,
-                        onClick = function (_, _, reRender, _)
+                        onClick = function(_, _, reRender, _)
                             if downloadIcon ~= '⋯' then
                                 downloadIcon = '⋯'
                                 reRender()
@@ -227,9 +227,9 @@ local function welcomeBoxComponent(packages, download, install)
             },
             {
                 id = 'install',
-                pos = { x = -#installText - 8,  y = 2 },
-                size = {x = #installText + 2,  y = 1 },
-                onRender = function (pos, size)
+                pos = { x = - #installText - 8, y = 2 },
+                size = { x = #installText + 2, y = 1 },
+                onRender = function(pos, size)
                     textBox(
                         pos,
                         size,
@@ -241,10 +241,10 @@ local function welcomeBoxComponent(packages, download, install)
                     {
                         id = 'install-icon',
                         pos = { x = -1 },
-                        onRender = function (pos)
+                        onRender = function(pos)
                             gpu.set(pos.x, pos.y, installIcon)
                         end,
-                        onClick = function (_, _, reRender, _)
+                        onClick = function(_, _, reRender, _)
                             if installIcon ~= '⋯' then
                                 installIcon = '⋯'
                                 reRender()
@@ -263,9 +263,11 @@ local function welcomeBoxComponent(packages, download, install)
     }
 end
 
+---@param packages Package[]
+---@param download function
+---@param install function
 ---@return Component
-function gui.rootComponent(packages, download, install)
-
+local function handGui(packages, download, install)
     local modules = {}
     local maxYPos = getMaxYPos(#packages)
     local function onScroll(_, direction, reRender)
@@ -291,7 +293,7 @@ function gui.rootComponent(packages, download, install)
         id = 'root',
         pos = { x = 0, y = 1 },
         size = resolution,
-        onRender = function (pos, size)
+        onRender = function(pos, size)
             windowBorder(pos, size, 'Package list')
         end,
         onScroll = onScroll,
@@ -303,4 +305,4 @@ function gui.rootComponent(packages, download, install)
     }
 end
 
-return gui
+return handGui
