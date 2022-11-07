@@ -13,7 +13,7 @@ local Altar = {}
 ---@param matrixAddress string
 ---@param meInterfaceAddress string
 ---@param transposerAddress string
----@param location Coordinate3D
+---@param location? Coordinate3D
 ---@return Altar
 function Altar.new(
     clawAddress,

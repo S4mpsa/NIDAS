@@ -7,7 +7,7 @@ local Matrix = { entityType = 'blockstonedevice_2' }
 
 ---Creates a new Matrix object
 ---@param address string
----@param location Coordinate3D
+---@param location? Coordinate3D
 ---@return Matrix
 function Matrix.new(address, location)
     ---@class Matrix: TileEntity

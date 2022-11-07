@@ -32,7 +32,7 @@ end
 
 ---Binds a TileEntity object
 ---@param address string
----@param location Coordinate3D
+---@param location? Coordinate3D
 ---@return TileEntity
 function TileEntity.bind(address, location, entityType)
     if not component.type(address) == entityType then
