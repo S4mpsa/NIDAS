@@ -32,7 +32,7 @@ end
 
 ---Binds a TileEntity object
 ---@param address string
----@param location Coordinates
+---@param location Coordinate3D
 ---@return TileEntity
 function TileEntity.bind(address, location, entityType)
     if not component.type(address) == entityType then
@@ -54,7 +54,7 @@ end
 
 ---Creates a new TileEntity object
 ---@param address string
----@param location Coordinates
+---@param location Coordinate3D
 ---@param ... any
 ---@return TileEntity
 function TileEntity.new(address, location, entityType, ...)

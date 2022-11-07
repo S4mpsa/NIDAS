@@ -118,115 +118,112 @@ local function isInside(component, pos)
         and pos.y <= component.absolutePosition.y + component.absoluteSize.y
 end
 
+local function findByPosition(rootCompoennt, pos)
+    local queue = assembleElementQueue(rootCompoennt)
+    local foundElement = rootCompoennt
+    for _, element in pairs(queue) do
+        if isInside(element, pos) then
+            foundElement = element
+        end
+    end
+    return foundElement
+end
+
+local function currentOnClick() end
+
+local function currentOnDrag() end
+
+local function currentOnScroll() end
+
+event.listen('touch', currentOnClick)
+event.listen('drag', currentOnDrag)
+event.listen('scroll', currentOnScroll)
+
 ---@param rootComponent Component
 function renderEngine.registerEvents(rootComponent)
-    local registerQueue = assembleElementQueue(rootComponent)
+    local onClick = function(_, _, x, y, button)
+        local pos = { x = x, y = y }
+        local component = findByPosition(rootComponent, pos)
+        while not component.onClick do
+            component = component.parent
+        end
 
-    for _, element in ipairs(registerQueue) do
+        component = component or {
+            onClick = function() end
+        }
         local function renderElement()
-            renderEngine.render(element)
+            renderEngine.render(component)
         end
 
-        if element.onClick then
-            local onClick = function(_, _, x, y, button)
-                local clickPosition = { x = x, y = y }
-                if not isInside(element, clickPosition) then
-                    element.clicked = false
-                else
-                    local tree = { element }
-                    local i = 1
-                    local parent = tree[i]
-                    while parent do
-                        local children = parent.children
-                        for _, child in ipairs(children or {}) do
-                            if child.onClick
-                                and isInside(child, clickPosition) then
-                                    element.clicked = false
-                                    return
-                            end
-                            table.insert(tree, child)
-                        end
-                        i = i + 1
-                        parent = tree[i]
-                    end
-
-                    element.onClick(
-                        clickPosition,
-                        button,
-                        renderElement,
-                        function (...)
-                            (element.callBack or function() end)(
-                                element.absolutePosition,
-                                element.absoluteSize,
-                                ...
-                            )
-                        end
-                    )
-                    element.clicked = true
-                    renderElement()
-                end
+        component.onClick(
+            pos,
+            button,
+            renderElement,
+            function(...)
+                (component.callBack or function() end)(
+                    component.absolutePosition,
+                    component.absoluteSize,
+                    ...
+                )
             end
-
-            event.listen('touch', onClick)
+        )
+        for _, element in ipairs(assembleElementQueue(rootComponent)) do
+            element.clicked = false
         end
-
-        if element.onDrag then
-            event.listen('drag', function(_, _, x, y, button)
-                if not element.onClick or element.clicked then
-                    element.onDrag(
-                        { x = x, y = y },
-                        button,
-                        renderElement,
-                        function (...)
-                            (element.callBack or function() end)(
-                                element.absolutePosition,
-                                element.absoluteSize,
-                                ...
-                            )
-                        end
-                    )
-                    renderEngine.render(element)
-                end
-            end)
-        end
-
-        if element.onScroll then
-            local onScroll = function(_, _, x, y, direction)
-                local scrollPosition = { x = x, y = y }
-                if not isInside(element, scrollPosition) then
-                    element.clicked = false
-                else
-                    local tree = { element }
-                    local i = 1
-                    local parent = tree[i]
-                    while parent do
-                        local children = parent.children
-                        for _, child in ipairs(children or {}) do
-                            if child.onScroll
-                                and isInside(child, scrollPosition) then
-                                    return
-                            end
-                            table.insert(tree, child)
-                        end
-                        i = i + 1
-                        parent = tree[i]
-                    end
-
-                    element.onScroll(scrollPosition, direction, renderElement)
-                    renderElement()
-                end
-            end
-
-            event.listen('scroll', onScroll)
-        end
-
-        event.listen('refresh', function(_, id)
-            if id == element.id then
-                renderElement()
-            end
-        end)
-
+        component.clicked = true
+        renderElement()
+        print(component.id)
     end
+    event.ignore('touch', currentOnClick)
+    currentOnClick = onClick
+    event.listen('touch', currentOnClick)
+
+    local onDrag = function(_, _, x, y, button)
+        local pos = { x = x, y = y }
+        local component = findByPosition(rootComponent, pos)
+        while not component.onScroll do
+            component = component.parent
+        end
+
+        local function renderElement()
+            renderEngine.render(component)
+        end
+
+        component.onDrag(
+            pos,
+            button,
+            renderElement,
+            function(...)
+                (component.callBack or function() end)(
+                    component.absolutePosition,
+                    component.absoluteSize,
+                    ...
+                )
+            end
+        )
+        renderElement()
+    end
+    event.ignore('drag', currentOnDrag)
+    currentOnDrag = onDrag
+    event.listen('drag', currentOnDrag)
+
+    local onScroll = function(_, _, x, y, direction)
+        local pos = { x = x, y = y }
+        local component = findByPosition(rootComponent, pos)
+        while not component.onClick do
+            component = component.parent
+        end
+
+        local function renderElement()
+            renderEngine.render(component)
+        end
+
+        component.onScroll(pos, direction, renderElement)
+        renderElement()
+    end
+    event.ignore('scroll', currentOnScroll)
+    currentOnScroll = onScroll
+    event.listen('scroll', currentOnScroll)
 end
 
 return renderEngine

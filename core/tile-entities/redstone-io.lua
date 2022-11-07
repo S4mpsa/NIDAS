@@ -8,7 +8,7 @@ local RedstoneIO = { entityType = 'redstone' }
 
 ---Creates a new RedstoneIO object
 ---@param address string
----@param location Coordinates
+---@param location Coordinate3D
 ---@return RedstoneIO
 function RedstoneIO.new(address, location, connectedSides, disconnectedSides)
     ---@class RedstoneIO: TileEntity

@@ -1,13 +1,13 @@
 local component = require('component')
 local TileEntity = require('core.tile-entities.tile-entity')
-local Essentia = require('modules.infusion.core.dtos.essentia')
+local Essentia = require('modules.infusion.core.altar.matrix.essentia')
 
 ---@type Matrix
 local Matrix = { entityType = 'blockstonedevice_2' }
 
 ---Creates a new Matrix object
 ---@param address string
----@param location Coordinates
+---@param location Coordinate3D
 ---@return Matrix
 function Matrix.new(address, location)
     ---@class Matrix: TileEntity

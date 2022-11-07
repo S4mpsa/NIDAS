@@ -15,32 +15,50 @@ end
 local gui = require('gui')
 local guiCoroutine = coroutine.create(gui)
 
-local infusionModule = require('modules.infusion')
-local activeModules = { infusionModule }
+-- local theHand = require('hand')
 
-local modules = {}
-for i, activeModule in pairs(activeModules) do
+local infusionModule = require('modules.infusion')
+local modules = { --[[theHand,]] infusionModule }
+local activeModuleName = infusionModule.name
+for i, module in pairs(modules) do
     modules[i] = {
-        name = activeModule.name,
-        coreCoroutine = coroutine.create(activeModule.core),
-        gui = activeModule.gui,
+        name = module.name,
+        coreCoroutine = coroutine.create(module.core),
+        gui = module.gui,
         guiReturnValue = {}
     }
 end
 
 while true do
     for _, module in ipairs(modules) do
+        ---@type any[]
         local coreReturn = { coroutine.resume(
             module.coreCoroutine,
             table.unpack(module.guiReturnValue)
         ), }
-        table.remove(coreReturn, 1)
-        module.guiReturnValue = { coroutine.resume(
-            guiCoroutine,
-            module.name,
-            module.gui(table.unpack(coreReturn))
-        ) }
+        if not table.remove(coreReturn, 1) then
+            print('Module "' .. module.name .. '" crashed')
+            print('Please open a ticket on github')
+        end
+
+        if module.name == activeModuleName then
+            module.guiReturnValue = { coroutine.resume(
+                guiCoroutine,
+                module.name,
+                module.gui(table.unpack(coreReturn))
+            ), }
+            if not table.remove(module.guiReturnValue, 1) then
+                print('Module "' .. module.name .. '" crashed')
+                print('Please open a ticket on github')
+            end
+
+            if table.unpack(module.guiReturnValue) == 'return' then
+                print('return')
+                -- activeModuleName = theHand.name
+            end
+        end
     end
+
     ---@diagnostic disable-next-line: undefined-field
     os.sleep(0)
 end

@@ -1,4 +1,4 @@
-local RecipeRepository = require('modules.infusion.core.repositories.infusion-recipe-repository')
+local RecipeRepository = require('modules.infusion.core.recipe.infusion-recipe-repository')
 local waitForAltarReading = require('modules.infusion.core.services.wait-for-altar-reading')
 local waitForPedestalItem = require('modules.infusion.core.services.wait-for-pedestal-item')
 local waitForRequiredEssentia = require('modules.infusion.core.services.wait-for-required-essentia')

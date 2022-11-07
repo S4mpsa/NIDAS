@@ -1,7 +1,7 @@
 local describe = _ENV.describe
 local it = _ENV.it
 
-local Essentia = require 'modules.infusion.core.dtos.essentia'
+local Essentia = require('modules.infusion.core.altar.matrix.essentia')
 
 describe('Essentia data object', function()
     local namedAspectsEssentia = Essentia.new({

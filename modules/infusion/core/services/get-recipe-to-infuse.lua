@@ -1,4 +1,4 @@
-local RecipeRepository = require('modules.infusion.core.repositories.infusion-recipe-repository')
+local RecipeRepository = require('modules.infusion.core.recipe.infusion-recipe-repository')
 local findAltarPattern = require('modules.infusion.core.services.find-altar-pattern')
 
 ---Returns an eligible recipe to be infused
