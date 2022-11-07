@@ -36,7 +36,6 @@ local function footer(isDisplayingTheHand)
                     gpu.set(pos.x, pos.y, '< < < Return')
                 end,
                 onClick = function()
-                    print('return')
                     coroutine.yield('return')
                 end
             } }
