@@ -5,20 +5,20 @@
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-print('Downloading some stuff first...')
-
 local tempDir = '/home/temp/'
 local NIDASDir = '/home/NIDAS/'
 
 local event = require('event')
+local computer = require('computer')
+event.listen('interrupted', function()
+    computer.shutdown(true)
+end)
 event.onError = print
 
 local filesystem = require('filesystem')
 local shell = require('shell')
-local computer = require('computer')
 
-local gui = require('hand.hand-gui')
-local renderEngine = require('core.lib.graphics.core.engine')
+local serialization = require('serialization')
 
 -------------------------------- Utilities -------------------------------------
 
@@ -40,25 +40,36 @@ local function install(package)
         shell.setWorkingDirectory(NIDASDir .. 'modules')
     end
     untar(tempDir .. package.name .. '.tar')
+    shell.setWorkingDirectory(package.name)
+    local file = io.open('package.lua', 'w')
+    file:write(serialization.serialize(package))
+
+    shell.setWorkingDirectory(NIDASDir)
 end
 
 ------------------------------- Dependencies -----------------------------------
 
-local tarMan = 'https://raw.githubusercontent.com/' ..
-    'mpmxyz/ocprograms/master/usr/man/tar.man'
-local tarBin = 'https://raw.githubusercontent.com/' ..
-    'mpmxyz/ocprograms/master/home/bin/tar.lua'
-local jsonBin = 'https://raw.githubusercontent.com/' ..
-    'rxi/json.lua/master/json.lua'
+local function downloadDependencies()
+    print('Downloading some stuff first...')
+    shell.setWorkingDirectory('/usr/man')
+    if not filesystem.exists('tar.man') then
+        local tarMan = 'https://raw.githubusercontent.com/' ..
+            'mpmxyz/ocprograms/master/usr/man/tar.man'
+        download(tarMan)
+    end
 
-shell.setWorkingDirectory('/usr/man')
-download(tarMan)
-
-shell.setWorkingDirectory('/bin')
-download(tarBin)
-download(jsonBin)
-
-local json = require('json')
+    shell.setWorkingDirectory('/bin')
+    if not filesystem.exists('tar.bin') then
+        local tarBin = 'https://raw.githubusercontent.com/' ..
+            'mpmxyz/ocprograms/master/home/bin/tar.lua'
+        download(tarBin)
+    end
+    if not filesystem.exists('json.lua') then
+        local jsonBin = 'https://raw.githubusercontent.com/' ..
+            'rxi/json.lua/master/json.lua'
+        download(jsonBin)
+    end
+end
 
 --------------------------------- Packages -------------------------------------
 
@@ -100,6 +111,9 @@ end
 ----------------------------------- Main ---------------------------------------
 
 local function main()
+    downloadDependencies()
+    local json = require('json')
+
     filesystem.remove(tempDir)
     filesystem.makeDirectory(tempDir)
     shell.setWorkingDirectory(tempDir)
@@ -109,20 +123,12 @@ local function main()
     local releases = json.decode(file:read('a'))
     file:close()
 
+    shell.setWorkingDirectory(NIDASDir)
+
     local packages = getPackages(releases)
-
-    local root = gui.rootComponent(packages, download, install)
-    renderEngine.registerEvents(root)
-    renderEngine.render(root)
+    while true do
+        coroutine.yield(packages, download, install)
+    end
 end
 
-event.listen('interrupted', function()
-    computer.shutdown(true)
-end)
-
-main()
-
-while true do
-    ---@diagnostic disable-next-line: undefined-field
-    os.sleep(1000)
-end
+return main
