@@ -1,6 +1,6 @@
 local serialization = require('serialization')
 local filesystem = require('filesystem')
-local Essentia = require('modules.infusion.core.dtos.essentia')
+local Essentia = require('modules.infusion.core.altar.matrix.essentia')
 
 local dataDir = '/home/NIDAS/data/'
 filesystem.makeDirectory(dataDir)

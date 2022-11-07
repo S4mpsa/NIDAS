@@ -1,6 +1,6 @@
 local sides = require('sides')
-local Matrix = require('modules.infusion.core.entities.matrix')
-local MeInterface = require('core.tile-entities.me-interface')
+local Matrix = require('modules.infusion.core.altar.matrix')
+local MeInterface = require('modules.infusion.core.altar.me-interface')
 local RedstoneIO = require('core.tile-entities.redstone-io')
 local Transposer = require('core.tile-entities.transposer')
 
@@ -13,7 +13,7 @@ local Altar = {}
 ---@param matrixAddress string
 ---@param meInterfaceAddress string
 ---@param transposerAddress string
----@param location Coordinates
+---@param location Coordinate3D
 ---@return Altar
 function Altar.new(
     clawAddress,
@@ -44,7 +44,7 @@ function Altar.new(
     )
     ---@type Matrix
     local matrix = Matrix.new(matrixAddress, location)
-    ---@type MeInterface
+    ---@type MagicalMeInterface
     local meInterface = MeInterface.new(meInterfaceAddress, location)
     ---@type Transposer
     local transposer = Transposer.new(transposerAddress, location)

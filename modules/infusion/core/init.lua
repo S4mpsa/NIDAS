@@ -1,5 +1,5 @@
 local getRecipeToInfuse = require('modules.infusion.core.services.get-recipe-to-infuse')
-local AltarRepository = require('modules.infusion.core.repositories.altar-repository')
+local AltarRepository = require('modules.infusion.core.altar.altar-repository')
 local resumeInfusion = require('modules.infusion.core.usecases.resume-infusion')
 local startInfusion = require('modules.infusion.core.usecases.start-infusion')
 local coreStatuses = require('modules.infusion.constants').coreStatuses
