@@ -16,7 +16,7 @@ local Transposer = { entityType = 'transposer' }
 
 ---Creates a new Transposer object
 ---@param address string
----@param location Coordinates
+---@param location Coordinate3D
 ---@param controllerSide number index 0
 ---@return Transposer
 function Transposer.new(address, location, controllerSide)

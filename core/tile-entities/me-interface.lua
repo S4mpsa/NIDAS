@@ -1,23 +1,18 @@
 local component = require('component')
 local TileEntity = require('core.tile-entities.tile-entity')
-local Essentia = require('modules.infusion.core.dtos.essentia')
 
 ---@type MeInterface
 local MeInterface = { entityType = 'me_interface' }
 
 ---Creates a new MeInterface object
 ---@param address string
----@param location Coordinates
+---@param location Coordinate3D
 ---@return MeInterface
 function MeInterface.new(address, location)
     ---@class MeInterface: TileEntity
     local self = TileEntity.bind(address, location)
 
     local proxy = component.proxy(address)
-
-    function self.getStoredEssentia()
-        return Essentia.new(proxy.getEssentiaInNetwork())
-    end
 
     ---Requests a craft for patternItem and returns that craft
     ---@param patternItem PatternItem | Essentia

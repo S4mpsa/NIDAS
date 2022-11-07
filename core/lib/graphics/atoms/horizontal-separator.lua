@@ -1,7 +1,7 @@
 local gpu = require('component').gpu
 
----@param pos Coordinates
----@param size Coordinates
+---@param pos Coordinate2D
+---@param size Coordinate2D
 ---@param title string
 local function horizontalSeparator(pos, size, title)
     local borderColor = 0x555555

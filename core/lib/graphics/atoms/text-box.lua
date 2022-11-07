@@ -2,8 +2,8 @@ local gpu = require('component').gpu
 
 local split = require('core.lib.stringUtils').split
 
----@param pos Coordinates
----@param size Coordinates
+---@param pos Coordinate2D
+---@param size Coordinate2D
 ---@param text string
 local function textBox(pos, size, text)
     local words = split(text)
