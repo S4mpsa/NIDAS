@@ -7,7 +7,7 @@ local altarWidgets = {}
 
 local function newPosition(widget, index)
     return {
-        x = widget.size.x * ((index - 1) % 2) + 2,
+        x = widget.size.x * ((index - 1) % 2),
         y = widget.size.y * (math.ceil(index / 2) - 1)
     }
 end
