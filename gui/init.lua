@@ -7,7 +7,7 @@ local function gui(title, centerComponent)
         engine.render(page)
         engine.registerEvents(page)
 
-        coroutine.yield()
+        title, centerComponent = coroutine.yield()
     end
 end
 
