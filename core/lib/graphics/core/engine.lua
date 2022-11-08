@@ -157,7 +157,6 @@ function renderEngine.registerEvents(rootComponent)
             pos,
             component.absoluteSize,
             button,
-            renderElement,
             function(...)
                 (component.callBack or function() end)(
                     component.absolutePosition,
@@ -166,7 +165,7 @@ function renderEngine.registerEvents(rootComponent)
                 )
             end
         )
-        -- renderElement()
+        renderElement()
     end
     event.ignore('touch', currentOnClick)
     currentOnClick = onClick
@@ -188,7 +187,6 @@ function renderEngine.registerEvents(rootComponent)
             pos,
             component.absoluteSize,
             button,
-            renderElement,
             function(...)
                 (component.callBack or function() end)(
                     component.absolutePosition,
@@ -197,7 +195,7 @@ function renderEngine.registerEvents(rootComponent)
                 )
             end
         )
-        -- renderElement()
+        renderElement()
     end
     event.ignore('drag', currentOnDrag)
     currentOnDrag = onDrag
@@ -218,10 +216,9 @@ function renderEngine.registerEvents(rootComponent)
         component.onScroll(
             component.absolutePosition,
             component.absoluteSize,
-            direction,
-            renderElement
+            direction
         )
-        -- renderElement()
+        renderElement()
     end
     event.ignore('scroll', currentOnScroll)
     currentOnScroll = onScroll
