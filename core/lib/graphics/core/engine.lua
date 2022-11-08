@@ -144,19 +144,18 @@ function renderEngine.registerEvents(rootComponent)
     local onClick = function(_, _, x, y, button)
         local pos = { x = x, y = y }
         local component = findByPosition(rootComponent, pos)
-        while not component.onClick do
+        while not component.onClick and component.parent do
             component = component.parent
         end
 
-        component = component or {
-            onClick = function() end
-        }
         local function renderElement()
             renderEngine.render(component)
         end
 
+        component.onClick = component.onClick or function() end
         component.onClick(
             pos,
+            component.absoluteSize,
             button,
             renderElement,
             function(...)
@@ -167,12 +166,7 @@ function renderEngine.registerEvents(rootComponent)
                 )
             end
         )
-        for _, element in ipairs(assembleElementQueue(rootComponent)) do
-            element.clicked = false
-        end
-        component.clicked = true
-        renderElement()
-        print(component.id)
+        -- renderElement()
     end
     event.ignore('touch', currentOnClick)
     currentOnClick = onClick
@@ -181,7 +175,7 @@ function renderEngine.registerEvents(rootComponent)
     local onDrag = function(_, _, x, y, button)
         local pos = { x = x, y = y }
         local component = findByPosition(rootComponent, pos)
-        while not component.onScroll do
+        while not component.onScroll and component.parent do
             component = component.parent
         end
 
@@ -189,8 +183,10 @@ function renderEngine.registerEvents(rootComponent)
             renderEngine.render(component)
         end
 
+        component.onDrag = component.onDrag or function() end
         component.onDrag(
             pos,
+            component.absoluteSize,
             button,
             renderElement,
             function(...)
@@ -201,7 +197,7 @@ function renderEngine.registerEvents(rootComponent)
                 )
             end
         )
-        renderElement()
+        -- renderElement()
     end
     event.ignore('drag', currentOnDrag)
     currentOnDrag = onDrag
@@ -210,7 +206,7 @@ function renderEngine.registerEvents(rootComponent)
     local onScroll = function(_, _, x, y, direction)
         local pos = { x = x, y = y }
         local component = findByPosition(rootComponent, pos)
-        while not component.onClick do
+        while not component.onClick and component.parent do
             component = component.parent
         end
 
@@ -218,8 +214,14 @@ function renderEngine.registerEvents(rootComponent)
             renderEngine.render(component)
         end
 
-        component.onScroll(pos, direction, renderElement)
-        renderElement()
+        component.onScroll = component.onScroll or function() end
+        component.onScroll(
+            component.absolutePosition,
+            component.absoluteSize,
+            direction,
+            renderElement
+        )
+        -- renderElement()
     end
     event.ignore('scroll', currentOnScroll)
     currentOnScroll = onScroll
