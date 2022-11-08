@@ -151,7 +151,7 @@ local function altarWidget(
     local essentiaComponents = {}
     for i, requiredEssentia in ipairs(requiredEssentiaList or {}) do
         local currentEssentia = {}
-        for _, essentia in ipairs(essentiaList) do
+        for _, essentia in ipairs(essentiaList or {}) do
             if essentia.label == requiredEssentia.label then
                 currentEssentia = essentia
                 break
