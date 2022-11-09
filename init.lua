@@ -1,64 +1,72 @@
+local shell = require('shell')
+shell.execute('clear')
+
 local event = require('event')
 local computer = require('computer')
 event.listen('interrupted', function()
     computer.shutdown(true)
 end)
 
-local shell = require('shell')
-shell.execute('clear')
-
 local component = require('component')
 if component.redstone then
     component.redstone.setWakeThreshold(1)
 end
 
-local gui = require('gui')
-local guiCoroutine = coroutine.create(gui)
-
--- local theHand = require('hand')
-
 local infusionModule = require('modules.infusion')
-local modules = { --[[theHand,]] infusionModule }
-local activeModuleName = infusionModule.name
-for i, module in pairs(modules) do
+local navigationStack = { infusionModule }
+event.listen('Return', function()
+    table.remove(navigationStack)
+end)
+
+local crashCount = 0
+local function wrap(f)
+    local coro = coroutine.create(f)
+    local function wrapped(...)
+        local ret = { coroutine.resume(coro, ...) }
+
+        local success = table.remove(ret, 1)
+        if not success then
+            print('Module "' .. navigationStack[#navigationStack] .. '" crashed:')
+            print(table.unpack(ret))
+            print('Please open a ticket on github')
+
+            coro = coroutine.create(f)
+            crashCount = crashCount + 1
+            if crashCount > 5 then
+                error(table.unpack(ret))
+            end
+        end
+
+        ---@diagnostic disable-next-line: undefined-field
+        os.sleep(0)
+
+        return table.unpack(ret)
+    end
+
+    return wrapped
+end
+
+local gui = require('gui')
+local wrappedGui = wrap(gui)
+
+local modulesIndexes = { infusionModule }
+local modules = {}
+for i, moduleIndex in ipairs({ table.unpack(modulesIndexes) }) do
     modules[i] = {
-        name = module.name,
-        coreCoroutine = coroutine.create(module.core),
-        gui = module.gui,
-        guiReturnValue = {}
+        name = moduleIndex.name,
+        gui = moduleIndex.gui,
+        guiReturn = {},
+        wrappedCore = wrap(moduleIndex.core),
     }
 end
 
 while true do
     for _, module in ipairs(modules) do
-        ---@type any[]
-        local coreReturn = { coroutine.resume(
-            module.coreCoroutine,
-            table.unpack(module.guiReturnValue)
-        ), }
-        if not table.remove(coreReturn, 1) then
-            print('Module "' .. module.name .. '" crashed')
-            print('Please open a ticket on github')
-        end
+        local coreReturn = { module.wrappedCore(table.unpack(module.guiReturn)) }
 
-        if module.name == activeModuleName then
-            module.guiReturnValue = { coroutine.resume(
-                guiCoroutine,
-                module.name,
-                module.gui(table.unpack(coreReturn))
-            ), }
-            if not table.remove(module.guiReturnValue, 1) then
-                print('Module "' .. module.name .. '" crashed')
-                print('Please open a ticket on github')
-            end
-
-            if table.unpack(module.guiReturnValue) == 'return' then
-                print('return')
-                -- activeModuleName = theHand.name
-            end
+        if module.name == navigationStack[#navigationStack] then
+            local guiComponent = module.gui(table.unpack(coreReturn))
+            modules.guiReturn = { wrappedGui(guiComponent, navigationStack) }
         end
     end
-
-    ---@diagnostic disable-next-line: undefined-field
-    os.sleep(0)
 end

@@ -1,13 +1,17 @@
 local frame = require('gui.frame')
 local engine = require('core.lib.graphics.core.engine')
 
-local function gui(title, centerComponent)
+local function gui(centerComponent, navigationStack)
     while true do
-        local page = frame(title, centerComponent)
+        local page = frame(
+            #navigationStack > 1,
+            centerComponent,
+            navigationStack[#navigationStack]
+        )
         engine.render(page)
         engine.registerEvents(page)
 
-        title, centerComponent = coroutine.yield()
+        centerComponent = coroutine.yield()
     end
 end
 
