@@ -1,8 +1,11 @@
 local horizontalSeparator = require('core.lib.graphics.atoms.horizontal-separator')
 local verticalSeparator = require('core.lib.graphics.atoms.vertical-separator')
 local gpu = require('component').gpu
+local event = require('event')
 
-local function label(title) return {
+local function label(title)
+    ---@type Component
+    local labelComponent = {
         id = title,
         pos = { x = 1 },
         size = { x = -2 },
@@ -10,6 +13,7 @@ local function label(title) return {
             horizontalSeparator(pos, size, title)
         end
     }
+    return labelComponent
 end
 
 local separator = {
@@ -20,59 +24,65 @@ local separator = {
 }
 
 ---@return Component
-local function footer(isDisplayingTheHand)
-    return {
+local function footer(canReturn)
+    ---@type Component
+    local footerComponent = {
         id = 'footer',
-        pos = { y = -3 },
+        pos = { y = -1 },
         onRender = horizontalSeparator,
         ---@type Component[]
-        children = isDisplayingTheHand
-            and { {} }
-            or { {
-                id = 'return-button',
-                pos = { x = 1, y = 1 },
-                size = { x = 12 },
-                onRender = function(pos)
+        children = { {
+            id = 'return-button',
+            pos = { x = 1, y = 1 },
+            size = { x = 12 },
+            onRender = function(pos)
+                if canReturn then
                     gpu.set(pos.x, pos.y, '< < < Return')
-                end,
-                onClick = function()
-                    coroutine.yield('return')
+                else
+                    gpu.set(pos.x, pos.y, '            ')
                 end
-            } }
+            end,
+            onClick = function()
+                if canReturn then
+                    event.push('Return')
+                    -- coroutine.yield('return')
+                end
+            end
+        } }
     }
+    return footerComponent
 end
 
 ---The frame present on every screen
----@param title string
+---@param canReturn boolean
 ---@param centerComponent Component
+---@param title string
 ---@return Component
-local function outerFrame(
-    title,
-    centerComponent
-)
-    local isDisplayingTheHand = title == 'The Hand of NIDAS'
-
+local function outerFrame(canReturn, centerComponent, title)
     ---@type Component
-    local component = {
+    local rootComponent = {
         id = 'outer-frame',
         pos = { x = 0, y = 2 },
-        size = { x = 160, y = 50 },
+        size = { x = 160, y = 48 },
         children = {
             label(title),
             {
                 id = 'center-component',
                 pos = { x = 41, y = 2 },
-                size = { y = -5 },
+                size = { y = -3 },
                 children = {
                     separator,
-                    centerComponent or {}
+                    {
+                        pos = { x = 2 },
+                        children = { centerComponent or {} },
+                    }
                 },
             },
-            footer(isDisplayingTheHand)
+            footer(canReturn)
         }
     }
 
-    return component
+    return rootComponent
 end
 
 return outerFrame
