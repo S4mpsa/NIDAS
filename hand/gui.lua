@@ -12,13 +12,11 @@ local separator = require('core.lib.graphics.atoms.horizontal-separator')
 --[[☰]]
 --------------------------------- Components -----------------------------------
 
-local wheelPos = { y = 0 }
 ---@type Coordinate2D
-local resolution = {}
-resolution.x, resolution.y = gpu.getResolution()
+local wheelPos = { y = 0 }
 
 local function getMaxYPos(numberOfPackages)
-    return math.min(7 * (numberOfPackages + 1), (resolution.y + 7) / 2) + 7
+    return math.min(7 * (numberOfPackages + 1), (20 + 7) / 2) + 7
 end
 
 ---@param packages Package[]
@@ -30,10 +28,9 @@ local function scrollBarComponent(packages, callBack)
         previousClickPosition = clickPosition
     end
 
-    local function onDrag(dragPosition, _, reRender, onDragCallBack)
+    local function onDrag(dragPosition, _, _, onDragCallBack)
         onDragCallBack(
-            (previousClickPosition.y - dragPosition.y) / getMaxYPos(#packages),
-            reRender
+            (previousClickPosition.y - dragPosition.y) / getMaxYPos(#packages)
         )
     end
 
@@ -70,10 +67,9 @@ local function modulesComponent(packages, callBack)
         previousClickPosition = clickPosition
     end
 
-    local function onDrag(dragPosition, _, reRender, onDragCallBack)
+    local function onDrag(dragPosition, _, _, onDragCallBack)
         onDragCallBack(
-            (dragPosition.y - previousClickPosition.y) / getMaxYPos(#packages),
-            reRender
+            (dragPosition.y - previousClickPosition.y) / getMaxYPos(#packages)
         )
     end
 
@@ -98,7 +94,7 @@ local function modulesComponent(packages, callBack)
             id = package.name .. '-' .. i,
             pos = childPos,
             visible = 0 <= childPos.y
-                and childPos.y < resolution.y - childSize.y - 2,
+                and childPos.y < 50 - childSize.y - 2,
             size = { y = childSize.y },
             children = {
                 {
@@ -162,13 +158,14 @@ local function modulesComponent(packages, callBack)
     return component
 end
 
-local function welcomeBoxComponent(packages, download, install)
+local function welcomeBox(packages, download, install)
     local downloadIcon = '⬇'
     local installIcon = '➡'
     local downloadText = 'Download selected packages'
     local installText = 'Install downloaded packages'
 
-    return {
+    ---@type Component
+    local wecolmeBoxComponent = {
         id = 'welcome',
         pos = { x = 5, y = 3 },
         size = { x = -4 },
@@ -210,13 +207,13 @@ local function welcomeBoxComponent(packages, download, install)
                         onRender = function(pos)
                             gpu.set(pos.x, pos.y, downloadIcon)
                         end,
-                        onClick = function(_, _, reRender, _)
+                        onClick = function()
                             if downloadIcon ~= '⋯' then
                                 downloadIcon = '⋯'
-                                reRender()
                                 for _, package in ipairs(packages) do
                                     if package.selected then
                                         download(package.url)
+                                        coroutine.yield()
                                     end
                                 end
                                 downloadIcon = '✔'
@@ -244,13 +241,13 @@ local function welcomeBoxComponent(packages, download, install)
                         onRender = function(pos)
                             gpu.set(pos.x, pos.y, installIcon)
                         end,
-                        onClick = function(_, _, reRender, _)
+                        onClick = function()
                             if installIcon ~= '⋯' then
                                 installIcon = '⋯'
-                                reRender()
                                 for _, package in ipairs(packages) do
                                     if package.selected then
                                         install(package)
+                                        coroutine.yield()
                                     end
                                 end
                                 installIcon = '✔'
@@ -261,6 +258,8 @@ local function welcomeBoxComponent(packages, download, install)
             }
         }
     }
+
+    return wecolmeBoxComponent
 end
 
 ---@param packages Package[]
@@ -270,29 +269,22 @@ end
 local function handGui(packages, download, install)
     local modules = {}
     local maxYPos = getMaxYPos(#packages)
-    local function onScroll(_, direction, reRender)
-        event.push('refresh', 'root')
+    local function onScroll(pos, size, direction)
         local nextWheelPosY = clamp(wheelPos.y - direction, 0, maxYPos)
         for i, child in ipairs(modules.children) do
             child.pos.y = (child.size.y + 1) * (i - 1) - wheelPos.y
-            child.visible = 0 <= child.pos.y
-                and child.pos.y < resolution.y - child.size.y - 8
+            child.visible = pos.y <= child.pos.y
+                and child.pos.y < pos.y + size.y - child.size.y - 8
         end
         wheelPos.y = nextWheelPosY
-        reRender()
     end
 
-    local function dragCallBack(_, _, direction, reRender)
-        onScroll(nil, direction, reRender)
-    end
-
-    modules = modulesComponent(packages, dragCallBack)
-    local scrollBar = scrollBarComponent(packages, dragCallBack)
-    local welcomeBox = welcomeBoxComponent(packages, download, install)
-    return {
+    modules = modulesComponent(packages, onScroll)
+    local scrollBar = scrollBarComponent(packages, onScroll)
+    local welcomeBoxComponent = welcomeBox(packages, download, install)
+    ---@type Component
+    local component = {
         id = 'root',
-        pos = { x = 0, y = 1 },
-        size = resolution,
         onRender = function(pos, size)
             windowBorder(pos, size, 'Package list')
         end,
@@ -300,9 +292,10 @@ local function handGui(packages, download, install)
         children = {
             modules,
             scrollBar,
-            welcomeBox,
+            welcomeBoxComponent,
         }
     }
+    return component
 end
 
 return handGui
