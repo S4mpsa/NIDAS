@@ -8,12 +8,12 @@
 local tempDir = '/home/temp/'
 local NIDASDir = '/home/NIDAS/'
 
-local event = require('event')
-local computer = require('computer')
-event.listen('interrupted', function()
-    computer.shutdown(true)
-end)
-event.onError = print
+-- local event = require('event')
+-- local computer = require('computer')
+-- event.listen('interrupted', function()
+--     computer.shutdown(true)
+-- end)
+-- event.onError = print
 
 local filesystem = require('filesystem')
 local shell = require('shell')
@@ -50,21 +50,21 @@ end
 ------------------------------- Dependencies -----------------------------------
 
 local function downloadDependencies()
-    print('Downloading some stuff first...')
+    print('Downloading a few utilities first...')
     shell.setWorkingDirectory('/usr/man')
-    if not filesystem.exists('tar.man') then
+    if not filesystem.exists('/usr/man/tar.man') then
         local tarMan = 'https://raw.githubusercontent.com/' ..
             'mpmxyz/ocprograms/master/usr/man/tar.man'
         download(tarMan)
     end
 
     shell.setWorkingDirectory('/bin')
-    if not filesystem.exists('tar.bin') then
+    if not filesystem.exists('/bin/tar.bin') then
         local tarBin = 'https://raw.githubusercontent.com/' ..
             'mpmxyz/ocprograms/master/home/bin/tar.lua'
         download(tarBin)
     end
-    if not filesystem.exists('json.lua') then
+    if not filesystem.exists('/bin/json.lua') then
         local jsonBin = 'https://raw.githubusercontent.com/' ..
             'rxi/json.lua/master/json.lua'
         download(jsonBin)
@@ -118,12 +118,14 @@ local function main()
     filesystem.makeDirectory(tempDir)
     shell.setWorkingDirectory(tempDir)
 
+    print('Making sure your system is up to date...')
     download('https://api.github.com/repos/S4mpsa/NIDAS/releases')
     local file = io.open('releases', 'r')
     local releases = json.decode(file:read('a'))
     file:close()
 
     shell.setWorkingDirectory(NIDASDir)
+    shell.execute('clear')
 
     local packages = getPackages(releases)
     while true do
