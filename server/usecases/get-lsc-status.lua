@@ -17,45 +17,49 @@ local function exec(address, name, location)
     end
 
     local sensorInformation = lsc:getSensorInformation()
-    --Check for battery buffer
-    if require("component").list()[address] == "gt_batterybuffer" then
-        local energyData = parser.split(sensorInformation[3], "/")
-        sensorInformation[2] = energyData[1]
-        sensorInformation[3] = energyData[2]
-    --Ergon Addition
-    elseif string.match(sensorInformation[2], "Ergon") then
-        sensorInformation[2] = sensorInformation[3]
-        sensorInformation[3] = sensorInformation[4]
-    end
-    local problems = getNumberOfProblems(sensorInformation[9])
-
-    local state = nil
-    if lsc:isWorkAllowed() then
-        if lsc:hasWork() then
-            state = states.ON
-        else
-            state = states.IDLE
+    if sensorInformation ~= nil then
+        --Check for battery buffer
+        if require("component").list()[address] == "gt_batterybuffer" then
+            local energyData = parser.split(sensorInformation[3], "/")
+            sensorInformation[2] = energyData[1]
+            sensorInformation[3] = energyData[2]
+        --Ergon Addition
+        elseif string.match(sensorInformation[2], "Ergon") then
+            sensorInformation[2] = sensorInformation[3]
+            sensorInformation[3] = sensorInformation[4]
         end
-    else
-        state = states.OFF
-    end
+        local problems = getNumberOfProblems(sensorInformation[9])
 
-    if problems > 0 then
-        state = states.BROKEN
+        local state = nil
+        if lsc:isWorkAllowed() then
+            if lsc:hasWork() then
+                state = states.ON
+            else
+                state = states.IDLE
+            end
+        else
+            state = states.OFF
+        end
+
+        if problems > 0 then
+            state = states.BROKEN
+        end
+        local status = {
+            name = name,
+            state = state,
+            storedEU = parser.getInteger(sensorInformation[2]),
+            EUCapacity = parser.getInteger(sensorInformation[3]),
+            problems = problems,
+            passiveLoss = parser.getInteger(sensorInformation[4] or 0),
+            location = location,
+            EUIn = parser.getInteger(sensorInformation[5] or 0),
+            EUOut = parser.getInteger(sensorInformation[6] or 0),
+            wirelessEU = parser.getInteger(sensorInformation[12] or 0)
+        }
+        return status
+    else
+        return {state = states.MISSING}
     end
-    local status = {
-        name = name,
-        state = state,
-        storedEU = parser.getInteger(sensorInformation[2]),
-        EUCapacity = parser.getInteger(sensorInformation[3]),
-        problems = problems,
-        passiveLoss = parser.getInteger(sensorInformation[4] or 0),
-        location = location,
-        EUIn = parser.getInteger(sensorInformation[5] or 0),
-        EUOut = parser.getInteger(sensorInformation[6] or 0),
-        wirelessEU = parser.getInteger(sensorInformation[12] or 0)
-    }
-    return status
 end
 
 return exec
