@@ -1,5 +1,5 @@
-local horizontalSeparator = require('core.lib.graphics.atoms.horizontal-separator')
-local verticalSeparator = require('core.lib.graphics.atoms.vertical-separator')
+local horizontalSeparator = require('gui.components.atoms.horizontal-separator')
+local verticalSeparator = require('gui.components.atoms.vertical-separator')
 local gpu = require('component').gpu
 local event = require('event')
 

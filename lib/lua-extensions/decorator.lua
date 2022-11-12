@@ -1,7 +1,7 @@
 ---@alias decorator {__metatable:{__concat:fun()}}
----@type fun(decoratorFunction:fun(decoratorArguments:any, functionToDecorate:fun())):decorator
 local Decorator = {}
 
+---@type fun(decoratorFunction:fun(decoratorArguments:any, functionToDecorate:fun())):decorator
 setmetatable(Decorator, {
     --- Prepares the decoratorFunction to receive the arguments it needs
     --- so it can then be applied to the functionToDecorate
