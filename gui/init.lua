@@ -4,11 +4,19 @@ local engine = require('gui.core.engine')
 local wrap = require('lib.lua-extensions.wrap')
 
 local main = wrap(function(centerComponent, navigationStack)
+
+    local function returnCallback()
+        if #navigationStack > 1 then
+            table.remove(navigationStack)
+        end
+    end
+
     while true do
         local page = frame(
             #navigationStack > 1,
             centerComponent,
-            navigationStack[#navigationStack]
+            navigationStack[#navigationStack],
+            returnCallback
         )
         engine.render(page)
         engine.registerEvents(page)
@@ -51,13 +59,6 @@ function gui.new(modules, processor)
             ---@type Event
             local outgoingPayload = main(centerComponent, navigationStack)
             outgoingPayload.name = currentScreen
-
-            if outgoingPayload[1] == 'back' then
-                table.remove(navigationStack)
-                if #navigationStack == 0 then
-                    table.insert(navigationStack, modules[1].name)
-                end
-            end
 
             processor.push('to-core', { payload = outgoingPayload })
         end

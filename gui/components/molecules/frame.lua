@@ -23,7 +23,8 @@ local separator = {
 }
 
 ---@return Component
-local function footer(canReturn)
+local function footer(canReturn, returnCallback)
+    local returnString = '< < < Return'
     ---@type Component
     local footerComponent = {
         id = 'footer',
@@ -36,16 +37,12 @@ local function footer(canReturn)
             size = { x = 12 },
             onRender = function(pos)
                 if canReturn then
-                    gpu.set(pos.x, pos.y, '< < < Return')
+                    gpu.set(pos.x, pos.y, returnString)
                 else
-                    gpu.set(pos.x, pos.y, '            ')
+                    gpu.set(pos.x, pos.y, string.rep(' ', #returnString))
                 end
             end,
-            onClick = function()
-                if canReturn then
-                    coroutine.yield('back')
-                end
-            end
+            onClick = returnCallback
         } }
     }
     return footerComponent
@@ -56,7 +53,7 @@ end
 ---@param centerComponent Component
 ---@param title string
 ---@return Component
-local function outerFrame(canReturn, centerComponent, title)
+local function outerFrame(canReturn, centerComponent, title, returnCallback)
     ---@type Component
     local rootComponent = {
         id = 'outer-frame',
@@ -76,7 +73,7 @@ local function outerFrame(canReturn, centerComponent, title)
                     }
                 },
             },
-            footer(canReturn)
+            footer(canReturn, returnCallback)
         }
     }
 
