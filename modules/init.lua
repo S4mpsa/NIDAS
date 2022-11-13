@@ -4,5 +4,6 @@
 ---@field name string
 
 return {
+    require('modules.hand'),
     require('modules.infusion')
 }
