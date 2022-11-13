@@ -3,11 +3,11 @@ event.onError = print
 
 local gpu = require('component').gpu
 
-local clamp = require('core.lib.numUtils').clamp
+local clamp = require('lib.numUtils').clamp
 
-local windowBorder = require('core.lib.graphics.atoms.window-border')
-local textBox = require('core.lib.graphics.atoms.text-box')
-local separator = require('core.lib.graphics.atoms.horizontal-separator')
+local windowBorder = require('gui.components.atoms.window-border')
+local textBox = require('gui.components.atoms.text-box')
+local separator = require('gui.components.atoms.horizontal-separator')
 
 --[[☰]]
 --------------------------------- Components -----------------------------------
