@@ -1,6 +1,6 @@
 local gpu = require('component').gpu
 
-local split = require('core.lib.stringUtils').split
+local split = require('lib.stringUtils').split
 
 ---@param pos Coordinate2D
 ---@param size Coordinate2D

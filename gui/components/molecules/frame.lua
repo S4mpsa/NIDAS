@@ -1,7 +1,6 @@
-local horizontalSeparator = require('core.lib.graphics.atoms.horizontal-separator')
-local verticalSeparator = require('core.lib.graphics.atoms.vertical-separator')
+local horizontalSeparator = require('gui.components.atoms.horizontal-separator')
+local verticalSeparator = require('gui.components.atoms.vertical-separator')
 local gpu = require('component').gpu
-local event = require('event')
 
 local function label(title)
     ---@type Component
@@ -24,7 +23,8 @@ local separator = {
 }
 
 ---@return Component
-local function footer(canReturn)
+local function footer(canReturn, returnCallback)
+    local returnString = '< < < Return'
     ---@type Component
     local footerComponent = {
         id = 'footer',
@@ -37,17 +37,12 @@ local function footer(canReturn)
             size = { x = 12 },
             onRender = function(pos)
                 if canReturn then
-                    gpu.set(pos.x, pos.y, '< < < Return')
+                    gpu.set(pos.x, pos.y, returnString)
                 else
-                    gpu.set(pos.x, pos.y, '            ')
+                    gpu.set(pos.x, pos.y, string.rep(' ', #returnString))
                 end
             end,
-            onClick = function()
-                if canReturn then
-                    event.push('Return')
-                    -- coroutine.yield('return')
-                end
-            end
+            onClick = returnCallback
         } }
     }
     return footerComponent
@@ -58,7 +53,7 @@ end
 ---@param centerComponent Component
 ---@param title string
 ---@return Component
-local function outerFrame(canReturn, centerComponent, title)
+local function outerFrame(canReturn, centerComponent, title, returnCallback)
     ---@type Component
     local rootComponent = {
         id = 'outer-frame',
@@ -78,7 +73,7 @@ local function outerFrame(canReturn, centerComponent, title)
                     }
                 },
             },
-            footer(canReturn)
+            footer(canReturn, returnCallback)
         }
     }
 

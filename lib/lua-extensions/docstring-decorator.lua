@@ -1,4 +1,4 @@
-local Decorator = require('core.lib.lua-extensions.decorator')
+local Decorator = require('lib.lua-extensions.decorator')
 
 --- Makes the function.__tostring = description.
 ---
@@ -11,7 +11,7 @@ local Decorator = require('core.lib.lua-extensions.decorator')
 ---@type decorator
 local docstring = Decorator(
     ---@param description string string to describe the function being decorated
-    ---@param functionToDescribe fun()
+    ---@param functionToDescribe fun(...)
     ---@return table describedFunction actually a table with `__call` and `__tostring` metamethods
     function(description, functionToDescribe)
         return setmetatable({}, {

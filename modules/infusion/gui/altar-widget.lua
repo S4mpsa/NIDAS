@@ -1,6 +1,6 @@
 local gpu = require('component').gpu
 
-local windowBorder = require('core.lib.graphics.atoms.window-border')
+local windowBorder = require('gui.components.atoms.window-border')
 
 ---@param label string
 ---@return Component
