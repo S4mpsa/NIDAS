@@ -33,6 +33,7 @@ local gui = {}
 function gui.new(modules, processor)
     local navigationStack = {
         modules[1].name,
+        modules[2].name,
     }
 
     local wrappedCoroutines = {}
