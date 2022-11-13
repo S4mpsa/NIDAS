@@ -1,7 +1,6 @@
 local horizontalSeparator = require('gui.components.atoms.horizontal-separator')
 local verticalSeparator = require('gui.components.atoms.vertical-separator')
 local gpu = require('component').gpu
-local event = require('event')
 
 local function label(title)
     ---@type Component
@@ -44,8 +43,7 @@ local function footer(canReturn)
             end,
             onClick = function()
                 if canReturn then
-                    event.push('Return')
-                    -- coroutine.yield('return')
+                    coroutine.yield('back')
                 end
             end
         } }
