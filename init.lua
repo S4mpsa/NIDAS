@@ -12,61 +12,23 @@ if component.redstone then
     component.redstone.setWakeThreshold(1)
 end
 
-local infusionModule = require('modules.infusion')
-local navigationStack = { infusionModule }
-event.listen('Return', function()
-    table.remove(navigationStack)
-end)
+local EventProcessor = require('core.event-processor')
 
-local crashCount = 0
-local function wrap(f)
-    local coro = coroutine.create(f)
-    local function wrapped(...)
-        local ret = { coroutine.resume(coro, ...) }
+local modules = require('modules')
 
-        local success = table.remove(ret, 1)
-        if not success then
-            print('Module "' .. navigationStack[#navigationStack] .. '" crashed:')
-            print(table.unpack(ret))
-            print('Please open a ticket on github')
+local processor = EventProcessor.new()
 
-            coro = coroutine.create(f)
-            crashCount = crashCount + 1
-            if crashCount > 5 then
-                error(table.unpack(ret))
-            end
-        end
+local coreListener = require('core').new(modules, processor)
+processor.listen('to-core', coreListener)
 
-        ---@diagnostic disable-next-line: undefined-field
-        os.sleep(0)
-
-        return table.unpack(ret)
-    end
-
-    return wrapped
-end
-
-local gui = require('gui')
-local wrappedGui = wrap(gui)
-
-local modulesIndexes = { infusionModule }
-local modules = {}
-for i, moduleIndex in ipairs({ table.unpack(modulesIndexes) }) do
-    modules[i] = {
-        name = moduleIndex.name,
-        gui = moduleIndex.gui,
-        guiReturn = {},
-        wrappedCore = wrap(moduleIndex.core),
-    }
+local otherListeners = {
+    require('gui').new(modules, processor)
+}
+for _, listener in ipairs(otherListeners) do
+    processor.listen('from-core', listener)
 end
 
 while true do
-    for _, module in ipairs(modules) do
-        local coreReturn = { module.wrappedCore(table.unpack(module.guiReturn)) }
-
-        if module.name == navigationStack[#navigationStack] then
-            local guiComponent = module.gui(table.unpack(coreReturn))
-            modules.guiReturn = { wrappedGui(guiComponent, navigationStack) }
-        end
-    end
+    processor.push('to-core', {})
+    processor.consumeQueue()
 end

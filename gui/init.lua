@@ -1,5 +1,5 @@
-local frame = require('gui.graphics.components.molucules.frame')
-local engine = require('gui.graphics.core.engine')
+local frame = require('gui.components.molecules.frame')
+local engine = require('gui.core.engine')
 
 local wrap = require('lib.lua-extensions.wrap')
 
@@ -13,7 +13,7 @@ local main = wrap(function(centerComponent, navigationStack)
         engine.render(page)
         engine.registerEvents(page)
 
-        centerComponent = coroutine.yield()
+        centerComponent, navigationStack = coroutine.yield()
     end
 end)
 
@@ -21,33 +21,45 @@ local gui = {}
 
 ---@param modules Module[]
 ---@param processor EventProcessor
----@return function
+---@return fun(payload: table?)
 function gui.new(modules, processor)
-    local navigationStack = { modules[1].name }
+    local navigationStack = {
+        modules[1].name,
+    }
 
     local wrappedCoroutines = {}
     for _, module in ipairs(modules) do
-        wrappedCoroutines[module.name] = wrap(module.core)
+        wrappedCoroutines[module.name] = wrap(
+            module.gui,
+            module.name .. '/gui',
+            true
+        )
     end
 
-    return function(payload)
-        local moduleName = payload.name
-        if moduleName == navigationStack[#navigationStack]
-            and wrappedCoroutines[moduleName]
+    return function(incomingPayload)
+        incomingPayload = incomingPayload or {}
+        local moduleName = incomingPayload.name
+        incomingPayload.name = nil
+        local currentScreen = navigationStack[#navigationStack]
+        if not moduleName or
+            moduleName == currentScreen and wrappedCoroutines[moduleName]
         then
-            local result = main(
-                wrappedCoroutines[moduleName](payload),
-                navigationStack
-            )
+            ---@type Component
+            local centerComponent = wrappedCoroutines[currentScreen](
+                table.unpack(incomingPayload)
+            )[1]
+            ---@type Event
+            local outgoingPayload = main(centerComponent, navigationStack)
+            outgoingPayload.name = currentScreen
 
-            if result.payload == 'back' then
+            if outgoingPayload[1] == 'back' then
                 table.remove(navigationStack)
                 if #navigationStack == 0 then
                     table.insert(navigationStack, modules[1].name)
                 end
             end
 
-            processor.push('to-core', result)
+            processor.push('to-core', { payload = outgoingPayload })
         end
     end
 end
