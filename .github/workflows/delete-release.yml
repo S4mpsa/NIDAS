@@ -20,13 +20,9 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${{ github.event.ref }})"
-        id: get_branch_name
       - uses: dev-drprasad/delete-tag-and-release@v0.1.3
         with:
           delete_release: true
-          tag_name: 'auto-release-${{ steps.get_branch_name.outputs.branch }}'
+          tag_name: 'auto-release-${{ github.event.ref }}'
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_SECRET }}
