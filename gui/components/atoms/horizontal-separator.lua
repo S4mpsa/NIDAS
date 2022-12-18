@@ -11,7 +11,7 @@ local function horizontalSeparator(pos, size, title)
     gpu.setForeground(borderColor)
     local top = ''
     for _ = 1, size.x do
-        top = top .. '▂'
+        top = top .. '━'
     end
     gpu.set(1 + pos.x, pos.y, top)
 
