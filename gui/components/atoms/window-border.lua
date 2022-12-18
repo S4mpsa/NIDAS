@@ -2,7 +2,7 @@ local gpu = require('component').gpu
 
 ---@param pos Coordinate2D
 ---@param size Coordinate2D
----@param title string
+---@param title string | nil
 local function windowBorder(pos, size, title)
     local borderColor = 0x555555
     local primaryColor = 0xADD8E6
