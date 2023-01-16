@@ -18,7 +18,8 @@ local modules = {
     {name = "Machine Display", module = "modules.displays.machineDisplay", desc = descriptions.machineDisplay},
     {name = "Infusion", module = "modules.infusion", desc = descriptions.infusion},
     {name = "Autostocker", module = "modules.tools.autostocker", desc = descriptions.autostocker},
-    {name = "Fluid Selector", module = "modules.displays.fluidSelector", desc = descriptions.fluidSelector}
+    {name = "Fluid Selector", module = "modules.displays.fluidSelector", desc = descriptions.fluidSelector},
+    {name = "Ore Processing", module = "modules.tools.OreProcessing", desc = descriptions.OreProcessing}
 }
 local processes = {}
 
