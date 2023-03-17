@@ -128,7 +128,7 @@ function powerDisplay.widget(glasses, data)
         energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestOutput)
     end
     --Wireless EU addition
-    if data.wirelessEU > 0 then
+    if data.wirelessEU > 10000000 then
         currentEU = data.wirelessEU
         maxEU = 2^1023
         data.wirelessMode = true
