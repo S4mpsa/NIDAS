@@ -1,5 +1,0 @@
-*.tar
-.vscode
-*.png
-settings/*
-available_version.lua
