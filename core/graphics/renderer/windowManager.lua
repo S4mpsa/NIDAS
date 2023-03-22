@@ -38,7 +38,7 @@ function windowManager.getWindows()
 end
 
 local function checkClick(window, x, y)
-    if (y >= window.position.y and y < window.position.y + window.size.y)
+    if (y >= window.position.y - 1 and y < window.position.y + window.size.y)
     and (x >= window.position.x and x < window.position.x + window.size.x) then
         return true
     else
