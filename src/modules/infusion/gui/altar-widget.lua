@@ -107,7 +107,7 @@ local function essentiaBar(essentiaName, essentiaProgress)
                     gpu.set(
                         pos.x,
                         pos.y,
-                        string.rep('=', size.x)
+                        string.rep('=', size.x) --⨴⨯⨯⨯⨯⨯⨵
                     )
                     -- gpu.set(pos.x + size.x - 1, pos.y, '◗')
 

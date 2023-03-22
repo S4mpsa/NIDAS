@@ -17,6 +17,27 @@ for i = 1, 6 do
     altarWidgets[i].pos = newPosition(altarWidgets[i], i)
 end
 
+local list = function(props)
+    return props.children
+end
+
+local item = function()
+    return {}
+end
+
+local function component()
+    return {
+        list,
+        style = {
+            margin = 1,
+            padding = 0,
+        },
+        { item, name = '1' },
+        { item, name = '2' },
+        { item, name = '3' },
+    }
+end
+
 ---@param altarId string
 ---@param status AltarStatus
 ---@param itemName? string

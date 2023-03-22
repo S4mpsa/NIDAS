@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build NIDAS
-        run: tar -cvf NIDAS.tar --exclude-from=tar-exclude.txt *
+        run: tar -cvf NIDAS.tar .shrc LICENSE.md  --exclude-from=tar-exclude.txt *
       - name: Build modules
         id: build-modules
         run: |

@@ -6,12 +6,12 @@ function EventProcessor.new()
     local topics = {}
 
     ---@class EventProcessor
-    local this = {}
+    local self = {}
 
     ---@param topicName? string
     ---@param listenerFunction function
     ---@return string? listenerId
-    function this.listen(topicName, listenerFunction)
+    function self.listen(topicName, listenerFunction)
         if topicName then
             topics[topicName] = topics[topicName] or Topic.new(topicName)
             return topics[topicName].addListener(listenerFunction)
@@ -20,7 +20,7 @@ function EventProcessor.new()
 
     ---@param topicName? string
     ---@param listenerId string
-    function this.ignore(topicName, listenerId)
+    function self.ignore(topicName, listenerId)
         if type(listenerId) ~= 'string' then
             return
         end
@@ -32,12 +32,12 @@ function EventProcessor.new()
     ---@param topicName any
     ---@param event Event
     ---@return string eventId
-    function this.push(topicName, event)
+    function self.push(topicName, event)
         topics[topicName] = topics[topicName] or Topic.new(topicName)
         return topics[topicName].insert(event)
     end
 
-    function this.consumeQueue()
+    function self.consumeQueue()
         local hasMore = true
         while hasMore do
             hasMore = false
@@ -51,7 +51,7 @@ function EventProcessor.new()
         end
     end
 
-    return this
+    return self
 end
 
 return EventProcessor
