@@ -22,7 +22,12 @@ function writeOnScreen(str)
     gpu.set(0, 45, str)
 end
 
-local window = windowManager.create("Test Window 2", {x=50, y=30}, {x=40, y=10})
+gpu.fill(0, 0, 160, 50, " ")
+
+local tab = windowManager.getActiveTab()
+windowManager.setActiveTab("Test Tab")
+
+local window = windowManager.create("Test Window 2", {x=50, y=20}, {x=5, y=3})
 window.addElements({
     elements.border(),
     elements.title(),
@@ -49,20 +54,14 @@ window.setOptions({
 })
 window.enableMovement()
 
-local function reboot()
-    local shell = require("shell")
-    shell.execute("reboot")
-end
+windowManager.setActiveTab("Empty Tab")
 
-local rebootWindow = windowManager.create("Reboot", {x=8, y=3}, {x=2, y=42})
-rebootWindow.addElements({
-    elements.border(),
-    elements.smallButton({x=2, y=2}, "Reboot", reboot, {}, true)
-})
+windowManager.setActiveTab("Home")
 
-windowManager.initialize()
+local welcomeWindow = windowManager.create("WelcomeWindow", {x=50, y=20}, {x=2, y=2}).addElement(
+    elements.multiLineText({x=0, y=0}, {x=50, y=20}, "Welcome to NIDAS 2.0! This is an in-development version. Expect bugs and missing features."))
 
-refresh()
+windowManager.switchToTab(("Home"))
 
 while true do
     os.sleep(0.05)

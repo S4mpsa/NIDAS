@@ -5,3 +5,7 @@ windowManager = require("core.graphics.renderer.windowManager")
 contextMenu = require("core.graphics.ui.contextMenu")
 renderer = require("core.graphics.renderer.renderer")
 theme = require("settings.theme")
+
+windowManager.initialize()
+
+require("shell").execute("test.lua")

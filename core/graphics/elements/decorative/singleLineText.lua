@@ -6,9 +6,8 @@ local component = require("component") local gpu = component.gpu
 function singleLineText(position, str, colour)
     
     local function draw(window, element)
-        colour = element.data.colour
-        gpu.setForeground(colour)
-        gpu.set(position.x, position.y, str)
+        gpu.setForeground(element.data.colour)
+        gpu.set(position.x, position.y, element.data.str)
     end
 
     local element = {
@@ -16,7 +15,7 @@ function singleLineText(position, str, colour)
         position = {x=0, y=0},
         onClick = false,
         draw = draw,
-        data = {colour = colour or theme.textColour},
+        data = {colour = colour or theme.textColour, str = str},
     }
     return element
 end

@@ -1,13 +1,17 @@
 ---Repository for graphical elements
 local component = require("component")
 local gpu = component.gpu
+local filesystem = require("filesystem")
 
 local elements = {}
 ----------------------------------------------------------------------
+
 elements.border = require("core.graphics.elements.decorative.border")
 elements.background = require("core.graphics.elements.decorative.background")
 elements.title = require("core.graphics.elements.decorative.title")
 elements.singleLineText = require("core.graphics.elements.decorative.singleLineText")
+elements.multiLineText = require("core.graphics.elements.decorative.multiLineText")
+elements.logoLarge = require("core.graphics.elements.decorative.logoLarge")
 elements.closeButton = require("core.graphics.elements.functional.closeButton")
 elements.smallButton = require("core.graphics.elements.functional.smallButton")
 elements.largeButton = require("core.graphics.elements.functional.largeButton")
@@ -16,6 +20,21 @@ elements.numberField = require("core.graphics.elements.functional.numberField")
 elements.checkbox = require("core.graphics.elements.functional.checkbox")
 elements.slider = require("core.graphics.elements.functional.slider")
 elements.colourSelector = require("core.graphics.elements.functional.colourSelector")
+
+--The following enables automatic element requires: Code autocompletion requires static requires.
+local folders = {"decorative", "functional"}
+
+for _, folder in ipairs(folders) do
+    local nextElement = filesystem.list("/home/NIDAS/core/graphics/elements/" .. folder .. "/")
+    local element = nextElement()
+    while element do
+        element = string.sub(element, 1, #element - 4)
+        if elements[element] == nil then
+            elements[element] = require("core.graphics.elements." .. folder .. "." .. element)
+        end
+        element = nextElement()
+    end
+end
 ----------------------------------------------------------------------
 
 

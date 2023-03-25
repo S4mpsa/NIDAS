@@ -54,8 +54,7 @@ local function onClick(window, eventName, address, x, y, button, name)
     --No element was clicked, handle window clicks
     if button == 0 then --Left click
         if eventName == "drag" then
-            if window.movingEnabled then
-                log("Moving to " .. tostring(x) .." " .. tostring(y))
+            if window.movingEnabled and y >= window.position.y - 1 and y <= window.position.y + 1 then
                 gpu.fill(window.position.x, window.position.y, window.size.x, window.size.y, " ")
                 window.position = {x = x - window.xOffset, y = y}
                 refresh()
