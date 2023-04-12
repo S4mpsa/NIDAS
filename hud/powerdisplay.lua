@@ -91,6 +91,25 @@ function powerDisplay.widget(glasses, data)
         currentEU = maxEU
         percentage = 1.0
     end
+
+    --Wireless EU addition
+    if data.wirelessEU > 10000000 then
+        currentEU = data.wirelessEU
+        maxEU = 2^1023
+        data.wirelessMode = true
+        percentage = energyData.animationCounter / 500
+        if energyData.energyPerTick > 0 then
+            energyData.animationCounter = energyData.animationCounter + 1
+        else
+            energyData.animationCounter = energyData.animationCounter - 1
+        end
+        if energyData.animationCounter > 500 then
+            energyData.animationCounter = 1
+        elseif energyData.animationCounter < 0 then
+            energyData.animationCounter = 500
+        end
+    end
+
     --Update I/O
     if energyData.intervalCounter == 1 then
         energyData.startTime = computer.uptime()
@@ -126,23 +145,6 @@ function powerDisplay.widget(glasses, data)
         energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestInput)
     else
         energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestOutput)
-    end
-    --Wireless EU addition
-    if data.wirelessEU > 10000000 then
-        currentEU = data.wirelessEU
-        maxEU = 2^1023
-        data.wirelessMode = true
-        percentage = energyData.animationCounter / 500
-        if energyData.energyPerTick > 0 then
-            energyData.animationCounter = energyData.animationCounter + 1
-        else
-            energyData.animationCounter = energyData.animationCounter - 1
-        end
-        if energyData.animationCounter > 500 then
-            energyData.animationCounter = 1
-        elseif energyData.animationCounter < 0 then
-            energyData.animationCounter = 500
-        end
     end
 
     if #hudObjects < #glasses then
