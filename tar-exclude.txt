@@ -5,7 +5,7 @@ tar-exclude.txt
 *.md
 *.png
 settings
-modules
+modules/infusion
 .releaserc
 test
 package*
