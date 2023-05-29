@@ -54,7 +54,7 @@ local function exec(address, name, location)
             location = location,
             EUIn = parser.getInteger(sensorInformation[5] or 0),
             EUOut = parser.getInteger(sensorInformation[6] or 0),
-            wirelessEU = parser.getInteger(sensorInformation[12] or 0)
+            wirelessEU = parser.getInteger(sensorInformation[15] or 0)
         }
         return status
     else
