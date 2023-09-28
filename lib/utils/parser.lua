@@ -51,4 +51,8 @@ end
 function parser.percentage(number) return
     (math.floor(number * 1000) / 10) .. "%" end
 
+function parser.stripColors(string)
+    return string.gsub(string, "§.", "")
+end
+
 return parser
