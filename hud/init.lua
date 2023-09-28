@@ -9,6 +9,7 @@ local fluidDisplay = require("hud.fluiddisplay")
 local component = require("component")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
+parser = require("lib.utils.parser")
 --
 
 local glassData = {}
@@ -204,6 +205,34 @@ local function updateFluidData()
         end
         if doSave then
             saveFluidData()
+        end
+    end
+
+    -- YOTT tanks
+    for address, _ in pairs(component.list("gt_machine")) do
+        local info = component.proxy(address).getSensorInformation()
+        if (info[1] == "Fluid Name:") then
+            local name = parser.stripColors(info[2])
+            local id = string.lower(string.gsub(name, " ", ""))
+            local amount = parser.getInteger(info[6]) / 10
+            local capacity = parser.getInteger(info[4])
+            local data = fluidMaximums[id]
+            local maximum = 0
+            
+            if not data then
+                maxium = getMax(capacity)
+                fluidMaximums[id] = {max=maxium, name=name}
+                doSave = true
+            else
+                maximum = data.max
+                if data.max ~= amount then
+                    maxium = getMax(capacity)
+                    fluidMaximums[id] = {max=maxium, name=name}
+                    doSave = true
+                end
+            end
+
+            fluidData[id] = {amount=amount, name=name, max=maximum, id=id}
         end
     end
 end
