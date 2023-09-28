@@ -214,7 +214,7 @@ local function updateFluidData()
         if (info[1] == "Fluid Name:") then
             local name = parser.stripColors(info[2])
             local id = string.lower(string.gsub(name, " ", ""))
-            local amount = parser.getInteger(info[6]) / 10
+            local amount = parser.getInteger(string.gsub(info[6], "%(.*%)", ""))
             local capacity = parser.getInteger(info[4])
             local data = fluidMaximums[id]
             local maximum = 0
