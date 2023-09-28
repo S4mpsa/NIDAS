@@ -9,7 +9,7 @@ local fluidDisplay = require("hud.fluiddisplay")
 local component = require("component")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
-parser = require("lib.utils.parser")
+local parser = require("lib.utils.parser")
 --
 
 local glassData = {}
@@ -185,14 +185,14 @@ local function updateFluidData()
                 local data = fluidMaximums[id]
                 local maximum = 0
                 if not data then
-                    maxium = getMax(amount)
-                    fluidMaximums[id] = {max=maxium, name=name}
+                    maximum = getMax(amount)
+                    fluidMaximums[id] = {max=maximum, name=name}
                     doSave = true
                 else
                     maximum = data.max
                     if data.max < amount then
                         maxium = getMax(amount)
-                        fluidMaximums[id] = {max=maxium, name=name}
+                        fluidMaximums[id] = {max=maximum, name=name}
                         doSave = true
                     end
                 end
@@ -220,14 +220,14 @@ local function updateFluidData()
             local maximum = 0
             
             if not data then
-                maxium = getMax(capacity)
-                fluidMaximums[id] = {max=maxium, name=name}
+                maximum = getMax(capacity)
+                fluidMaximums[id] = {max=maximum, name=name}
                 doSave = true
             else
                 maximum = data.max
                 if data.max ~= amount then
-                    maxium = getMax(capacity)
-                    fluidMaximums[id] = {max=maxium, name=name}
+                    maximum = getMax(capacity)
+                    fluidMaximums[id] = {max=maximum, name=name}
                     doSave = true
                 end
             end
