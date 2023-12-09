@@ -5,7 +5,7 @@ local parser = require("lib.utils.parser")
 local time = require("lib.utils.time")
 local screen = require("lib.utils.screen")
 local states = require("server.entities.states")
-
+local serialization = require("serialization")
 local powerDisplay = {}
 
 local hudObjects = {}
@@ -26,12 +26,34 @@ local function getAverage(array)
     return sum / #array
 end
 
+local function updateMaxEU(value)
+    local file = io.open("/home/NIDAS/settings/maxWireless", "w")
+    if file then
+        file:write(serialization.serialize({maxCapacity = value}))
+        file:close()
+    end
+end
+
+local function getMaxEU()
+    file = io.open("/home/NIDAS/settings/maxWireless", "r")
+    local maxValue = 0
+    if file ~= nil then
+        local data = serialization.unserialize(file:read("*a"))
+        if maxValue then
+            maxValue = data.maxCapacity
+        end
+        file:close()
+    end
+    return maxValue
+end
+
 local updateInterval = 100
 
 local energyData = {
     intervalCounter = 1,
-    animationCounter = 1,
     readings = {},
+    hourData = {intervalCounter = 1, readings = {}, average = 0, startTime = 0, endTime = 0},
+    minuteData = {intervalCounter = 1, readings = {}, average = 0, startTime = 0, endTime = 0},
     startTime = 0,
     endTime = 0,
     updateInterval = updateInterval,
@@ -77,39 +99,34 @@ end
 --Glasses is a table of all glasses you want to dispaly the data on, with optional colour data.
 --Glass table format {glassProxy, [{resolutionX, resolutionY}], [scale], [borderColor], [primaryColor], [accentColor], [width], [heigth]}
 --Only the glass proxy is required, rest have default values.
+local currentEU = 0
+local maxEU = getMaxEU()
+local tick = 0
 function powerDisplay.widget(glasses, data)
     if data ~= nil then
     if data.state ~= states.MISSING then
-    
-    local currentEU = math.abs(math.floor(data.storedEU))
-    local maxEU = math.abs(math.floor(data.EUCapacity))
+
+    --Wireless EU addition
+    if energyData.wirelessMode or data.wirelessEU > 10000000 then
+        energyData.wirelessMode = true
+        currentEU = data.wirelessEU
+        if currentEU > maxEU then
+            maxEU = maxEU * 10
+            updateMaxEU(maxEU)
+        end
+    else
+        currentEU = math.abs(math.floor(data.storedEU))
+        maxEU = math.abs(math.floor(data.EUCapacity))
+    end
 
     local percentage = math.min(currentEU/maxEU, 1.0)
-
-    
     if percentage >= 0.999 then
         currentEU = maxEU
         percentage = 1.0
     end
 
-    --Wireless EU addition
-    if data.wirelessEU > 10000000 then
-        currentEU = data.wirelessEU
-        maxEU = 2^1023
-        data.wirelessMode = true
-        percentage = energyData.animationCounter / 500
-        if energyData.energyPerTick > 0 then
-            energyData.animationCounter = energyData.animationCounter + 1
-        else
-            energyData.animationCounter = energyData.animationCounter - 1
-        end
-        if energyData.animationCounter > 500 then
-            energyData.animationCounter = 1
-        elseif energyData.animationCounter < 0 then
-            energyData.animationCounter = 500
-        end
-    end
-
+    tick = tick + 1
+    if tick > 72000 then tick = 0 end
     --Update I/O
     if energyData.intervalCounter == 1 then
         energyData.startTime = computer.uptime()
@@ -145,6 +162,34 @@ function powerDisplay.widget(glasses, data)
         energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestInput)
     else
         energyData.offset = energyData.offset + 10*(energyData.energyPerTick / energyData.highestOutput)
+    end
+
+    --5 minute average
+    if energyData.minuteData.intervalCounter == 1 then
+        energyData.minuteData.startTime = computer.uptime()
+        energyData.minuteData.readings[1] = currentEU
+        energyData.minuteData.intervalCounter = energyData.minuteData.intervalCounter + 1
+    end
+    if tick % 6000 == 0 then
+        energyData.minuteData.endTime = computer.uptime()
+        energyData.minuteData.readings[2] = currentEU
+        local ticks = math.ceil((energyData.minuteData.endTime - energyData.minuteData.startTime) * 20) + 1
+        energyData.minuteData.average = ((energyData.minuteData.readings[2] - energyData.minuteData.readings[1])/ticks)
+        
+        energyData.minuteData.intervalCounter = 1
+    end
+
+    if energyData.hourData.intervalCounter == 1 then
+        energyData.hourData.startTime = computer.uptime()
+        energyData.hourData.readings[1] = currentEU
+        energyData.hourData.intervalCounter = energyData.hourData.intervalCounter + 1
+    end
+    if tick % 72000 == 0 then
+        energyData.hourData.endTime = computer.uptime()
+        energyData.hourData.readings[2] = currentEU
+        local ticks = math.ceil((energyData.hourData.endTime - energyData.hourData.startTime) * 20) + 1
+        energyData.hourData.average = ((energyData.hourData.readings[2] - energyData.hourData.readings[1])/ticks)
+        energyData.hourData.intervalCounter = 1
     end
 
     if #hudObjects < #glasses then
@@ -199,6 +244,7 @@ function powerDisplay.widget(glasses, data)
                 hudObjects[i].dynamic.currentEU = ar.text(hudObjects[i].glasses, "", {x+2, y-9}, primaryColor)
                 hudObjects[i].dynamic.maxEU = ar.text(hudObjects[i].glasses, "", {x+w-90, y-9}, accentColor)
                 hudObjects[i].dynamic.percentage = ar.text(hudObjects[i].glasses, "", {x+w/2-5, y-9}, accentColor)
+                hudObjects[i].dynamic.wirelessEU = ar.text(hudObjects[i].glasses, "", {x+w/2-5 + 50, y-9}, primaryColor)
                 hudObjects[i].dynamic.filltime = ar.text(hudObjects[i].glasses, "Time to empty:", {x+30+hIO, y+2*hDivisor+hProgress+3}, accentColor, 0.7)
                 hudObjects[i].dynamic.fillrate = ar.text(hudObjects[i].glasses, "", {x+w/2-10, y+2*hDivisor+hProgress+2}, borderColor)
                 hudObjects[i].dynamic.input = ar.text(hudObjects[i].glasses, "", {x+w - 46, y+2*hDivisor+hProgress - 1}, primaryColor, 0.55)
@@ -215,14 +261,22 @@ function powerDisplay.widget(glasses, data)
             hudObjects[i].dynamic.energyBar.setVertex(3, x+3+hProgress+energyBarLength*percentage, y+hDivisor+hProgress)
             hudObjects[i].dynamic.energyBar.setVertex(4, x+3+energyBarLength*percentage, y+hDivisor)
             if compact then
-                hudObjects[i].dynamic.currentEU.setText(parser.metricNumber(currentEU))
+                if currentEU > 9000000000000000000 then
+                    hudObjects[i].dynamic.currentEU.setText(string.format("%.2e " .. energyUnit, currentEU))
+                else
+                    hudObjects[i].dynamic.currentEU.setText(parser.metricNumber(currentEU))
+                end
             else
-                hudObjects[i].dynamic.currentEU.setText(parser.splitNumber(currentEU).." "..energyUnit)
+                if currentEU > 9000000000000000000 then
+                    hudObjects[i].dynamic.currentEU.setText(string.format("%.2e " .. energyUnit, currentEU))
+                else
+                    hudObjects[i].dynamic.currentEU.setText(parser.splitNumber(currentEU).." "..energyUnit)
+                end
             end
 
             if maxEU > 9000000000000000000 then
-                hudObjects[i].dynamic.maxEU.setText("∞ "..energyUnit)
-                hudObjects[i].dynamic.maxEU.setPosition(x+w-25, y-9)
+                hudObjects[i].dynamic.maxEU.setText(string.format("%.2e " .. energyUnit, maxEU))
+                hudObjects[i].dynamic.maxEU.setPosition(x+w-60, y-9)
             else
                 if compact then
                     hudObjects[i].dynamic.maxEU.setText(parser.metricNumber(maxEU))
@@ -233,6 +287,11 @@ function powerDisplay.widget(glasses, data)
                     hudObjects[i].dynamic.maxEU.setPosition(x+w-30-(4.5*#parser.splitNumber(maxEU)), y-9)
                 end
             end
+            --Show LSC EU if wireless mode, and if you are Sampsa :) 
+            if energyData.wirelessMode and hudObjects[i].glasses.getBindPlayers() == "Sampsa_" then
+                hudObjects[i].dynamic.wirelessEU.setText(parser.metricNumber(math.abs(math.floor(data.storedEU))).." "..energyUnit)
+            end
+
             local hIOString = ""
             if compact then
                 hIOString = parser.metricNumber(energyData.energyPerTick)
@@ -248,8 +307,21 @@ function powerDisplay.widget(glasses, data)
                 hudObjects[i].dynamic.fillrate.setColor(screen.toRGB(colors.red))
             end
 
-            hudObjects[i].dynamic.input.setText("+" .. parser.metricNumber(energyData.input) .. " " .. energyUnit.."/t")
-            hudObjects[i].dynamic.output.setText("-" .. parser.metricNumber(energyData.output) .. " " .. energyUnit.."/t")
+            if energyData.wirelessMode then
+                if energyData.minuteData.average < 0 then
+                    hudObjects[i].dynamic.input.setText("5m: " .. parser.metricNumber(energyData.minuteData.average) .. " " .. energyUnit.."/t")
+                else
+                    hudObjects[i].dynamic.input.setText("5m: +" .. parser.metricNumber(energyData.minuteData.average) .. " " .. energyUnit.."/t")
+                end
+                if energyData.hourData.average < 0 then
+                    hudObjects[i].dynamic.output.setText("1h: " .. parser.metricNumber(energyData.hourData.average) .. " " .. energyUnit.."/t") 
+                else
+                    hudObjects[i].dynamic.output.setText("1h: +" .. parser.metricNumber(energyData.hourData.average) .. " " .. energyUnit.."/t") 
+                end
+            else
+                hudObjects[i].dynamic.input.setText("+" .. parser.metricNumber(energyData.input) .. " " .. energyUnit.."/t")
+                hudObjects[i].dynamic.output.setText("-" .. parser.metricNumber(energyData.output) .. " " .. energyUnit.."/t") 
+            end
 
             local fillTimeString = ""
             local fillTime = 0
