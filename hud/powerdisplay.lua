@@ -36,7 +36,7 @@ end
 
 local function getMaxEU()
     file = io.open("/home/NIDAS/settings/maxWireless", "r")
-    local maxValue = 0
+    local maxValue = 10e5
     if file ~= nil then
         local data = serialization.unserialize(file:read("*a"))
         if maxValue then
