@@ -36,7 +36,7 @@ end
 
 local function getMaxEU()
     file = io.open("/home/NIDAS/settings/maxWireless", "r")
-    local maxValue = 10e5
+    local maxValue = 0
     if file ~= nil then
         local data = serialization.unserialize(file:read("*a"))
         if maxValue then
@@ -206,8 +206,9 @@ function powerDisplay.widget(glasses, data)
                 borderColor     = glasses[i][4] or colors.darkGray,
                 primaryColor    = glasses[i][5] or colors.electricBlue,
                 accentColor     = glasses[i][6] or colors.magenta,
-                width           = glasses[i][7] or 0,
-                heigth          = glasses[i][8] or 29
+                width           = 0,
+                heigth          = 29,
+                compactMode     = glasses[i][7] or false
             })
         end 
     end
@@ -216,7 +217,7 @@ function powerDisplay.widget(glasses, data)
             if hudObjects[i].width == 0 then hudObjects[i].width = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[1]/2 - 91 end
             local h = hudObjects[i].heigth
             local w = hudObjects[i].width
-            local compact = w < 250
+            local compact = (w < 250) or hudObjects[i].compactMode
             local x = 0
             local y = screen.size(hudObjects[i].resolution, hudObjects[i].scale)[2] - h
             local hProgress = math.ceil(h * 0.4)

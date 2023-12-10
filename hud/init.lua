@@ -9,7 +9,6 @@ local fluidDisplay = require("hud.fluiddisplay")
 local component = require("component")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
-local parser = require("lib.utils.parser")
 --
 
 local glassData = {}
@@ -31,7 +30,7 @@ local function load()
         local glasses = component.proxy(address)
         if glasses then
             ar.clear(glasses)
-            if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
+            if data.energyDisplay then table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor, data.compactMode}) end
             if data.fluidDisplay then table.insert(fluidDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
             if data.toolbar then table.insert(toolbarUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
             if data.notifications then table.insert(notificationsUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.offset or 0, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor}) end
@@ -65,7 +64,7 @@ local function save()
 
     for address, data in pairs(glassData) do
         if data.energyDisplay then
-            table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor})
+            table.insert(powerDisplayUsers, {component.proxy(address), {data.xRes or 2560, data.yRes or 1440}, data.scale or 3, data.backgroundColor or colors.darkGray, data.primaryColor or colors.electricBlue, data.accentColor or colors.accentColor, data.compactMode})
             powerDisplay.changeColor(address, data.backgroundColor, data.primaryColor, data.accentColor)
             powerDisplay.remove(address)
         end
@@ -128,6 +127,7 @@ function hud.configure(x, y, gui, graphics, renderer, page)
             {name = "Resolution (X)",   attribute = "xRes",             type = "number",    defaultValue = 2560},
             {name = "Resolution (Y)",   attribute = "yRes",             type = "number",    defaultValue = 1440},
             {name = "Scale",            attribute = "scale",            type = "number",    defaultValue = 3},
+            {name = "Compact Mode",     attribute = "compactMode",      type = "boolean",   defaultValue = false},
             {name = "UTC Offset",       attribute = "offset",           type = "number",    defaultValue = 0},
             {name = "Primary Color",    attribute = "primaryColor",     type = "color",     defaultValue = colors.electricBlue},
             {name = "Accent Color",     attribute = "accentColor",      type = "color",     defaultValue = colors.magenta},
@@ -185,14 +185,14 @@ local function updateFluidData()
                 local data = fluidMaximums[id]
                 local maximum = 0
                 if not data then
-                    maximum = getMax(amount)
-                    fluidMaximums[id] = {max=maximum, name=name}
+                    maxium = getMax(amount)
+                    fluidMaximums[id] = {max=maxium, name=name}
                     doSave = true
                 else
                     maximum = data.max
                     if data.max < amount then
                         maxium = getMax(amount)
-                        fluidMaximums[id] = {max=maximum, name=name}
+                        fluidMaximums[id] = {max=maxium, name=name}
                         doSave = true
                     end
                 end
@@ -205,34 +205,6 @@ local function updateFluidData()
         end
         if doSave then
             saveFluidData()
-        end
-    end
-
-    -- YOTT tanks
-    for address, _ in pairs(component.list("gt_machine")) do
-        local info = component.proxy(address).getSensorInformation()
-        if (info[1] == "Fluid Name:") then
-            local name = parser.stripColors(info[2])
-            local id = string.lower(string.gsub(name, " ", ""))
-            local amount = parser.getInteger(info[6]) / 10
-            local capacity = parser.getInteger(info[4])
-            local data = fluidMaximums[id]
-            local maximum = 0
-            
-            if not data then
-                maximum = getMax(capacity)
-                fluidMaximums[id] = {max=maximum, name=name}
-                doSave = true
-            else
-                maximum = data.max
-                if data.max ~= amount then
-                    maximum = getMax(capacity)
-                    fluidMaximums[id] = {max=maximum, name=name}
-                    doSave = true
-                end
-            end
-
-            fluidData[id] = {amount=amount, name=name, max=maximum, id=id}
         end
     end
 end
