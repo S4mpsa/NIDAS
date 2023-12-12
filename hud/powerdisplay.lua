@@ -126,7 +126,7 @@ function powerDisplay.widget(glasses, data)
     end
 
     tick = tick + 1
-    if tick > 72000 then tick = 0 end
+    if tick > 72100 then tick = 0 end
     --Update I/O
     if energyData.intervalCounter == 1 then
         energyData.startTime = computer.uptime()
