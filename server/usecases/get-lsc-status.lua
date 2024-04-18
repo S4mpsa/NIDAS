@@ -28,7 +28,13 @@ local function exec(address, name, location)
             sensorInformation[2] = sensorInformation[3]
             sensorInformation[3] = sensorInformation[4]
         end
-        local problems = getNumberOfProblems(sensorInformation[9])
+	local problems = nil
+        if #lsc.getSensorInformation() > 16 then
+            problems = getNumberOfProblems(sensorInformation[13])
+        else
+            problems = getNumberOfProblems(sensorInformation[9])
+        end
+
 
         local state = nil
         if lsc:isWorkAllowed() then
@@ -44,7 +50,22 @@ local function exec(address, name, location)
         if problems > 0 then
             state = states.BROKEN
         end
-        local status = {
+        local status = nil
+        if #lsc.getSensorInformation() > 16 then
+            status = {
+            name = name,
+            state = state,
+            storedEU = parser.getInteger(sensorInformation[2]),
+            EUCapacity = parser.getInteger(sensorInformation[5]),
+            problems = problems,
+            passiveLoss = parser.getInteger(sensorInformation[7] or 0),
+            location = location,
+            EUIn = parser.getInteger(sensorInformation[8] or 0),
+            EUOut = parser.getInteger(sensorInformation[9] or 0),
+            wirelessEU = parser.getInteger(sensorInformation[19] or 0)
+        }
+        else
+            status = {
             name = name,
             state = state,
             storedEU = parser.getInteger(sensorInformation[2]),
@@ -56,6 +77,7 @@ local function exec(address, name, location)
             EUOut = parser.getInteger(sensorInformation[6] or 0),
             wirelessEU = parser.getInteger(sensorInformation[15] or 0)
         }
+        end
         return status
     else
         return {state = states.MISSING}
