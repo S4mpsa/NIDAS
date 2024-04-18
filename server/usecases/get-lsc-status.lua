@@ -50,7 +50,7 @@ local function exec(address, name, location)
             state = states.BROKEN
         end
         local status = nil
-        if #lsc.getSensorInformation() > 15 then
+        if #lsc.getSensorInformation() > 16 then
             status = {
             name = name,
             state = state,
