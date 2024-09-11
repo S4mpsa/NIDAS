@@ -1,7 +1,7 @@
 local component = require("component") local gpu = component.gpu
 
-function closeButton()
-    
+local function closeButton()
+
     local initialized = false
 
     local function draw(window, element)

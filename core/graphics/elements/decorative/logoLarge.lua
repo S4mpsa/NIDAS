@@ -1,7 +1,7 @@
 local component = require("component") local gpu = component.gpu
 
 ---@param position Coordinate2D
-function singleLineText(position)
+local function logoLarge(position)
     
     local logo1 = {
         "█◣  █  ◢  ███◣   ◢█◣  ◢███◣",
@@ -43,4 +43,4 @@ function singleLineText(position)
     return element
 end
 
-return singleLineText
+return logoLarge

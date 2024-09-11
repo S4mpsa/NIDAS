@@ -6,7 +6,7 @@ local io = require("io")
 ---@param position Coordinate2D
 ---@param num number
 ---@param width number
-function numberField(position, num, width)
+local function numberField(position, num, width)
     local function draw(window, element)
         gpu.setForeground(theme.primaryColour)
         gpu.fill(element.position.x, element.position.y, width, 1, " ")

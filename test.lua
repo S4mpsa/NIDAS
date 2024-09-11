@@ -2,9 +2,13 @@ local component = require("component")
 
 --Window manager is global
 
-local elements = require("core.graphics.elements.element")
-
+local machineDisplay = require("core.modules.sampsa.machineDisplay")
+local hudConfigurator = require("core.modules.sampsa.hudConfigurator")
+elements = require("core.graphics.elements.element")
+hudElements = require("core.ar.hud.hudElement")
+local worldElements = require("core.ar.world.worldElement")
 local gpu = component.gpu
+
 
 function log(str)
     local x, y = gpu.getResolution()
@@ -55,14 +59,21 @@ window.setOptions({
 window.enableMovement()
 
 windowManager.setActiveTab("Empty Tab")
-
+windowManager.setActiveTab("Errors")
 windowManager.setActiveTab("Home")
 
 local welcomeWindow = windowManager.create("WelcomeWindow", {x=50, y=20}, {x=2, y=2}).addElement(
     elements.multiLineText({x=0, y=0}, {x=50, y=20}, "Welcome to NIDAS 2.0! This is an in-development version. Expect bugs and missing features."))
 
-windowManager.switchToTab(("Home"))
+windowManager.switchToTab("Home")
 
-while true do
-    os.sleep(0.05)
-end
+--local worldObject = glassManager.createObject("Sampsa_", "Test Cube", {x=1, y=1, z=1})
+--worldObject.addElement(worldElements.cube({x=0, y=0, z=0}, 1.5, 0x22FFAA, 0.8))
+
+--machineDisplay.init()
+
+moduleManager.attach(hudConfigurator())
+
+glassManager.render()
+
+moduleManager.init()

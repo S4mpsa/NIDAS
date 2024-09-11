@@ -6,7 +6,7 @@ local event = require("event")
 ---@param func function
 ---@param args table
 ---@param blink boolean
-function smallButton(position, str, func, args, blink)
+local function smallButton(position, str, func, args, blink)
     blink = blink or true
     local function draw(window, element)
         gpu.setForeground(theme.primaryColour)

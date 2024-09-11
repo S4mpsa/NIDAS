@@ -1,0 +1,4 @@
+settings/data/*
+*.png
+*.tar
+.vscode

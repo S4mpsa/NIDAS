@@ -3,8 +3,8 @@ local component = require("component") local gpu = component.gpu
 ---@param position Coordinate2D
 ---@param str string
 ---@param colour? number
-function singleLineText(position, str, colour)
-    
+local function singleLineText(position, str, colour)
+
     local function draw(window, element)
         gpu.setForeground(element.data.colour)
         gpu.set(position.x, position.y, element.data.str)

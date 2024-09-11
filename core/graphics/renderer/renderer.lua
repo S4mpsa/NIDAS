@@ -5,7 +5,7 @@ local renderer = {}
 
 function renderer.refresh()
     for _, window in ipairs(windowManager.getWindows()) do
-        windowManager.update(window)
+        windowManager.draw(window)
         gpu.bitblt(0, window.position.x, window.position.y, window.size.x, window.size.y, window.buffer, 1, 1)
         end
     gpu.setActiveBuffer(0)
@@ -17,7 +17,7 @@ function refresh(window, update)
     if window then
         for _, windowCandidate in ipairs(windowManager.getWindows()) do
             if windowCandidate.name == window.name then
-                if update then windowManager.update(window) end
+                if update then windowManager.draw(window) end
                 gpu.bitblt(0, window.position.x, window.position.y, window.size.x, window.size.y, window.buffer, 1, 1)
                 break
             end

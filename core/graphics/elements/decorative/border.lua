@@ -1,6 +1,6 @@
 local component = require("component") local gpu = component.gpu
 
-function border(colour)
+local function border(colour)
     
     local function draw(window, element)
         gpu.setForeground(element.data.colour)

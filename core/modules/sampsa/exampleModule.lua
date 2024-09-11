@@ -1,7 +1,7 @@
 local component = require("component") local gpu = component.gpu
 
-function exampleModule(position, str)
-
+function exampleModule()
+    local Module
     local function init()
         --Sets up the module, called on boot.
     end
@@ -16,7 +16,7 @@ function exampleModule(position, str)
     end
 
 
-    local module = {
+    Module = {
         init = init,
         update = update,
         save = save,
@@ -24,7 +24,7 @@ function exampleModule(position, str)
         data = {} --Data should have all the variables that are used by the module. It can be accessed from elsewhere by the return value.
     }
 
-    return module
+    return Module
 end
 
 return exampleModule

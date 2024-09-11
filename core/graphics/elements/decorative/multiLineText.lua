@@ -5,7 +5,7 @@ local stringUtils = require("core.lib.stringUtils")
 ---@param size Coordinate2D
 ---@param str string
 ---@param colour? number
-function multiLineText(position, size, str, colour)
+local function multiLineText(position, size, str, colour)
     
     local function draw(window, element)
         local words = stringUtils.split(str, " ")
@@ -24,6 +24,7 @@ function multiLineText(position, size, str, colour)
         end
         for i = 1, #lines do
             if i < element.size.y then
+                gpu.setForeground(element.data.colour)
                 gpu.set(1, i, lines[i])
             end
         end

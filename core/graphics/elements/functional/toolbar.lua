@@ -1,7 +1,7 @@
 local component = require("component") local gpu = component.gpu
 local event = require("event")
 
-function toolbar()
+local function toolbar()
     blink = blink or true
     local function draw(window, element)
         local x, y = gpu.getResolution()

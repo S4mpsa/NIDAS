@@ -26,8 +26,8 @@ function windowManager.clear()
     gpu.fill(0, 0, 160, 50, " ")
 end
 
-function windowManager.update(update)
-    return w.update(update)
+function windowManager.draw(update)
+    return w.draw(update)
 end
 
 ---@param window Window
@@ -138,7 +138,7 @@ local function stopClickHandler()
 end
 
 --Clear out existing click handlers
-function windowManager.initialize()
+function windowManager.init()
     stopClickHandler()
     startClickHandler()
     local x, y = 120, 34

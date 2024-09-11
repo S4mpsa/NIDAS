@@ -4,6 +4,12 @@
 ---@field x number
 ---@field y number
 
+
+---@class Coordinate3D
+---@field x number
+---@field y number
+---@field z number
+
 ---@class Window
 ---@field name string
 ---@field size Coordinate2D

@@ -11,6 +11,7 @@ elements.background = require("core.graphics.elements.decorative.background")
 elements.title = require("core.graphics.elements.decorative.title")
 elements.singleLineText = require("core.graphics.elements.decorative.singleLineText")
 elements.multiLineText = require("core.graphics.elements.decorative.multiLineText")
+elements.errorMessage = require("core.graphics.elements.decorative.errorMessage")
 elements.logoLarge = require("core.graphics.elements.decorative.logoLarge")
 elements.closeButton = require("core.graphics.elements.functional.closeButton")
 elements.smallButton = require("core.graphics.elements.functional.smallButton")
@@ -42,7 +43,7 @@ end
 ---@param position Coordinate2D
 ---@param size Coordinate2D
 ---@return table
-function exampleElement(position, size)
+local function exampleElement(position, size)
 
     local function draw(window, element)
         --Draw is called when the window if updated, and should render the element directly on screen. The buffer is always on the correct window.

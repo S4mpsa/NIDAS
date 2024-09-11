@@ -6,7 +6,7 @@ local numUtils = require("core.lib.numUtils")
 ---@param steps table
 ---@param defaultIndex number
 ---@param width number
-function slider(position, steps, defaultIndex, width)
+local function slider(position, steps, defaultIndex, width)
 
     local function compareLocations(stepOffsets, offset)
         for i, stepOffset in ipairs(stepOffsets) do

@@ -7,11 +7,11 @@ local colours = require("core.lib.colours")
 
 ---@param position Coordinate2D
 ---@param colour number
-function colourSelector(position, colour)
+local function colourSelector(position, colour)
+
     blink = blink or true
     local function draw(window, element)
         gpu.setForeground(element.data.colour)
-        
         gpu.set(position.x, position.y, numUtils.numberToColourHex(element.data.colour))
     end
     local function onClick(window, element, eventName, address, x, y, button, name)

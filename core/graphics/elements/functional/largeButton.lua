@@ -8,7 +8,7 @@ local outline = require("core.graphics.drawing.outline")
 ---@param func function
 ---@param args table
 ---@param blink boolean
-function largeButton(position, str, func, args, blink)
+local function largeButton(position, str, func, args, blink)
     blink = blink or true
     local function draw(window, element)
         gpu.setForeground(theme.primaryColour)

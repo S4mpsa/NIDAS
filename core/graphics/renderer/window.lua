@@ -54,7 +54,7 @@ local function onClick(window, eventName, address, x, y, button, name)
     --No element was clicked, handle window clicks
     if button == 0 then --Left click
         if eventName == "drag" then
-            if window.movingEnabled and y >= window.position.y - 1 and y <= window.position.y + 1 then
+            if window.options.movingEnabled and y >= window.position.y - 1 and y <= window.position.y + 1 then
                 gpu.fill(window.position.x, window.position.y, window.size.x, window.size.y, " ")
                 window.position = {x = x - window.xOffset, y = y}
                 refresh()
@@ -69,8 +69,10 @@ local function onClick(window, eventName, address, x, y, button, name)
     end
 end
 
-function windowClass.update(window)
+function windowClass.draw(window)
+    --Set this to 0 to get all errors on screen
     gpu.setActiveBuffer(window.buffer)
+    --gpu.setActiveBuffer(0)
     for _, element in ipairs(window.elements) do
         element.draw(window, element)
     end
@@ -89,14 +91,16 @@ function windowClass.create(name, size, position)
             buffer = buffer,
             elements = {},
             onClick = onClick,
-            options = {},
-            movingEnabled = false
+            options = {
+                movingEnabled = false
+            },
         }
         -------------------------------------------
         local function remove()
             gpu.freeBuffer(window.buffer)
             gpu.setActiveBuffer(0)
             gpu.fill(window.position.x, window.position.y, window.size.x, window.size.y, " ")
+            moduleManager.detach(window)
             window = {}
             refresh()
         end
@@ -116,7 +120,7 @@ function windowClass.create(name, size, position)
         window.setOptions = setOptions
         -------------------------------------------
         local function enableMovement()
-            window.movingEnabled = true
+            window.options.movingEnabled = true
         end
         window.enableMovement = enableMovement
         -------------------------------------------
@@ -136,10 +140,18 @@ function windowClass.create(name, size, position)
         end
         window.addElements = addElements
         -------------------------------------------
-        local function update()
+        local function draw()
             gpu.setActiveBuffer(window.buffer)
             for _, element in ipairs(window.elements) do
                 element.draw(window, element)
+            end
+        end
+        window.draw = draw
+        -------------------------------------------
+        local function update(tick)
+            gpu.setActiveBuffer(window.buffer)
+            for _, element in ipairs(window.elements) do
+                element.update(window, element, tick)
             end
         end
         window.update = update

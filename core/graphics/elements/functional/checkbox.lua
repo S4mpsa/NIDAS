@@ -5,7 +5,7 @@ local numUtils = require("core.lib.numUtils")
 local io = require("io")
 ---@param position Coordinate2D
 ---@param value boolean
-function textField(position, value)
+local function textField(position, value)
     local function draw(window, element)
         gpu.setForeground(theme.borderColour)
         gpu.fill(element.position.x, element.position.y, 3, 1, " ")
