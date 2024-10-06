@@ -35,7 +35,6 @@ local function exec(address, name, location)
             problems = getNumberOfProblems(sensorInformation[9])
         end
 
-
         local state = nil
         if lsc:isWorkAllowed() then
             if lsc:hasWork() then
@@ -51,7 +50,7 @@ local function exec(address, name, location)
             state = states.BROKEN
         end
         local status = nil
-        if #lsc.getSensorInformation() > 16 then
+        if #lsc.getSensorInformation() > 20 then
             status = {
             name = name,
             state = state,
@@ -63,6 +62,19 @@ local function exec(address, name, location)
             EUIn = parser.getInteger(sensorInformation[8] or 0),
             EUOut = parser.getInteger(sensorInformation[9] or 0),
             wirelessEU = parser.getInteger(sensorInformation[19] or 0)
+        }
+        elseif #lsc.getSensorInformation() > 16 then
+            status = {
+            name = name,
+            state = state,
+            storedEU = parser.getInteger(sensorInformation[2]),
+            EUCapacity = parser.getInteger(sensorInformation[5]),
+            problems = problems,
+            passiveLoss = parser.getInteger(sensorInformation[7] or 0),
+            location = location,
+            EUIn = parser.getInteger(sensorInformation[8] or 0),
+            EUOut = parser.getInteger(sensorInformation[9] or 0),
+            wirelessEU = parser.getInteger(sensorInformation[18] or 0)
         }
         else
             status = {
