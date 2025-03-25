@@ -41,7 +41,7 @@ Tracks machine information:
     
         Each machine has to be individually configured for location support.
 
-    `Local servers` can display the data on a connected screen, while the `main server` provides HUD notifications of maintenace from all `local servers`.
+    `Local servers` can display the data on a connected screen, while the `main server` provides HUD notifications of maintenance from all `local servers`.
 
 ## **Automated Infusions**
   * Checks for a pattern that maches the items in an ME subnetwork
