@@ -150,23 +150,54 @@ end
 
 
 local displayedMachines = {}
+
+local function clearMachineNotification(address)
+    if not displayedMachines[address] then return end
+    displayedMachines[address]()
+    displayedMachines[address] = nil
+end
+
+local function displayMachineStateNotification(address, values)
+    if values.state.name == states.OFF.name then
+        local displayString = values.name or address
+        displayedMachines[address] = notifications.addNotification(displayString .. " is disabled", nil, 0xFF0000)
+        --Add location displaying here
+    elseif values.state.name == states.BROKEN.name then
+        local displayString = values.name or address
+        displayedMachines[address] = notifications.addNotification(displayString .. " requires maintenance", nil, gui.accentColor())
+        --Add location displaying here
+    end
+    if displayedMachines[address] then
+        if values.state.name == states.ON.name or values.state.name == states.IDLE.name then
+            clearMachineNotification(address)
+        end
+    end
+end
+
+local function displayRawNotification(address, values)
+    local message = values.message
+    local timeout = values.timeout
+    local color = values.color or gui.accentColor()
+    if values.message then
+        if not timeout then
+            displayedMachines[address] = notifications.addNotification(message, timeout, color)
+        else
+            notifications.addNotification(message, timeout, color)
+        end
+    else
+        clearMachineNotification(address)
+    end
+
+end
+
+
 local function displayMaintenance(_, serializedData)
     local statusData = serialization.unserialize(serializedData)
     for address, values in pairs(statusData) do
-        if values.state.name == states.OFF.name then
-            local displayString = values.name or address
-            displayedMachines[address] = notifications.addNotification(displayString .. " is disabled", nil, 0xFF0000)
-            --Add location displaying here
-        elseif values.state.name == states.BROKEN.name then
-            local displayString = values.name or address
-            displayedMachines[address] = notifications.addNotification(displayString .. " requires maintenance", nil, gui.accentColor())
-            --Add location displaying here
-        end
-        if displayedMachines[address] then
-            if values.state.name == states.ON.name or values.state.name == states.IDLE.name then
-                displayedMachines[address]()
-                displayedMachines[address] = nil
-            end
+        if values.raw then
+            displayRawNotification(address, values)
+        else
+            displayMachineStateNotification(address, values) 
         end
     end
 end
