@@ -7,12 +7,12 @@ local data = {}
 ---@param name string
 ---@param dataToWrite table
 function data.save(name, dataToWrite)
-    local file = io.open(settings.dataFolder .. name, "w")
+    local file, msg = io.open(settings.dataFolder .. name, "w")
     if file then
         file:write(serialization.serialize(dataToWrite))
         file:close()
     else
-        error("Opening " .. settings.dataFolder .. name .. " failed.")
+        error("Opening " .. settings.dataFolder .. name .. " failed." .. "\n(" .. msg .. ")")
     end
 end
 

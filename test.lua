@@ -72,7 +72,7 @@ windowManager.switchToTab("Home")
 
 --machineDisplay.init()
 
-moduleManager.attach(hudConfigurator())
+moduleManager.attach(hudConfigurator(), false)
 
 glassManager.render()
 

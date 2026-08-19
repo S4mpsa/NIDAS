@@ -7,43 +7,57 @@ local numUtils = require("core.lib.numUtils")
 ---@param colour? number
 ---@param alpha? any
 ---@param rate? integer
-local function text(position, stringSource, font, colour, alpha, rate)
+---@param align? integer -1/0/1. Align the text to left/center/right of the position.
+local function variableText(position, stringSource, font, colour, alpha, rate, align)
 
-    local function init(window, element)
+    local Element
+    local function init(window)
+        Element.window = window
         local text = window.glasses.addTextLabel()
-        text.setPosition(window.position.x + element.position.x, window.position.y + element.position.y)
-        text.setScale(1.0)
+        text.setPosition(window.position.x + Element.position.x, window.position.y + Element.position.y)
+        text.setScale(font)
         text.setText(stringSource())
-        text.setColor(numUtils.toRGB(element.data.colour))
-        text.setAlpha(element.data.alpha)
-        element.data.widgets["text"] = text
+        text.setColor(numUtils.toRGB(Element.data.colour))
+        text.setAlpha(Element.data.alpha)
+        Element.data.widgets["text"] = text
     end
 
-    local function update(window, element, tick)
+    local function update(tick)
         if tick % rate == 0 then
-            element.data.widgets["text"].setText(stringSource())
+            local str = Element.data.stringSource()
+            Element.data.widgets["text"].setText(str)
+            Element.data.text = str
+            if align == 1 then
+                Element.data.widgets["text"].setPosition(Element.window.position.x + Element.position.x - 11 - (4.5*#str), Element.window.position.y + position.y)
+            elseif align == 0 then
+                Element.data.widgets["text"].setPosition(Element.window.position.x + Element.position.x - ((2.25*#str)), Element.window.position.y + position.y)
+            end
         end
     end
 
-    local function move(window, element)
-        element.data.widgets["text"].setPosition(window.position.x + element.position.x, window.position.y + element.position.y)
+    ---@param position Coordinate2D
+    local function move(position)
+        Element.position = position
+        Element.data.widgets["text"].setPosition(Element.window.position.x + position.x, Element.window.position.y + position.y)
     end
 
-    local function remove(window, element)
-        window.glasses.removeObject(element.data.widgets["text"].getID())
+    local function remove(window)
+        window.glasses.removeObject(Element.data.widgets["text"].getID())
     end
 
-    local element = {
+    Element = {
+        window = nil,
         size = {x=0, y=0},
         position = position,
         init = init,
         update = update,
         move = move,
         remove = remove,
-        data = {widgets = {}, font = font or 1.0, colour = colour or 0xFFFFFF, alpha = alpha or 1.0, rate = rate or 1}
+        data = {widgets = {}, font = font or 1.0, colour = colour or 0xFFFFFF, alpha = alpha or 1.0,
+                rate = rate or 1, text = "", align = align or -1, stringSource = stringSource}
     }
 
-    return element
+    return Element
 end
 
-return text
+return variableText

@@ -1,5 +1,8 @@
 ---@meta
 
+---@class ColourHex
+---@field rgb number
+
 ---@class Coordinate2D
 ---@field x number
 ---@field y number

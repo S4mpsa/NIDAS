@@ -28,15 +28,22 @@ local function getProxy(proxy)
             dataProxy.name = machineNames[dataProxy.proxy.address] or dataProxy.name
             dataProxy.location = {x = x, y = y, z = z}
             dataProxy.currentCapacity = numUtils.getInteger(info[2])
-            dataProxy.maxCapacity = numUtils.getInteger(info[3])
-            dataProxy.input = numUtils.getInteger(info[5])
-            dataProxy.output = numUtils.getInteger(info[6])
-            dataProxy.wirelessMode = stringUtils.contains(info[10], "enabled")
-            dataProxy.maintenance = getMaintenanceStatus(info[9])
-            dataProxy.wirelessEU = numUtils.getInteger(info[13])
+            dataProxy.maxCapacity = numUtils.getInteger(info[5])
+            dataProxy.passiveLoss = numUtils.getInteger(info[7])
+            dataProxy.input = numUtils.getInteger(info[8])
+            dataProxy.output = numUtils.getInteger(info[9])
+            dataProxy.averageInShort = numUtils.getInteger(info[10], 1)
+            dataProxy.averageOutShort = numUtils.getInteger(info[11], 1)
+            dataProxy.averageInLong = numUtils.getInteger(info[12], 1)
+            dataProxy.averageOutLong = numUtils.getInteger(info[13], 1)
+            dataProxy.timeToCap = info[16]
+            dataProxy.wirelessMode = stringUtils.contains(info[18], "enabled")
+            dataProxy.maintenance = getMaintenanceStatus(info[17])
+            dataProxy.wirelessEU = numUtils.getInteger(info[23])
             dataProxy.running = dataProxy.proxy.isMachineActive()
         end
     end
+
     local function getInfo()
         local percentageString = ""
         local wirelessString = ""

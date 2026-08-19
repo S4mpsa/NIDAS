@@ -19,7 +19,7 @@ local function contextMenu(funcTable, pos)
         selectionBox.setPosition(Element.data.choicePosition.x, Element.data.choicePosition.y)
 
         selectionBox.setColor(numUtils.toRGB(theme.background))
-        selectionBox.setAlpha(0.3)
+        selectionBox.setAlpha(0.6)
         Element.data.widgets["selectionBox"] = selectionBox
         local i = 0
         for key, func in pairs(funcTable) do
@@ -59,7 +59,7 @@ local function contextMenu(funcTable, pos)
             Element.remove(window, element)
             window.remove()
             if Element.data.choices[choice] then
-                Element.data.choices[choice]()
+                Element.data.choices[choice](x, y)
             end
             return true
         else

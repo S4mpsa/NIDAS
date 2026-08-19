@@ -1,7 +1,9 @@
 local component = require("component") local gpu = component.gpu
 
-local horizontalSteps = 4
-local verticalSteps = 9
+local powerDisplayModule = require("core.modules.sampsa.powerDisplay")
+
+local horizontalSteps = 16
+local verticalSteps = 36
 
 function hudConfigurator()
     local Module
@@ -52,6 +54,11 @@ function hudConfigurator()
                 end
                 Module.data.selectionStart = {x=x, y=y}
             end
+            if Module.data.gridSelection ~= nil then
+                Module.data.gridSelection.remove()
+                Module.data.gridSelection = nil
+            end
+
             return true
         end
 
@@ -132,31 +139,32 @@ function hudConfigurator()
                 Module.data.gridSelection = gridSelectionWindow
                 gridSelectionRect.onClick = function() return false end
                 gridSelectionRect.onDrag = function() return false end
-
-                local function removeGridSelection()
+                
+                --Test module
+                local function addModule()
+                    if Module.data.selectionWindow then
+                        Module.data.selectionWindow.remove()
+                        Module.data.selectionWindow = nil
+                        Module.data.selection = nil
+                    end
                     if Module.data.gridSelection ~= nil then
                         Module.data.gridSelection.remove()
                         Module.data.gridSelection = nil
                     end
-                end
-                
-                --Test module
-                local function addModule()
                     local moduleWindow = glassManager.create("Sampsa_", "Module"..tostring(Module.data.moduleCount),
                         {x=selectionWidth, y=selectionHeight},
                         {x=gridSelectionLeft, y=gridSelectionTop})
-                        moduleWindow.options.closeOnFocusLoss = false
-                    local dummyModule = hudElements.rectangle({x=0, y=0}, {x=selectionWidth, y=selectionHeight}, theme.accentColour, 1.0)
-                    moduleWindow.addElement(dummyModule)
+                    moduleWindow.options.closeOnFocusLoss = false 
                     Module.data.moduleCount = Module.data.moduleCount + 1
-                    glassManager.render(moduleWindow)
+                    local powerDisplay = powerDisplayModule(moduleWindow)
+                    moduleManager.attach(powerDisplay)
+                    powerDisplay.init()
                 end
 
                 gridSelectionRect.onClickRight = function (window2, element2, eventName2, address2, x2, y2, button2, name2)
                     local contextWindow = glassManager.create("Sampsa_", "Context Surface", {x=res.x, y=res.y}, {x=0, y=0})
                     contextWindow.options.closeOnFocusLoss = false
                     local menu = hudElements.contextMenu({
-                        ["Remove selection"] = removeGridSelection,
                         ["Add module"] = addModule
                     }, {x=x2, y=y2})
                     contextWindow.addElement(menu)

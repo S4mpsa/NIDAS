@@ -1,7 +1,8 @@
-
+local data = require("core.lib.data")
 
 local moduleManager = {}
 
+local moduleData = {}
 local running = false
 
 local moduleUpdateQueue = {}
@@ -19,11 +20,32 @@ function moduleManager.listPeriodic()
     return messageUpdateQueue
 end
 
-function moduleManager.attach(module)
+function moduleManager.attach(module, saveConfig)
+    if saveConfig == nil then saveConfig = true else saveConfig = false end
+    if saveConfig == true then
+        table.insert(moduleData, {
+            owner = module.data.window.owner,
+            name = module.data.window.name,
+            x = module.data.window.position.x,
+            y = module.data.window.position.y,
+            width = module.data.window.size.x,
+            height = module.data.window.size.y
+        })
+        data.save("moduleData", moduleData)
+    end
     table.insert(moduleUpdateQueue, module)
 end
 
 function moduleManager.detach(module)
+    for i, candidate in ipairs(moduleData) do
+        if module.data ~= nil then
+            if module.data.window.name == candidate.name then
+                table.remove(moduleData, i)
+                data.save("moduleData", moduleData)
+                return
+            end
+        end
+    end
     for i, candidate in ipairs(moduleUpdateQueue) do
         if module.name == candidate.name then
             table.remove(moduleUpdateQueue, i)
@@ -44,6 +66,7 @@ end
 local tick = 0
 local function update()
     while running do
+        componentManager.update()
         tick = tick + 1
         for _, module in ipairs(moduleUpdateQueue) do
             module.update(tick)
@@ -61,7 +84,23 @@ local function update()
 end
 
 function moduleManager.init()
+    moduleData = data.load("moduleData")
+    if moduleData ~= nil then
+        for _, module in ipairs(moduleData) do
+            glassManager.setActivePlayer(module.owner)
+            local moduleWindow = glassManager.create(module.owner, module.name,
+                {x=module.width, y=module.height},
+                {x=module.x, y=module.y})
+            moduleWindow.options.closeOnFocusLoss = false
+            local moduleWidget = powerDisplayModule(moduleWindow)
+
+            table.insert(moduleUpdateQueue, moduleWidget)
+        end
+    else
+        moduleData = {}
+    end
     for _, module in ipairs(moduleUpdateQueue) do
+        module.load()
         module.init()
     end
     moduleManager.resume()

@@ -3,10 +3,13 @@ local component = require("component")
 local data = require("core.lib.data")
 local message = require("core.lib.message")
 
+local proxyService = require("core.network.data.multiblocks.getMachineProxy")
+
 local componentManager = {}
 
 local machineDataFile = "knownAddresses"
 local addressList = {}
+local dataCache = {}
 local streamList = {}
 
 function componentManager.list()
@@ -43,7 +46,7 @@ local function addExistingMachines()
             end
         end
     end
-    if changes then data.save(machineDataFile, addressList) end
+    --if changes then data.save(machineDataFile, addressList) end
 end
 
 local function processLocalChange(eventName, address, type)
@@ -74,6 +77,31 @@ function componentManager.init()
     addExistingMachines()
     event.listen("component_added", processLocalChange)
     event.listen("component_removed", processLocalChange)
+end
+
+function componentManager.data(address)
+    if dataCache[address] ~= nil then
+        return dataCache[address].proxy
+    else
+        return nil
+    end
+end
+
+local tick = 0
+function componentManager.update()
+    tick = tick + 1
+    if tick % 4 == 0 then
+        for address, info in pairs(addressList) do
+            if dataCache[address] == nil then
+                dataCache[address] = {}
+            dataCache[address].proxy = proxyService(address, "local")
+            end
+            if dataCache[address].proxy ~= nil then
+                dataCache[address].proxy.update()
+            end
+        end
+        tick = 0
+    end
 end
 
 return componentManager

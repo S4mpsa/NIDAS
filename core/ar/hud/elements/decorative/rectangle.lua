@@ -2,15 +2,17 @@ local component = require("component")
 local numUtils = require("core.lib.numUtils")
 
 ---@param position Coordinate2D
----@param size Coordinate2D
+---@param size Coordinate2D Width and heigth
+---@param colour ColourHex
+---@param alpha float Alpha value between 0.0 and 1.0
 local function rectangle(position, size, colour, alpha)
     local Element
-    local function init(window, element)
+    local function init(window)
         local rect = window.glasses.addRect()
-        rect.setPosition(window.position.x + element.position.x, window.position.y + element.position.y)
-        rect.setSize(element.size.y, element.size.x)
-        rect.setColor(numUtils.toRGB(element.data.colour))
-        rect.setAlpha(element.data.alpha)
+        rect.setPosition(window.position.x + Element.position.x, window.position.y + Element.position.y)
+        rect.setSize(Element.size.y, Element.size.x)
+        rect.setColor(numUtils.toRGB(Element.data.colour))
+        rect.setAlpha(Element.data.alpha)
         Element.data.widgets["rectangle"] = rect
     end
 
@@ -18,28 +20,28 @@ local function rectangle(position, size, colour, alpha)
 
     end
 
-    local function move(window, element)
-        Element.data.widgets["rectangle"].setPosition(window.position.x + element.position.x, window.position.y + element.position.y)
+    local function move(window)
+        Element.data.widgets["rectangle"].setPosition(window.position.x + Element.position.x, window.position.y + Element.position.y)
     end
 
     local function onClick(window, element, eventName, address, x, y, button, name)
-        return true
+        return false
     end
 
     local function onClickRight(window, element, eventName, address, x, y, button, name)
-        return true
+        return false
     end
 
     local function onDrag(window, element, eventName, address, x, y, button, name)
-        return true
+        return false
     end
 
     local function onDragRight(window, element, eventName, address, x, y, button, name)
-        return true
+        return false
     end
 
-    local function remove(window, element)
-        for key, widget in pairs(element.data.widgets) do
+    local function remove(window)
+        for key, widget in pairs(Element.data.widgets) do
             window.glasses.removeObject(widget.getID())
         end
     end

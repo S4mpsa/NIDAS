@@ -22,11 +22,12 @@ function numUtils.numberToColourHex(number)
 
 end
 
-function numUtils.getInteger(string)
-    if type(string) == "string" then
-        local numberString = string.gsub(string, "([^0-9]+)", "")
+function numUtils.getInteger(str, offset)
+    offset = offset or 0
+    if type(str) == "string" then
+        local numberString = string.gsub(str, "([^0-9]+)", "")
         if tonumber(numberString) then
-            return math.floor(tonumber(numberString) + 0)
+            return math.floor(tonumber(string.sub(numberString, 1, #numberString - offset)) + 0)
         end
         return 0
     else

@@ -5,7 +5,7 @@ local numUtils = require("core.lib.numUtils")
 local elements = require("core.graphics.elements.element")
 
 ---@param window? Window
----@param options table
+---@param options table A table of name-function pairs where each name is an entry in the context menu. The function is called with the right X coordinate of the context menu, the middle Y coordiante of the selected option and the button that was pressed to allow for chained context menus.
 ---@param x number
 ---@param y number
 function contextMenu(window, options, x, y)
@@ -31,7 +31,7 @@ function contextMenu(window, options, x, y)
     local function onClick(eventName, address, clickX, clickY, button, name)
         if (clickY > y and clickY < y + #options + 1) and (clickX > x and clickX < x + longestOption + 2 - 1) and button == 0 then
             local selection = clickY - y
-            options[selection].func()
+            options[selection].func(contextWindow.position.x + contextWindow.size.x, clickY, button)
         end
         windowManager.detach(contextWindow)
         contextWindow.remove()
