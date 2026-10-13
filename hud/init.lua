@@ -7,6 +7,7 @@ local toolbar = require("hud.toolbar")
 local notifications = require("hud.notifications")
 local fluidDisplay = require("hud.fluiddisplay")
 local component = require("component")
+local computer = require("computer")
 local serialization = require("serialization")
 local colors = require("lib.graphics.colors")
 --
@@ -222,15 +223,71 @@ function hud.updateFluidSettings()
     end
 end
 
+local hudNeedsReset = false
+local nextHudAttempt = 0
+local hudRetryDelay = 1
+
+local function usedGlasses()
+    local used = {}
+    for _, users in ipairs({powerDisplayUsers, fluidDisplayUsers, toolbarUsers, notificationsUsers}) do
+        for _, user in ipairs(users) do
+            if user[1] then used[user[1].address] = user[1] end
+        end
+    end
+    return used
+end
+
+local function glassesReady()
+    for _, glasses in pairs(usedGlasses()) do
+        if not pcall(glasses.getObjectCount) then
+            return false
+        end
+    end
+    return true
+end
+
+local function resetHud()
+    for _, glasses in pairs(usedGlasses()) do
+        ar.clear(glasses)
+    end
+    powerDisplay.reset()
+    toolbar.reset()
+    notifications.reset()
+    fluidDisplay.reset()
+end
+
+local function drawHud(serverInfo, updateFluids)
+    if hudNeedsReset then
+        resetHud()
+        hudNeedsReset = false
+    end
+    powerDisplay.widget(powerDisplayUsers, serverInfo.power)
+    toolbar.widget(toolbarUsers)
+    notifications.widget(notificationsUsers)
+    if updateFluids then
+        fluidDisplay.widget(fluidDisplayUsers, fluidData, fluidConfiguration)
+    end
+end
+
 local loop = 20
 function hud.update(serverInfo)
     if serverInfo then
-        powerDisplay.widget(powerDisplayUsers, serverInfo.power)
-        toolbar.widget(toolbarUsers)
-        notifications.widget(notificationsUsers)
         if loop == 20 then
             updateFluidData()
-            fluidDisplay.widget(fluidDisplayUsers, fluidData, fluidConfiguration)
+        end
+        if computer.uptime() >= nextHudAttempt and glassesReady() then
+            local success, reason = pcall(drawHud, serverInfo, loop == 20)
+            if not success then
+                hudNeedsReset = true
+                nextHudAttempt = computer.uptime() + hudRetryDelay
+                local file = io.open("/tmp/nidas-hud.log", "a")
+                if file then
+                    file:write(os.date() .. " HUD update failed, rebuilding: " .. tostring(reason) .. "\n")
+                    file:close()
+                end
+            end
+        end
+        if loop == 20 then
             loop = 0
         end
     end

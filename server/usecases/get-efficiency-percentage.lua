@@ -1,5 +1,5 @@
 local function exec(efficiencyString)
-    local noParagraphMarkString = string.gsub(efficiencyString, "§r", "")
+    local noParagraphMarkString = string.gsub(efficiencyString or "", "§r", "")
     local efficiency = "0.0"
     pcall(
         function()

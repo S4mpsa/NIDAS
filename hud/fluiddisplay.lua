@@ -199,4 +199,8 @@ function fluidDisplay.remove(glassAddress)
     end
 end
 
+function fluidDisplay.reset()
+    hudObjects = {}
+end
+
 return fluidDisplay

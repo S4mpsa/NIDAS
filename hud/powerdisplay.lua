@@ -419,4 +419,8 @@ function powerDisplay.remove(glassAddress)
     end
 end
 
+function powerDisplay.reset()
+    hudObjects = {}
+end
+
 return powerDisplay

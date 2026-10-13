@@ -152,4 +152,8 @@ function toolbar.remove(glassAddress)
     end
 end
 
+function toolbar.reset()
+    hudObjects = {}
+end
+
 return toolbar

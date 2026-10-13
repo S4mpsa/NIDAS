@@ -242,4 +242,8 @@ function notifications.widget(glasses)
     end
 end
 
+function notifications.reset()
+    hudObjects = {}
+end
+
 return notifications
